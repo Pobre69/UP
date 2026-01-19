@@ -12,9 +12,18 @@ header{
     transform: translate(-50%,-50%);
     top: calc(75px / 2);
     left: 50%;
+    
+}
+
+.inter-font {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
 #Consultoria_Button{
+    font-family: "Inter", sans-serif;
     width: 200px;
     height: 40px;
     border-radius: 20px;
@@ -45,6 +54,7 @@ header{
 }
 
 #header_links{
+    font-family: "Inter", sans-serif;
     color: gray;
     font-size: 1.3em;
     display: flex;
