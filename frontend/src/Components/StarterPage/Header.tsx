@@ -1,5 +1,5 @@
-import "../Design/css/StarterPage/Header.css";
-import React from "../Images/react.svg";
+import "../../Design/StarterPage/Header.css";
+import React from "../../Images/react.svg";
 
 export default function Header() {
     return (

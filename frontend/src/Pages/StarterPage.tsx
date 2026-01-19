@@ -1,13 +1,12 @@
-import Header from "../Components/Header";
-import "../Design/css/StarterPage/StarterPage.css";
+import Header from "../Components/StarterPage/Header";
+import Box1 from "../Components/StarterPage/Box1";
+import "../Design/StarterPage/StarterPage.css";
 
 export default function StartPage() {
     return (
         <>
             <Header />
-            <div>
-                penis inicial
-            </div>
+            <Box1 />
         </>
     )
 }
