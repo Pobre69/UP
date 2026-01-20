@@ -1,0 +1,89 @@
+import "../../Design/StarterPage/Box3.css";
+import { BarChart3, Rocket, Target, Users, TrendingUp, Zap } from "lucide-react";
+
+export default function Box3() {
+    return (
+        <div id="box3">
+            <div id="Title-OqueFazemos">
+                <h3><span className="title_Recolor">O que fazemos por você</span>
+                    <br />
+                    <span className="TitlePhrase">Oferecemos soluções completas para transformar e elevar seu negócio ao próximo nível com tecnologia e estratégia.</span>
+                </h3>
+            </div>
+            <div id="BoxGrid">
+                <div className="BoxContainer">
+                    <div className="BoxContent2">
+                        <div className="icon-text-inline">
+                            <div className="icon-holder">
+                                <BarChart3 className="icon"/>
+                            </div>                        
+                            <p className="ptitle2">Análise de Dados</p>
+                        </div>
+                        <br />
+                        <p className="ptext2">Transforme dados em insights valiosos para decisões estratégicas.</p>
+                    </div>
+                </div>
+                <div className="BoxContainer">
+                    <div className="BoxContent2">
+                        <div className="icon-text-inline">
+                            <div className="icon-holder">
+                                <Rocket className="icon"/>
+                            </div>           
+                            <p className="ptitle2">Marketing Digital</p>
+                        </div>                      
+                        <br />
+                        <p className="ptext2">Estratégias personalizadas para impulsionar sua presença online.</p>
+                    </div>
+                </div>
+                <div className="BoxContainer">
+                    <div className="BoxContent2">
+                        <div className="icon-text-inline">
+                            <div className="icon-holder">
+                                <Target className="icon"/>
+                            </div>  
+                            <p className="ptitle2">Consultoria</p>
+                        </div>                        
+                        <br />
+                        <p className="ptext2">Orientação especializada para alcançar seus objetivos de negócio.</p>
+                    </div>
+                </div>
+                <div className="BoxContainer">
+                    <div className="BoxContent2">
+                        <div className="icon-text-inline">
+                            <div className="icon-holder">
+                                <Users className="icon"/>                                
+                            </div>
+                            <p className="ptitle2">Gestão de Equipes</p>
+                        </div>                     
+                        <br />
+                        <p className="ptext2">Ferramentas e metodologias para times mais produtivos.</p>
+                    </div>
+                </div>
+                <div className="BoxContainer">
+                    <div className="BoxContent2">
+                        <div className="icon-text-inline">
+                            <div className="icon-holder">
+                                <TrendingUp className="icon"/>
+                            </div>                 
+                            <p className="ptitle2">Crescimento</p>
+                        </div>                      
+                        <br />
+                        <p className="ptext2">Estratégias comprovadas para escalar seu negócio.</p>
+                    </div>
+                </div>
+                <div className="BoxContainer">
+                    <div className="BoxContent2">
+                        <div className="icon-text-inline">
+                            <div className="icon-holder">
+                                <Zap className="icon"/>
+                            </div>                        
+                            <p className="ptitle2">Automação</p>
+                        </div>                        
+                        <br />
+                        <p className="ptext2">Otimize processos e aumente a eficiência operacional.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
