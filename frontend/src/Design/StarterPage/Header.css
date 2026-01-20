@@ -10,9 +10,8 @@ header{
     z-index: 10;
     position: fixed;
     transform: translate(-50%,-50%);
-    top: calc(75px / 2);
+    top: calc(75px / 2 - 0.1px);
     left: 50%;
-    
 }
 
 .inter-font {
