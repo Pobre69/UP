@@ -7,7 +7,7 @@ export default function Box3() {
             <div id="Title-OqueFazemos">
                 <h3><span className="title_Recolor">O que fazemos por você</span>
                     <br />
-                    <span className="TitlePhrase">Oferecemos soluções completas para transformar e elevar seu negócio ao próximo nível com tecnologia e estratégia.</span>
+                    <div className="TitlePhrase">Oferecemos soluções completas para transformar e elevar seu negócio ao próximo nível com tecnologia e estratégia.</div>
                 </h3>
             </div>
             <div id="BoxGrid">
