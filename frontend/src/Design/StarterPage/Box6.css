@@ -1,0 +1,63 @@
+#box6 {
+    height: 100vh;
+    width: 100%;
+    background-color: rgb(12,12,12);
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+#box6_comentario {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 50px;
+}
+
+#box6_comentario p {
+    font-size: 2.7em;
+}
+
+#box6_comentario h3 {
+    font-size: 1.2em;
+    color: gray;
+    margin-top: 30px;
+}
+
+#box6_perguntas {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    padding-bottom: 75px;
+}
+
+#box6_perguntas div {
+    margin: 0.5%;
+    background-color: white;
+    border: transparent solid 1px;
+    border-radius: 20px;
+    width: 40%;
+    height: 40px;
+    padding: 0.6% 2%;
+    color: black;
+}
+
+#box6_perguntas p {
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    height: 40px;
+}
+
+#box6_perguntas div:hover p {
+    color: #9B2BFF;
+}
+
+#box6_perguntas h3 {
+    font-weight: 300;
+    font-size: 1em;
+    color: gray;
+    margin-top: 15px;
+}

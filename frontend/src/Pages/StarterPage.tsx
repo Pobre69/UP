@@ -4,6 +4,8 @@ import Box2 from "../Components/StarterPage/Box2";
 import Box3 from "../Components/StarterPage/Box3";
 import Box4 from "../Components/StarterPage/Box4";
 import Box5 from "../Components/StarterPage/Box5";
+import Box6 from "../Components/StarterPage/Box6";
+import Footer from "../Components/StarterPage/Footer";
 import "../Design/StarterPage/StarterPage.css";
 
 export default function StarterPage() {
@@ -15,6 +17,8 @@ export default function StarterPage() {
             <Box3 />
             <Box4 />
             <Box5 />
+            <Box6 />
+            <Footer />
         </>
     )
 }
