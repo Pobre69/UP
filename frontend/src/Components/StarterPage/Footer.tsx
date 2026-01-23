@@ -1,4 +1,5 @@
 import "../../Design/StarterPage/Footer.css";
+import {Twitter, Linkedin, Instagram} from "lucide-react";
 
 export default function Footer() {
     return (
@@ -8,9 +9,9 @@ export default function Footer() {
                     <img id="footer_logo" src="" alt="Logo" />
                     <h4>Elevando negócios através de soluções digitais inovadoras e resultados mensuráveis.</h4>
                     <div id="footer_icons">
-                        <img src="" alt="LinkedIn" />
-                        <img src="" alt="Instagram" />
-                        <img src="" alt="Twitter" />
+                        <a href=""><Linkedin /></a>
+                        <a href=""><Instagram /></a>
+                        <a href=""><Twitter /></a>
                     </div>
                 </div>
                 <div>

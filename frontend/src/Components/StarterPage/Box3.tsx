@@ -1,5 +1,5 @@
 import "../../Design/StarterPage/Box3.css";
-import { BarChart3, Rocket, Target, Users, TrendingUp, Zap } from "lucide-react";
+import { BarChart3, Rocket, Target, LucideMegaphone, TrendingUp, Globe } from "lucide-react";
 
 export default function Box3() {
     return (
@@ -51,12 +51,12 @@ export default function Box3() {
                     <div className="BoxContent2">
                         <div className="icon-text-inline">
                             <div className="icon-holder">
-                                <Users className="icon"/>                                
+                                <LucideMegaphone className="icon"/>                                
                             </div>
-                            <p className="ptitle2">Gestão de Equipes</p>
+                            <p className="ptitle2">Tráfego Pago</p>
                         </div>                     
                         <br />
-                        <p className="ptext2">Ferramentas e metodologias para times mais produtivos.</p>
+                        <p className="ptext2">Google Ads + Meta AI para alcançar seu público ideal.</p>
                     </div>
                 </div>
                 <div className="BoxContainer">
@@ -75,12 +75,12 @@ export default function Box3() {
                     <div className="BoxContent2">
                         <div className="icon-text-inline">
                             <div className="icon-holder">
-                                <Zap className="icon"/>
+                                <Globe className="icon"/>
                             </div>                        
-                            <p className="ptitle2">Automação</p>
+                            <p className="ptitle2">Criação de Sites</p>
                         </div>                        
                         <br />
-                        <p className="ptext2">Otimize processos e aumente a eficiência operacional.</p>
+                        <p className="ptext2">Sites modernos e otimizados para converter visitantes em clientes.</p>
                     </div>
                 </div>
             </div>

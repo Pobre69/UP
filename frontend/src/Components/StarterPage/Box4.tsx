@@ -30,7 +30,7 @@ export default function Box4() {
                     </div>
                     <div>
                         <p>Confiança</p>
-                        <h3>Transparência em cada etapa — você sempre sabe o que está sendo feito e por quê</h3>
+                        <h3>Transparência em cada etapa — você sempre sabe o que está sendo feito e por quê.</h3>
                     </div>
                 </div>
                 <div className="box4_boxes">
