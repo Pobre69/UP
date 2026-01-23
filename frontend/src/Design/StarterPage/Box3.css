@@ -1,4 +1,3 @@
-
 #box3 {
     height: fit-content;
     padding-bottom: 17vh;
@@ -36,10 +35,8 @@
 #Title-OqueFazemos h3 {
     display: flexbox;
     justify-items: center;
-}
-
-.title_Recolor{
-    color: #9B2BFF;
+    color: black;
+    width: 65%;
 }
 
 #BoxGrid {

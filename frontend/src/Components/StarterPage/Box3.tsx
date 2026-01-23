@@ -5,8 +5,8 @@ export default function Box3() {
     return (
         <div id="box3">
             <div id="Title-OqueFazemos">
-                <h3><span className="title_Recolor">O que fazemos por você</span>
-                    <br />
+                <h3>
+                    O que <span className="text_purple_linear">fazemos</span> por você<br />
                     <div className="TitlePhrase">Oferecemos soluções completas para transformar e elevar seu negócio ao próximo nível com tecnologia e estratégia.</div>
                 </h3>
             </div>

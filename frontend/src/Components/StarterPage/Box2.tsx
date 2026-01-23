@@ -6,7 +6,7 @@ export default function Box2() {
         <div id="box2">
             <div id="Title-ComoTrabalhamos">
                 <h3> 
-                    Como <span id="title_Recolor">trabalhamos</span>
+                    Como <span className="text_purple_linear">trabalhamos</span>
                     <br />
                     <span className="TitlePhrase">Um processo simples e eficiente para transformar sua presença digital</span>
                 </h3>

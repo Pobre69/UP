@@ -1,11 +1,9 @@
 #box6 {
     height: 100vh;
     width: 100%;
-    background-color: rgb(12,12,12);
     display: grid;
     justify-content: center;
     align-items: center;
-    color: white;
 }
 
 #box6_comentario {
@@ -33,29 +31,35 @@
     padding-bottom: 75px;
 }
 
-#box6_perguntas div {
+#box6_perguntas .pergunta {
     margin: 0.5%;
     background-color: white;
-    border: transparent solid 1px;
-    border-radius: 20px;
-    width: 40%;
-    height: 40px;
+    border-radius: 15px;
+    width: 55%;
+    height: 45px;
     padding: 0.6% 2%;
     color: black;
+    border: 1px solid #9664C84D;
+    cursor: pointer;
+    transition: border 0.3s ease-in-out;
 }
 
-#box6_perguntas p {
+#box6_perguntas .pergunta.ativo {
+    border: 1px solid #9B2BFF;
+}
+
+#box6_perguntas .pergunta p {
     font-size: 1.2em;
     display: flex;
     align-items: center;
-    height: 40px;
+    height: 45px;
 }
 
-#box6_perguntas div:hover p {
+#box6_perguntas .pergunta:hover p {
     color: #9B2BFF;
 }
 
-#box6_perguntas h3 {
+#box6_perguntas .pergunta h3 {
     font-weight: 300;
     font-size: 1em;
     color: gray;

@@ -8,6 +8,11 @@
     display: flex;
     align-items: center;
     padding: 2%;
+    transition: all 0.1s ease-in-out;
+}
+
+.box4_boxes:hover {
+    padding-right: 5%;
 }
 
 .box4_boxes img {
@@ -71,6 +76,7 @@
 
 .box4_icon {
     margin-right: 10px;
+    color: #9B2BFF;
 }
 
 .box4-2-icon {

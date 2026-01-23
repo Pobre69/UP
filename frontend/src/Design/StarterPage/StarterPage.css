@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    font-family: "Inter", sans-serif;
 }
 
 .text_Gray{
@@ -11,6 +12,20 @@
     color: white;
 }
 
+.text_Black{
+    color: black;
+}
+
 .text_Purple{
     color: #9B2BFF;
+}
+
+.text_purple_linear{
+    background: linear-gradient(
+        140deg,
+        #7A1FFF,
+        #8f67ff
+    );;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

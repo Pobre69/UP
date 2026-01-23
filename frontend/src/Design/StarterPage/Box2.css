@@ -1,11 +1,16 @@
 .BoxContainer {
     border-radius: 15px;
-    border: 2px solid rgb(222, 225, 225);
+    border: 2px solid rgb(225, 225, 225);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     height: 100%;
     width: 100%;
     font-family: "Inter", sans-serif;
     padding: 0.75%;
+    transition: all 0.2s ease-in-out;
+}
+
+.BoxContainer:hover {
+    border: 2px solid #9B2BFF;
 }
 
 .TitlePhrase {
@@ -21,13 +26,14 @@
 .BoxContent {
     padding: 7% 5%;
     max-width: 350px;
+    margin-top: 1px;
 }
 
 .iconBox {
     font-size: 2rem;
     background: linear-gradient(
         120deg,
-        #7f0ebd,
+        #8f67ff,
         #a718c4
     );
     border-radius: 50%;
@@ -86,8 +92,4 @@
 
 #BoxRow div {
     background-color: white;
-}
-
-#title_Recolor{
-    color: #9B2BFF;
 }

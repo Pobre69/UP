@@ -5,7 +5,7 @@ export default function Box1() {
         <div id="box1">
             <div id="box1_part1">
                 <div id="Card"><span id="Ponto"></span>Transformação Digital</div>
-                <p className="text_White">Elevando o Seu <br /><span className="text_Purple">Negócio</span></p>
+                <p className="text_White">Elevando o Seu <br /><span className="text_purple_linear">Negócio</span></p>
                 <h4 className="text_Gray">Potencialize seus resultados com soluções digitais inovadoras. Juntos, construímos o futuro do seu negócio.</h4>
                 <div id="SaibaMaisButtonEffects">
                     <div className="glow left"></div>

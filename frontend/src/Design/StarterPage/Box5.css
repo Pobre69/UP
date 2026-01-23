@@ -1,14 +1,29 @@
-#box5 {
-    height: fit-content;
-    width: 100%;
-    display: flexbox;
-    justify-items: center;
-    padding-bottom: 10vh;
+.Plan {
+    border: #9B2BFF solid 1px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    width: 40%;
+    height: 75vh;
+    padding: 3%;
+    background-color: white;
+}
+
+.Plan p {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.Plan h3 {
+    font-size: 1em;
+    font-weight: 300;
+    text-align: center;
+    margin-top: 15px;
+    color: gray;
 }
 
 .TitlePhrase-TrabalheConosco {
     font-size: 1.2rem;
-    font-family: "Inter", sans-serif;
     font-weight: 375;
     color: rgb(145, 145, 145);   
 
@@ -20,6 +35,104 @@
 
     padding-top: 25px;
 }
+
+.Plans_Detalhe {
+    margin-top: 20px;
+    margin-bottom: 60px;
+}
+
+.Plans_Detalhe div {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.Plans_Detalhe h3 {
+    color: auto;
+}
+
+.Plano_Valor {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+}
+
+.Plano_Valor span {
+    font-size: 3em;
+    font-weight: bold;
+}
+
+.Plano_Valor h3 {
+    font-size: 1em;
+    padding-bottom: 10px;
+    align-self: flex-end;
+    font-weight: 300;
+    color: gray;
+}
+
+.Plan_Check {
+    border-radius: 50%;
+    background-color: white;
+    color: #7A1FFF;
+}
+
+.Plans_extra {
+    text-align: start;
+    margin-top: 20px;
+    color: gray;
+    font-size: 1em;
+    font-weight: 300;
+    color: #7A1FFF;
+}
+
+.planoButton {
+    margin-top: 30px;
+    border-radius: 10px;
+    width: 90%;
+    margin-left: 5%;
+    text-align: center;
+    border: transparent;
+    height: 50px;
+    transition: all 0.3s ease-in-out;
+    background: linear-gradient(
+        140deg,
+        #8f67ff,
+        #a718c4
+    );
+}
+
+.planoButton:hover {
+    cursor: pointer;
+    width: 100%;
+    margin-left: 0;
+}
+
+.Plan_Effect {
+    position: relative;
+}
+
+.Plan_Effect div {
+    position: absolute;
+    width: 500px;
+    height: 100%;
+    border-radius: 50%;
+    filter: blur(25px);
+    z-index: 0;
+    pointer-events: none;
+    transition: all 0.2s ease-in-out;
+    background-color: #9B2BFF;
+}
+
+#box5 {
+    height: fit-content;
+    width: 100%;
+    display: flexbox;
+    justify-items: center;
+    padding-bottom: 10vh;
+}
+
 #Title-TrabalheConosco {
     display: flex;
     justify-content: center;
@@ -27,7 +140,6 @@
     text-align: center;
 
     font-size: 2.5rem;
-    font-family: "Inter", sans-serif;
     color: white;
 
     height: 10vh;
@@ -44,10 +156,70 @@
     width: 80%;
 }
 
-#Plan {
-    border: 2px solid rgb(238, 224, 255);
-    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
-    border-radius: 5%;
-    width: 40%;
-    height: 70vh;
+#Especial {
+    background-color: black;
+    color: white;
+}
+
+#MaisPopular {
+    position: relative;
+}
+
+#MaisPopular div{
+    position: absolute;
+    background: linear-gradient(
+        150deg,
+        #7A1FFF,
+        #bc2bff
+    );;
+    border-radius: 20px;
+    width: 150px;
+    height: 30px;
+    top: 0%;
+    left: 50%;
+    transform: translate(-50%,-200%);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#MaisPopular h3 {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-size: 1em;
+    color: white;
+    font-weight: 300;
+}
+
+#Plan_ChekcEspecial {
+    color: white;
+    background-color: #7A1FFF;
+}
+
+#Planos_ExtraEspecial {
+    color: white;
+}
+
+#Plans_DetalheExtra {
+    position: relative;
+}
+
+#Plans_DetalheExtra h3 {
+    font-size: 0.9em;
+    color: gray;
+    font-weight: 300;
+    position: absolute;
+    text-align: start;
+    left: 0;
+    top: 0;
+}
+
+#planoButtonEspecial {
+    background: linear-gradient(
+        140deg,
+        white,
+        gray
+    );;
 }

@@ -28,7 +28,13 @@
 
 .box1_textEdit2{
     font-size: 3em;
-    color: #7A1FFF;
+    background: linear-gradient(
+        140deg,
+        #7A1FFF,
+        #8f67ff
+    );;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 #box1{
