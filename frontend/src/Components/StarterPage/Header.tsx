@@ -1,10 +1,10 @@
 import "../../Design/StarterPage/Header.css";
-import React from "../../Images/react.svg";
+import Up_Logo from "../../Images/UP_logo.png";
 
 export default function Header() {
     return (
         <header>
-            <div><img src={ React } id="logo" alt="UP Logo" /></div>
+            <div><img src={ Up_Logo } id="logo" alt="UP Logo" /></div>
             <div id="header_links">
                 <div>Inicio</div>
                 <div>Serviçoes</div>

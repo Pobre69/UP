@@ -1,12 +1,13 @@
 import "../../Design/StarterPage/Footer.css";
 import {Twitter, Linkedin, Instagram} from "lucide-react";
+import Up_Logo from "../../Images/UP_logo.png";
 
 export default function Footer() {
     return (
         <footer>
             <div id="Footer_Conteudo">
                 <div id="footer_social">
-                    <img id="footer_logo" src="" alt="Logo" />
+                    <img id="footer_logo" src={Up_Logo} alt="Logo" />
                     <h4>Elevando negócios através de soluções digitais inovadoras e resultados mensuráveis.</h4>
                     <div id="footer_icons">
                         <a href=""><Linkedin /></a>
