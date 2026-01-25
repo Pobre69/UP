@@ -1,112 +1,112 @@
+/* Mobile-first approach */
 .Plan {
     border: #9B2BFF solid 1px;
     box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
     border-radius: 20px;
-    width: 40%;
-    height: 75vh;
-    padding: 3%;
+    width: 100%;
+    min-height: 500px;
+    padding: 24px;
     background-color: white;
+    box-sizing: border-box;
+    margin-bottom: 24px;
 }
 
 .Plan p {
-    font-size: 1.5em;
+    font-size: 1.3rem;
     font-weight: bold;
     text-align: center;
+    margin: 0 0 8px;
 }
 
 .Plan h3 {
-    font-size: 1em;
+    font-size: 0.9rem;
     font-weight: 300;
     text-align: center;
-    margin-top: 15px;
+    margin: 0 0 16px;
     color: gray;
+    line-height: 1.4;
 }
 
 .TitlePhrase-TrabalheConosco {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     font-weight: 375;
-    color: rgb(145, 145, 145);   
-
-    height: 5vh;
-    width: 100%;
-    z-index: 1;
-
-    line-height: 30px;
-
-    padding-top: 25px;
+    color: rgb(145, 145, 145);
+    text-align: center;
+    margin-bottom: 32px;
+    line-height: 1.4;
 }
 
 .Plans_Detalhe {
-    margin-top: 20px;
-    margin-bottom: 60px;
+    margin: 20px 0 40px;
 }
 
 .Plans_Detalhe div {
     display: flex;
-    align-items: end;
-    gap: 10px;
-    margin-top: 5px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .Plans_Detalhe h3 {
-    color: auto;
+    color: black;
+    font-size: 0.85rem;
+    margin: 0;
+    text-align: left;
 }
 
 .Plano_Valor {
-    margin-top: 25px;
+    margin: 20px 0;
     display: flex;
     justify-content: center;
-    gap: 7px;
+    align-items: baseline;
+    gap: 4px;
 }
 
 .Plano_Valor span {
-    font-size: 3em;
+    font-size: 2.5rem;
     font-weight: bold;
 }
 
 .Plano_Valor h3 {
-    font-size: 1em;
-    padding-bottom: 10px;
-    align-self: flex-end;
+    font-size: 0.9rem;
     font-weight: 300;
     color: gray;
+    margin: 0;
 }
 
 .Plan_Check {
     border-radius: 50%;
     background-color: white;
     color: #7A1FFF;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
 }
 
 .Plans_extra {
-    text-align: start;
-    margin-top: 20px;
-    color: gray;
-    font-size: 1em;
-    font-weight: 300;
+    text-align: left;
+    margin-top: 16px;
     color: #7A1FFF;
+    font-size: 0.85rem;
+    font-weight: 300;
 }
 
 .planoButton {
-    margin-top: 30px;
+    margin-top: 24px;
     border-radius: 10px;
-    width: 90%;
-    margin-left: 5%;
+    width: 100%;
     text-align: center;
-    border: transparent;
-    height: 50px;
+    border: none;
+    height: 45px;
     transition: all 0.3s ease-in-out;
-    background: linear-gradient(
-        140deg,
-        #8f67ff,
-        #a718c4
-    );
+    background: linear-gradient(140deg, #8f67ff, #a718c4);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
 }
 
 .planoButton:hover {
-    cursor: pointer;
-    width: 100%;
-    margin-left: 0;
+    transform: scale(1.02);
 }
 
 .Plan_Effect {
@@ -115,22 +115,25 @@
 
 .Plan_Effect div {
     position: absolute;
-    width: 500px;
-    height: 100%;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
-    filter: blur(25px);
-    z-index: 0;
+    filter: blur(60px);
+    z-index: -1;
     pointer-events: none;
-    transition: all 0.2s ease-in-out;
     background-color: #9B2BFF;
+    opacity: 0.3;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #box5 {
-    height: fit-content;
-    width: 100%;
-    display: flexbox;
-    justify-items: center;
-    padding-bottom: 10vh;
+    min-height: 100vh;
+    width: 145.3%;
+    padding: 40px 16px;
+    box-sizing: border-box;
+    background-color: #f8f9fa;
 }
 
 #Title-TrabalheConosco {
@@ -138,22 +141,17 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-
-    font-size: 2.5rem;
-    color: white;
-
-    height: 10vh;
-    width: 39%;
-    z-index: 1;
-
-
-    padding: 5% 0 3% 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: black;
 }
 
 #Plans-holder {
     display: flex;
-    gap: 5%;
-    width: 80%;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
 }
 
 #Especial {
@@ -165,32 +163,27 @@
     position: relative;
 }
 
-#MaisPopular div{
+#MaisPopular div {
     position: absolute;
-    background: linear-gradient(
-        150deg,
-        #7A1FFF,
-        #bc2bff
-    );;
+    background: linear-gradient(150deg, #7A1FFF, #bc2bff);
     border-radius: 20px;
-    width: 150px;
-    height: 30px;
-    top: 0%;
+    width: 120px;
+    height: 28px;
+    top: -14px;
     left: 50%;
-    transform: translate(-50%,-200%);
+    transform: translate(-50%,-80%);
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 2;
 }
 
 #MaisPopular h3 {
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    font-size: 1em;
+    font-size: 0.8rem;
     color: white;
-    font-weight: 300;
+    font-weight: 400;
+    margin: 0;
 }
 
 #Plan_ChekcEspecial {
@@ -207,19 +200,274 @@
 }
 
 #Plans_DetalheExtra h3 {
-    font-size: 0.9em;
+    font-size: 0.8rem;
     color: gray;
     font-weight: 300;
-    position: absolute;
-    text-align: start;
-    left: 0;
-    top: 0;
+    text-align: left;
+    margin: 0;
 }
 
 #planoButtonEspecial {
-    background: linear-gradient(
-        140deg,
-        white,
-        gray
-    );;
+    background: linear-gradient(140deg, white, #e0e0e0);
+    color: black;
+}
+
+/* Tablet */
+@media (min-width: 480px) {
+    .Plan {
+        min-height: 550px;
+        padding: 32px;
+    }
+    
+    .Plan p {
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+    }
+    
+    .Plan h3 {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+    
+    .TitlePhrase-TrabalheConosco {
+        font-size: 1rem;
+        margin-bottom: 40px;
+    }
+    
+    #box5 {
+        padding: 60px 32px;
+    }
+    
+    #Title-TrabalheConosco {
+        font-size: 2.2rem;
+        margin-bottom: 32px;
+    }
+    
+    #Plans-holder {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+    
+    .Plan {
+        margin-bottom: 0;
+    }
+    
+    .Plano_Valor span {
+        font-size: 2.8rem;
+    }
+    
+    .Plans_Detalhe h3 {
+        font-size: 0.9rem;
+    }
+    
+    .Plans_extra {
+        font-size: 0.9rem;
+    }
+    
+    .planoButton {
+        height: 48px;
+    }
+    
+    #MaisPopular div {
+        width: 140px;
+        height: 32px;
+        top: -16px;
+    }
+    
+    #MaisPopular h3 {
+        font-size: 0.85rem;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .Plan {
+        width: 40%;
+        height: 75vh;
+        padding: 2%;
+        margin-bottom: 0;
+        margin-top: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: box-shadow 0.3s ease-in-out;
+    }
+    
+    .Plan:hover {
+        box-shadow: 0 0 25px rgba(155, 43, 255, 0.7);
+    }
+    
+    .Plan p {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+    }
+    
+    .Plan h3 {
+        font-size: 0.9rem;
+        margin-top: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .TitlePhrase-TrabalheConosco {
+        font-size: 1.2rem;
+        height: 5vh;
+        line-height: 30px;
+        padding-top: 25px;
+        margin-bottom: 0;
+    }
+    
+    .Plans_Detalhe {
+        margin: 16px 0;
+        flex-grow: 1;
+        overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .Plans_Detalhe::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .Plans_Detalhe div {
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    
+    .Plans_Detalhe h3 {
+        font-size: 0.85rem;
+        line-height: 1.3;
+        margin: 0;
+    }
+    
+    .Plano_Valor {
+        margin: 16px 0;
+        gap: 6px;
+    }
+    
+    .Plano_Valor span {
+        font-size: 2.5rem;
+    }
+    
+    .Plano_Valor h3 {
+        font-size: 0.9rem;
+        padding-bottom: 6px;
+        align-self: flex-end;
+        margin: 0;
+    }
+    
+    .Plan_Check {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .Plans_extra {
+        margin-top: 12px;
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+    
+    .planoButton {
+        margin-top: 16px;
+        width: 90%;
+        margin-left: 5%;
+        height: 45px;
+        font-size: 0.9rem;
+    }
+    
+    .planoButton:hover {
+        transform: none;
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .Plan_Effect div {
+        width: 400px;
+        height: 80%;
+        filter: blur(25px);
+        opacity: 0.7;
+        top: 10%;
+        left: 0;
+        transform: none;
+    }
+    
+    #box5 {
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 10vh;
+        width: 100%;
+        background-color: white;
+    }
+    
+    #Title-TrabalheConosco {
+        font-size: 2.5rem;
+        height: 10vh;
+        width: 39%;
+        padding: 5% 0 3% 0;
+        margin-bottom: 0;
+    }
+    
+    #Plans-holder {
+        display: flex;
+        flex-direction: row;
+        gap: 5%;
+        width: 80%;
+    }
+    
+    #MaisPopular div {
+        width: 150px;
+        height: 30px;
+        top: 0%;
+        transform: translate(-50%, -120%);
+    }
+    
+    #MaisPopular h3 {
+        font-size: 1rem;
+        font-weight: 300;
+    }
+    
+    #Plans_DetalheExtra h3 {
+        font-size: 0.75rem;
+        position: static;
+        margin-top: 8px;
+        line-height: 1.2;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+    #Title-TrabalheConosco {
+        font-size: 3rem;
+    }
+
+    #MaisPopular div {
+        transform: translate(-50%, -150%);
+    }
+    
+    .TitlePhrase-TrabalheConosco {
+        font-size: 1.4rem;
+    }
+    
+    .Plan p {
+        font-size: 1.7rem;
+    }
+    
+    .Plan h3 {
+        font-size: 1.1rem;
+    }
+    
+    .Plano_Valor span {
+        font-size: 3.5rem;
+    }
+    
+    .Plans_Detalhe h3 {
+        font-size: 1.1rem;
+    }
+    
+    .Plans_extra {
+        font-size: 1.1rem;
+    }
 }

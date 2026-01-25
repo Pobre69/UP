@@ -1,32 +1,59 @@
-header{
+/* Mobile-first approach */
+header {
     width: 100%;
-    height: 75px;
+    height: 60px;
     background-color: black;
-
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 100px;
-    z-index: 10;
+    padding: 0 12px;
+    box-sizing: border-box;
+    
     position: fixed;
-    transform: translate(-50%,-50%);
-    top: calc(75px / 2 - 0.1px);
-    left: 50%;
+    top: 0;
+    left: 0;
+    z-index: 10;
 }
 
 .inter-font {
-  font-family: "Inter", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
 }
 
-#Consultoria_Button{
+#logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+#header_links {
     font-family: "Inter", sans-serif;
-    width: 200px;
-    height: 40px;
-    border-radius: 20px;
-    background-color: white;
+    color: gray;
+    font-size: 0.9rem;
+    
+    display: none; /* Hidden on mobile by default */
+    gap: 20px;
+}
+
+#header_links div {
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+}
+
+#header_links div:hover {
+    color: white;
+    cursor: pointer;
+}
+
+#Consultoria_Button {
+    font-family: "Inter", sans-serif;
+    width: 100px;
+    height: 32px;
+    border-radius: 999px;
+    
     background: linear-gradient(
         180deg,
         #ffffff,
@@ -36,43 +63,124 @@ header{
     );
     background-size: 150% 300%;
     background-position: top;
+    
     border: none;
-    font-size: 1.2em;
+    font-size: 0.75rem;
     text-align: center;
+    flex-shrink: 0;
+    color: black;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
     transition: all 0.3s ease-in-out;
-    transform: translate(5px,0);
 }
 
-#Consultoria_Button:hover{
+#Consultoria_Button:hover {
     cursor: pointer;
     background-position: bottom;
     color: purple;
-    transform: translate(15px,0);
-    font-size: 1.3em;
-    width: 220px;
 }
 
-#header_links{
-    font-family: "Inter", sans-serif;
-    color: gray;
-    font-size: 1.3em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 60px;
+/* Tablet */
+@media (min-width: 768px) {
+    header {
+        height: 70px;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 24px;
+    }
+    
+    #logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    #header_links {
+        display: flex;
+        justify-content: center;
+        font-size: 1rem;
+        gap: 20px;
+    }
+    
+    #Consultoria_Button {
+        width: 120px;
+        height: 36px;
+        font-size: 0.85rem;
+    }
+    
+    #Consultoria_Button:hover {
+        transform: scale(1.05);
+    }
 }
 
-#header_links div{
-    transition: all 0.2s ease-in-out;
+/* Desktop */
+@media (min-width: 1024px) {
+    header {
+        height: 75px;
+        padding: 0 50px;
+        gap: 50px;
+    }
+    
+    #logo {
+        width: 50px;
+        height: 50px;
+    }
+    
+    #header_links {
+        font-size: 1.1rem;
+        gap: 40px;
+    }
+    
+    #Consultoria_Button {
+        width: 160px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    #Consultoria_Button:hover {
+        width: 180px;
+        font-size: 1.1rem;
+    }
 }
 
-#header_links div:hover{
+/* Large Desktop */
+@media (min-width: 1440px) {
+    header {
+        padding: 0 80px;
+        gap: 80px;
+    }
+    
+    #header_links {
+        font-size: 1.2rem;
+        gap: 60px;
+    }
+    
+    #Consultoria_Button {
+        width: 180px;
+        font-size: 1.1rem;
+    }
+    
+    #Consultoria_Button:hover {
+        width: 200px;
+        font-size: 1.2rem;
+    }
+}
+
+/* Mobile menu toggle (if needed) */
+.mobile-menu-toggle {
+    display: block;
+    background: none;
+    border: none;
     color: white;
+    font-size: 1.5rem;
     cursor: pointer;
 }
 
-#logo{
-    width: 50px;
-    height: 50px;
-    margin-left: 50px;
+@media (min-width: 768px) {
+    .mobile-menu-toggle {
+        display: none;
+    }
 }

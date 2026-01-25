@@ -1,8 +1,10 @@
 import "../../Design/StarterPage/Box5.css";
 import { Check } from "lucide-react";
+import { stripeService } from "../../services/stripeService";
 
 const Planos = [
     {
+        id: 'basico',
         especial: false,
         titulo: "Gestão de Instagram",
         dinheiro: "R$ 250",
@@ -19,6 +21,7 @@ const Planos = [
         ]
     },
     {
+        id: 'premium',
         especial: true,
         titulo: "Instagram + Tráfego Pago",
         dinheiro: "R$ 499",
@@ -35,6 +38,7 @@ const Planos = [
         ]
     },
     {
+        id: 'completo',
         especial: false,
         titulo: "Site + Instagram + Tráfego",
         dinheiro: "R$ 999",
@@ -53,25 +57,34 @@ const Planos = [
 ]
 
 export default function Box5() {
+    const handlePagamento = async (planoId: string) => {
+        try {
+            const { url } = await stripeService.createCheckoutSession(planoId);
+            window.location.href = url;
+        } catch (error) {
+            console.error('Erro ao processar pagamento:', error);
+            alert('Erro ao processar pagamento. Tente novamente.');
+        }
+    };
     return (
         <div id="box5">
             <div id="Title-TrabalheConosco">
-                <h3><span className="title_Recolor">Venha trabalhar conosco</span>
+                <h3>Venha <span className="text_purple_linear">trabalhar</span> conosco
                     <br />
                     <div className="TitlePhrase-TrabalheConosco">Não vendemos apenas posts ou anúncios. Construímos presença digital, atraímos clientes e ajudamos sua empresa a crescer de forma estratégica.</div>
                 </h3>
             </div>
             <div id="Plans-holder">
-                {Planos.map((plano) => (
-                    <div className="Plan" id={`${plano.especial ? "Especial" : ""}`}>
+                {Planos.map((plano, index) => (
+                    <div key={index} className="Plan" id={`${plano.especial ? "Especial" : ""}`}>
                         <div className="Plan_Effect"><div></div></div>
                         {plano.especial && <div id="MaisPopular"><div><h3>Mais Popular</h3></div></div>}
                         <p>{plano.titulo}</p>
                         <div className="Plano_Valor"><span className={plano.especial ? "" : "text_purple_linear"}>{plano.dinheiro}</span><h3>/mês</h3></div>
                         <h3 style={{ fontSize: "0.9em" }}>{plano.subtitulo}</h3>
                         <div className="Plans_Detalhe">
-                            {plano.detalhes.map((detalhe) => (
-                                <div>
+                            {plano.detalhes.map((detalhe, detIndex) => (
+                                <div key={detIndex}>
                                     <Check className="Plan_Check" id={plano.especial ? "Plan_ChekcEspecial" : ""} size={20}/>
                                     <h3><div className={`${plano.especial ? "text_White" : "text_Black"}`}>{detalhe}</div></h3>
                                 </div>
@@ -79,7 +92,13 @@ export default function Box5() {
                             {plano.especial && <div id="Plans_DetalheExtra"><h3>📌 A verba dos anúncios é paga separadamente pelo cliente</h3></div>}
                         </div>
                         <div className="Plans_extra" id={plano.especial ? "Planos_ExtraEspecial" : ""}>👉 Foco total em presença online, constância e imagem profissional.</div>
-                        <button className="planoButton" id={`${plano.especial ? "planoButtonEspecial" : ""}`}>Quero esse plano</button>
+                        <button 
+                            className="planoButton" 
+                            id={`${plano.especial ? "planoButtonEspecial" : ""}`}
+                            onClick={() => handlePagamento(plano.id)}
+                        >
+                            Quero esse plano
+                        </button>
                     </div>
                 ))}
             </div>

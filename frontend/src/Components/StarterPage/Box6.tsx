@@ -42,6 +42,10 @@ const perguntas = [
 export default function Box6() {
     const [ativo, setAtivo] = useState<number | null>(null);
 
+    const togglePergunta = (index: number) => {
+        setAtivo(ativo === index ? null : index);
+    };
+
     return (
         <div id="box6">
             <div id="box6_comentario">
@@ -56,7 +60,7 @@ export default function Box6() {
                     <div
                         key={index}
                         className={`pergunta ${ativo === index ? "ativo" : ""}`}
-                        onClick={() => setAtivo(index)}
+                        onClick={() => togglePergunta(index)}
                     >
                         <p>{item.pergunta}</p>
                         <h3>{item.resposta}</h3>

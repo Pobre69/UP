@@ -1,98 +1,330 @@
+/* Mobile-first approach */
 #box3 {
-    height: fit-content;
-    padding-bottom: 17vh;
+    min-height: 100vh;
+    padding: 40px 16px;
+    box-sizing: border-box;
+    background-color: white;
+    width: 145.3%;
+    overflow-x: hidden;
 }
 
 .TitlePhrase {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     font-family: "Inter", sans-serif;
     font-weight: 375;
     color: rgb(145, 145, 145);
-
-    height: 5vh;
-    width: 100%;
-    z-index: 1;
-    max-width: 60%;
-
-    line-height: 30px;
-
-    padding-top: 25px;
+    text-align: center;
+    margin-bottom: 32px;
+    line-height: 1.4;
+    max-width: 100%;
 }
+
 #Title-OqueFazemos {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     font-family: "Inter", sans-serif;
-    height: 10vh;
-    width: 100%;
-    z-index: 1;
-    color: white;
+    color: black;
     text-align: center;
-    padding: 5% 0 3% 0;
+    margin-bottom: 24px;
+    font-weight: 600;
 }
 
 #Title-OqueFazemos h3 {
-    display: flexbox;
-    justify-items: center;
     color: black;
-    width: 65%;
+    width: 100%;
+    margin: 0;
+    text-align: center;
 }
 
 #BoxGrid {
-    display: grid;
-    grid-template-columns: repeat(3,auto);
-    height: 35vh;
-    width: 100;
-    z-index: 1;
-    padding: 0 10%;
-    gap: 2%;
-    grid-row-gap: 10%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
 }
 
-.ptitle2{
-    font-size: 1.4rem;
+.box3_1 {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    width: 100%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-bottom: 24px;
+}
+
+.box3_1::-webkit-scrollbar {
+    display: none;
+}
+
+.box3_2 {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    width: 100%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.box3_2::-webkit-scrollbar {
+    display: none;
+}
+
+.box3_1 .BoxContainer3,
+.box3_2 .BoxContainer3 {
+    min-width: 240px;
+    flex-shrink: 0;
+}
+
+.ptitle2 {
+    font-size: 1rem;
     font-weight: 550;
     color: rgb(0, 0, 0);
     font-family: "Inter", sans-serif;
+    margin: 12px 0 8px;
+    line-height: 1.3;
 }
-.ptext2{
-    font-size: 1.1rem;
+
+.ptext2 {
+    font-size: 0.85rem;
     font-weight: 375;
     color: rgb(87, 87, 87);
     font-family: "Inter", sans-serif;
+    line-height: 1.4;
+    margin: 0;
 }
 
-.BoxContent2 {
-    text-align: justify;
-    max-width: fit-content;
-    padding: 6% 6%;
-    justify-content: center;
-    align-items: center;
+.BoxContainer3 {
+    border-radius: 12px;
+    border: 2px solid rgb(225, 225, 225);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    height: 100%;
+    width: 100%;
+    font-family: "Inter", sans-serif;
+    padding: 16px;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
+    opacity: 1;
+}
+
+.BoxContainer3:hover {
+    border: 2px solid #9B2BFF;
+}
+
+.BoxContent3 {
+    padding: 0;
+    max-width: 100%;
+    margin-top: 0;
 }
 
 .icon-text-inline {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .icon {
-    width: 35px;
-    height: 35px;
+    width: 28px;
+    height: 28px;
     color: white;
 }
 
 .icon-holder {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(
-        120deg,
-        #7f0ebd,
-        #a718c4
-    );
-    border-radius: 20%;
+    background: linear-gradient(120deg, #7f0ebd, #a718c4);
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+/* Tablet */
+@media (min-width: 480px) {
+    #box3 {
+        padding: 60px 32px;
+    }
+    
+    .TitlePhrase {
+        font-size: 1rem;
+        margin-bottom: 40px;
+        max-width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    #Title-OqueFazemos {
+        font-size: 2.2rem;
+        margin-bottom: 32px;
+    }
+    
+    #BoxGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+    
+    .box3_1,
+    .box3_2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        overflow: visible;
+    }
+    
+    .box3_1 {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+    }
+    
+    .box3_2 {
+        grid-column: 1 / -1;
+    }
+    
+    .box3_1 .BoxContainer3,
+    .box3_2 .BoxContainer3 {
+        min-width: auto;
+        flex-shrink: 1;
+    }
+    
+    .ptitle2 {
+        font-size: 1.1rem;
+        margin: 16px 0 10px;
+    }
+    
+    .ptext2 {
+        font-size: 0.9rem;
+    }
+    
+    .BoxContent3 {
+        padding: 24px;
+    }
+    
+    .icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .icon-holder {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+    }
+    
+    .icon-text-inline {
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    #box3 {
+        padding: 80px 50px;
+        min-height: fit-content;
+        padding-bottom: 17vh;
+        height: 90vh;
+        width: 100%;
+    }
+    
+    .TitlePhrase {
+        font-size: 1.2rem;
+        max-width: 60%;
+        height: 5vh;
+        line-height: 30px;
+        padding-top: 25px;
+        margin-bottom: 0;
+    }
+    
+    #Title-OqueFazemos {
+        font-size: 2.8rem;
+        height: 10vh;
+        padding-bottom: 5%;
+        margin-bottom: 10px;
+    }
+    
+    #Title-OqueFazemos h3 {
+        width: 65%;
+    }
+    
+    #BoxGrid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        height: 35vh;
+        gap: 2%;
+        grid-row-gap: 10%;
+        margin-top: 50px;
+    }
+    
+    .box3_1,
+    .box3_2 {
+        display: contents;
+    }
+    
+    .ptitle2 {
+        font-size: 1.3rem;
+    }
+    
+    .ptext2 {
+        font-size: 1rem;
+    }
+    
+    .BoxContent3 {
+        text-align: justify;
+        padding: 6%;
+    }
+    
+    .icon {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .icon-holder {
+        width: 60px;
+        height: 60px;
+        border-radius: 20%;
+    }
+    
+    .icon-text-inline {
+        gap: 10px;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+    #box3 {
+        padding: 100px 80px 17vh;
+        height: 95vh;
+    }
+    
+    .TitlePhrase {
+        font-size: 1.4rem;
+    }
+    
+    #Title-OqueFazemos {
+        font-size: 3.2rem;
+        padding-bottom: 2%;
+    }
+    
+    .ptitle2 {
+        font-size: 1.5rem;
+    }
+    
+    .ptext2 {
+        font-size: 1.1rem;
+    }
+    
+    .icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .icon-holder {
+        width: 68px;
+        height: 68px;
+    }
 }

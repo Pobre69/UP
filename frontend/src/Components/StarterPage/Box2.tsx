@@ -1,6 +1,38 @@
+import { useEffect } from "react";
 import "../../Design/StarterPage/Box2.css";
 
 export default function Box2() {
+    let executado = false;
+    useEffect(() => {
+        const ALTURA = 400;
+
+        const onScroll = () => {
+            if (!executado && window.scrollY >= ALTURA) {
+                ExecutarEfeito();
+                executado = true;
+                window.removeEventListener("scroll", onScroll);
+            }
+        };
+
+        window.addEventListener("scroll", onScroll);
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+        
+    function ExecutarEfeito() {
+        const elementos = document.getElementsByClassName("BoxContainer");
+
+        Array.from(elementos).forEach((element) => {
+            const el = element as HTMLElement;
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+            el.style.transition = "all 0.7s ease-in-out";
+
+            setTimeout(() => {
+                el.style.transition = "all 0.2s ease-in-out";
+            }, 700);
+        });
+    }
+
     return (
         
         <div id="box2">
@@ -8,7 +40,7 @@ export default function Box2() {
                 <h3> 
                     Como <span className="text_purple_linear">trabalhamos</span>
                     <br />
-                    <span className="TitlePhrase">Um processo simples e eficiente para transformar sua presença digital</span>
+                    <span id="TitlePhrase">Um processo simples e eficiente para transformar sua presença digital</span>
                 </h3>
             </div>
             <div id="BoxRow">
