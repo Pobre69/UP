@@ -1,5 +1,5 @@
 import "../../Design/StarterPage/Header.css";
-import React from "../../Images/react.svg";
+import Up_Logo from "../../Images/UP_logo.png";
 
 export default function Header() {
     const scrollToSection = (sectionId: string) => {
@@ -11,7 +11,7 @@ export default function Header() {
 
     return (
         <header>
-            <div><img src={ React } id="logo" alt="UP Logo" /></div>
+            <div><img src={ Up_Logo } id="logo" alt="UP Logo" /></div>
             <div id="header_links">
                 <div onClick={() => scrollToSection('box1')} style={{ cursor: 'pointer' }}>Inicio</div>
                 <div onClick={() => scrollToSection('box3')} style={{ cursor: 'pointer' }}>Serviçoes</div>
