@@ -1,0 +1,14 @@
+{
+    "urlBase": "/",
+    "database": {
+        "UP": {
+            "name": "UP_AltasAventuras",
+            "host": "localhost",
+            "username": "root",
+            "password": "",
+            "database": "UP",
+            "charset": "utf8mb4"
+        }
+    },
+    "firstController": "indexController@index"
+}

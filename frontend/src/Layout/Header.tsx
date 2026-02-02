@@ -1,5 +1,5 @@
-import "../../Design/StarterPage/Header.css";
-import Up_Logo from "../../Images/UP_logo.png";
+import "../LayoutDesign/Header.css";
+import Up_Logo from "../Images/UP_logo.png";
 
 export default function Header() {
     const scrollToSection = (sectionId: string) => {

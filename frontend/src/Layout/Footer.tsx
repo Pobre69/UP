@@ -1,6 +1,6 @@
-import "../../Design/StarterPage/Footer.css";
+import "../LayoutDesign/Footer.css";
 import {Twitter, Linkedin, Instagram} from "lucide-react";
-import Up_Logo from "../../Images/UP_logo.png";
+import Up_Logo from "../Images/UP_logo.png";
 
 export default function Footer() {
     return (

@@ -1,0 +1,417 @@
+/* container */
+#boxform {
+  padding-top: 80px;
+  padding-bottom: 80px; /* ✅ padding embaixo */
+  margin: 0 100px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* header */
+#title-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(120deg, #8f67ff, #a718c4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.purplegradient {
+  background: linear-gradient(90deg, #8f67ff, #a718c4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#title {
+  font-weight: 800;
+  font-size: 32px;
+  line-height: 38px;
+  color: #121212;
+  margin-top: 20px;
+}
+
+#titlePhrase {
+  display: block;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  color: #6b6b6b;
+  margin-top: 8px;
+}
+
+/* form wrapper */
+#form {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+#signupForm {
+  width: 100%;
+  max-width: 760px;
+}
+
+/* card */
+.card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #ececf5;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(16, 16, 24, 0.06);
+  text-align: left;
+  position: relative;
+  overflow: hidden; /* ✅ garante que nada sai da caixa branca */
+}
+
+.section-title {
+  font-weight: 900;
+  font-size: 18px;
+  color: #121212;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: rgba(109, 40, 217, 0.12);
+  color: #6d28d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b6b6b;
+}
+
+/* grid */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.grid-2 > * {
+  min-width: 0;
+}
+
+/* fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.label {
+  font-size: 12px;
+  color: #3a3a48;
+}
+
+.label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label-icon {
+  width: 18px;
+  height: 18px;
+  color: #6d28d9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.req {
+  color: #d92b2b;
+  font-weight: 800;
+}
+
+/* inputs */
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid #ececf5;
+  border-radius: 12px;
+  padding: 12px;
+  outline: none;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  box-sizing: border-box;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: rgba(109, 40, 217, 0.55);
+  box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.12);
+}
+
+.input-error {
+  border-color: rgba(217, 43, 43, 0.55) !important;
+  box-shadow: 0 0 0 4px rgba(217, 43, 43, 0.1) !important;
+}
+
+.hint {
+  font-size: 12px;
+  color: #6b6b6b;
+}
+
+.error {
+  font-size: 12px;
+  color: #d92b2b;
+}
+
+.form-error {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #d92b2b;
+  text-align: center;
+}
+
+/* =========================
+   Dropdown (sempre dentro do card)
+   ========================= */
+
+.dd {
+  width: 100%;
+  border: 1px solid #ececf5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.dd-open {
+  border-color: rgba(109, 40, 217, 0.55);
+  box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.12);
+}
+
+.dd-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dd-text {
+  font-size: 14px;
+  color: #121212;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-placeholder {
+  color: #6b6b6b;
+}
+
+.dd-chevron {
+  color: #6b6b6b;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* menu: fica DENTRO do card e nunca passa a borda */
+.dd-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ececf5;
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(16, 16, 24, 0.12);
+  padding: 8px;
+  overflow: auto;
+  z-index: 30;
+}
+
+/* abre para baixo */
+.dd-menu-down {
+  top: calc(100% + 8px);
+}
+
+/* abre para cima */
+.dd-menu-up {
+  bottom: calc(100% + 8px);
+}
+
+.dd-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #121212;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dd-item:hover {
+  background: rgba(109, 40, 217, 0.08);
+}
+
+.dd-item-selected {
+  background: #6d28d9;
+  color: #fff;
+}
+
+.dd-item-selected:hover {
+  background: #6d28d9;
+}
+
+.dd-item-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* buttons */
+.button {
+  width: 100%;
+  margin-top: 16px;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #fff;
+  background: #6d28d9;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  background: #111827;
+}
+
+.btn-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* success */
+.success {
+  text-align: center;
+  padding: 24px 18px;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  border-radius: 16px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-title {
+  font-weight: 900;
+  font-size: 18px;
+  color: #121212;
+}
+
+.success-subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b6b6b;
+  line-height: 18px;
+}
+
+.link-btn {
+  margin-top: 12px;
+  border: none;
+  background: transparent;
+  color: #6d28d9;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  #boxform {
+    margin: 0 32px;
+    padding-top: 70px;
+  }
+}
+
+@media (max-width: 720px) {
+  #boxform {
+    margin: 0 16px;
+  }
+
+  #title {
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  #boxform {
+    margin: 0 14px;
+    padding-top: 54px;
+    padding-bottom: 54px;
+  }
+
+  #title {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  #titlePhrase {
+    font-size: 14px;
+  }
+
+  #title-icon {
+    width: 60px;
+    height: 60px;
+  }
+}

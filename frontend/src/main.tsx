@@ -1,9 +1,12 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import WebRoutes from './Routes/Web.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import WebRoutes from "./Routes/Web";
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <WebRoutes />
-  </StrictMode>,
-)
+    <BrowserRouter>
+      <WebRoutes />
+    </BrowserRouter>
+  </StrictMode>
+);
