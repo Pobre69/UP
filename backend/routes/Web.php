@@ -1,21 +1,17 @@
 <?php
 
 require_once __DIR__ . "/Acess.php";
-require_once __DIR__ . "/Security.php";
 require_once __DIR__ . "/Route.php";
 require_once __DIR__ . "/PageNotFound.php";
 
 use Routes\Acess;
 use Routes\Route;
-use Routes\Security;
-use DataBase\Connection\DB_Connection;
+use App\Middleware\Security;
 
 $acess = new Acess();
 $acess->GetAll();
 $security = new Security();
 $security->startSession();
-$db_connection = new DB_Connection();
-$db_connection->Start_DataBase($acess->sqlAcess());
 
 $route = new Route();
 $route->notFound(
@@ -42,7 +38,11 @@ $route->notFound(
 );
 
 $route->group('/Home', function (Route $route) {
-    $route->get('indexControler@index')->name([''])->parametros([]);
+    $route->get('indexController@index')->name([''])->parametros([]);
+});
+
+$route->group('/api', function (Route $route) {
+    $route->post('SignUpController@register')->name(['signup'])->parametros([]);
 });
 
 $route->execute();

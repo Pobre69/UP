@@ -15,6 +15,7 @@ import {
   Calendar,
   ChevronDown,
 } from "lucide-react";
+import { API_ENDPOINTS } from "../../config/api";
 
 type Option = { value: string; label: string };
 
@@ -337,10 +338,24 @@ export default function SignInForm() {
 
     try {
       setIsSubmitting(true);
-      await new Promise((r) => setTimeout(r, 800));
+      
+      const response = await fetch(API_ENDPOINTS.signup, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Erro ao enviar cadastro');
+      }
+
       setSuccess(true);
-    } catch {
-      setSubmitError("Não foi possível enviar. Tente novamente.");
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Não foi possível enviar. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }

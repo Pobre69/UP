@@ -66,7 +66,7 @@ class Route
 
     private function firstRoute()
     {
-        $configPath = __DIR__ . '/../config.json';
+        $configPath = __DIR__ . '/../config/config.json';
         $configJson = file_get_contents($configPath);
         $configJson = json_decode($configJson, true);
         $this->partes = [];

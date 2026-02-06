@@ -1,7 +1,32 @@
+import { useEffect, useState } from "react";
 import "../LayoutDesign/Header.css";
 import Up_Logo from "../Images/UP_logo.png";
 
 export default function Header() {
+    const [visible, setVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [hidePoint, setHidePoint] = useState(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+
+            if (currentScrollY === 0) {
+                setVisible(true);
+            } else if (currentScrollY > lastScrollY) {
+                setVisible(false);
+                setHidePoint(currentScrollY);
+            } else if (currentScrollY < hidePoint - 15) {
+                setVisible(true);
+            }
+
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY, hidePoint]);
+
     const scrollToSection = (sectionId: string) => {
         const element = document.getElementById(sectionId);
         if (element) {
@@ -10,7 +35,7 @@ export default function Header() {
     };
 
     return (
-        <header>
+        <header className={visible ? 'header-visible' : 'header-hidden'}>
             <div><img src={ Up_Logo } id="logo" alt="UP Logo" /></div>
             <div id="header_links">
                 <div onClick={() => scrollToSection('box1')} style={{ cursor: 'pointer' }}>Inicio</div>

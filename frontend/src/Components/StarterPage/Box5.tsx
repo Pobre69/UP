@@ -1,6 +1,5 @@
 import "../../Design/StarterPage/Box5.css";
 import { Check } from "lucide-react";
-import { stripeService } from "../../services/stripeService";
 
 const Planos = [
     {
@@ -57,15 +56,6 @@ const Planos = [
 ]
 
 export default function Box5() {
-    const handlePagamento = async (planoId: string) => {
-        try {
-            const { url } = await stripeService.createCheckoutSession(planoId);
-            window.location.href = url;
-        } catch (error) {
-            console.error('Erro ao processar pagamento:', error);
-            alert('Erro ao processar pagamento. Tente novamente.');
-        }
-    };
     return (
         <div id="box5">
             <div id="Title-TrabalheConosco">
@@ -95,7 +85,6 @@ export default function Box5() {
                         <button 
                             className="planoButton" 
                             id={`${plano.especial ? "planoButtonEspecial" : ""}`}
-                            onClick={() => handlePagamento(plano.id)}
                         >
                             Quero esse plano
                         </button>
