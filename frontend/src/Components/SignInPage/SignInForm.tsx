@@ -37,7 +37,7 @@ function clamp(n: number, min: number, max: number) {
 }
 
 function useOutsideClick(
-  refs: React.RefObject<HTMLElement>[],
+  refs: React.RefObject<HTMLElement | null>[],
   onClose: () => void,
   enabled: boolean
 ) {
@@ -63,11 +63,6 @@ function useOutsideClick(
   }, [enabled, onClose, refs]);
 }
 
-/**
- * ✅ Dropdown custom dentro do CARD (sem portal)
- * ✅ Nunca sai pra fora da caixa branca
- * ✅ Só um aberto por vez via openId/setOpenId
- */
 function Dropdown({
   id,
   label,
@@ -105,7 +100,7 @@ function Dropdown({
   const [openUp, setOpenUp] = useState(false);
   const [maxH, setMaxH] = useState(280);
 
-  useOutsideClick([wrapRef, menuRef], () => setOpenId(null), isOpen);
+  useOutsideClick([wrapRef], () => setOpenId(null), isOpen);
 
   const selected = options.find((o) => o.value === value);
 
@@ -120,7 +115,6 @@ function Dropdown({
     onBlur?.();
   }
 
-  // calcula abertura (para cima/baixo) + altura máxima respeitando o CARD
   useEffect(() => {
     if (!isOpen) return;
 
@@ -137,17 +131,18 @@ function Dropdown({
     const preferDown = spaceBelow >= 220 || spaceBelow >= spaceAbove;
     setOpenUp(!preferDown);
 
-    const mh = clamp(preferDown ? spaceBelow : spaceAbove, 160, 320);
-    setMaxH(mh);
+    setMaxH(clamp(preferDown ? spaceBelow : spaceAbove, 160, 320));
 
-    // reposiciona em scroll/resize dentro do card
     function onRecalc() {
-      const cardNow = wrap.closest(".card") as HTMLElement | null;
+      const cardNow = wrapRef.current?.closest(".card") as HTMLElement | null;
+      if (!wrapRef.current) return;
+
       const b = (cardNow ?? document.body).getBoundingClientRect();
-      const rr = wrap.getBoundingClientRect();
+      const rr = wrapRef.current.getBoundingClientRect();
       const sb = b.bottom - rr.bottom - 12;
       const sa = rr.top - b.top - 12;
       const down = sb >= 220 || sb >= sa;
+
       setOpenUp(!down);
       setMaxH(clamp(down ? sb : sa, 160, 320));
     }
@@ -158,22 +153,24 @@ function Dropdown({
       window.removeEventListener("resize", onRecalc);
       window.removeEventListener("scroll", onRecalc, true);
     };
-  }, [isOpen, setOpenId]);
+  }, [isOpen]);
 
   return (
     <div className="field" id={`field-${id}`}>
-      <label className="label" htmlFor={id} id={`label-${id}`}>
+      <label className="label" htmlFor={id}>
         <span className="label-row">
           <span className="label-icon">{icon}</span>
           <span className="label-text">
-            {label} {required ? <span className="req">*</span> : null}
+            {label} {required && <span className="req">*</span>}
           </span>
         </span>
       </label>
 
       <div
         ref={wrapRef}
-        className={`dd ${isOpen ? "dd-open" : ""} ${touched && error ? "input-error" : ""}`}
+        className={`dd ${isOpen ? "dd-open" : ""} ${
+          touched && error ? "input-error" : ""
+        }`}
         id={id}
         tabIndex={0}
         role="button"
@@ -189,16 +186,15 @@ function Dropdown({
           <span className={`dd-text ${selected ? "" : "dd-placeholder"}`}>
             {selected ? selected.label : placeholder}
           </span>
-          <span className="dd-chevron" aria-hidden="true">
+          <span className="dd-chevron">
             <ChevronDown size={18} />
           </span>
         </div>
 
-        {isOpen ? (
+        {isOpen && (
           <div
             ref={menuRef}
             className={`dd-menu ${openUp ? "dd-menu-up" : "dd-menu-down"}`}
-            id={`${id}-menu`}
             role="listbox"
             style={{ maxHeight: maxH }}
           >
@@ -207,30 +203,31 @@ function Dropdown({
               return (
                 <div
                   key={opt.value}
-                  className={`dd-item ${isSel ? "dd-item-selected" : ""}`}
+                  className={`dd-item ${
+                    isSel ? "dd-item-selected" : ""
+                  }`}
                   role="option"
                   aria-selected={isSel}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => choose(opt.value)}
                 >
-                  <span className="dd-item-text">{opt.label}</span>
+                  {opt.label}
                 </div>
               );
             })}
           </div>
-        ) : null}
+        )}
       </div>
 
-      {touched && error ? <div className="error">{error}</div> : null}
+      {touched && error && <div className="error">{error}</div>}
     </div>
   );
 }
 
 export default function SignInForm() {
-  // ✅ PASSO 2: um único dropdown aberto por vez
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const segmentOptions: Option[] = useMemo(
+  const segmentOptions = useMemo<Option[]>(
     () => [
       { value: "restaurante-food-service", label: "Restaurante / Food Service" },
       { value: "moda-vestuario", label: "Moda / Vestuário" },
@@ -248,7 +245,7 @@ export default function SignInForm() {
     []
   );
 
-  const goalOptions: Option[] = useMemo(
+  const goalOptions = useMemo<Option[]>(
     () => [
       { value: "mais-clientes-vendas", label: "Mais clientes / vendas" },
       { value: "mais-seguidores", label: "Mais seguidores" },
@@ -260,7 +257,7 @@ export default function SignInForm() {
     []
   );
 
-  const attendantOptions: Option[] = useMemo(
+  const attendantOptions = useMemo<Option[]>(
     () => [
       { value: "arthur-valentim", label: "Arthur Valentim" },
       { value: "arthur-victor", label: "Arthur Victor" },
@@ -305,7 +302,7 @@ export default function SignInForm() {
     const e: Partial<Record<keyof FormState, string>> = {};
     if (!form.fullName.trim()) e.fullName = "Obrigatório.";
     if (!form.email.trim()) e.email = "Obrigatório.";
-    if (form.email.trim() && !validateEmail(form.email)) e.email = "E-mail inválido.";
+    if (form.email && !validateEmail(form.email)) e.email = "E-mail inválido.";
     if (!form.segment) e.segment = "Obrigatório.";
     if (!form.city.trim()) e.city = "Obrigatório.";
     if (!form.mainGoal) e.mainGoal = "Obrigatório.";
@@ -338,24 +335,26 @@ export default function SignInForm() {
 
     try {
       setIsSubmitting(true);
-      
+
       const response = await fetch(API_ENDPOINTS.signup, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Erro ao enviar cadastro');
+        throw new Error(data.message || "Erro ao enviar cadastro");
       }
 
       setSuccess(true);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Não foi possível enviar. Tente novamente.");
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível enviar. Tente novamente."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -379,7 +378,7 @@ export default function SignInForm() {
     });
   }
 
-  return (
+    return (
     <div id="boxform">
       <div id="title-icon">
         <Rocket size={38} color="white" strokeWidth={2} />
@@ -387,7 +386,9 @@ export default function SignInForm() {
 
       <div id="title">
         Bem-vindo(a) à <span className="purplegradient">UP!</span>
-        <span id="titlePhrase">Preencha os dados abaixo para começarmos a trabalhar juntos.</span>
+        <span id="titlePhrase">
+          Preencha os dados abaixo para começarmos a trabalhar juntos.
+        </span>
       </div>
 
       <div id="form">
@@ -402,7 +403,8 @@ export default function SignInForm() {
               </div>
 
               <div className="section-subtitle" id="section-subtitle">
-                Precisamos de algumas informações para personalizar sua estratégia.
+                Precisamos de algumas informações para personalizar sua
+                estratégia.
               </div>
 
               <div className="grid-2">
@@ -419,14 +421,22 @@ export default function SignInForm() {
                   </label>
 
                   <input
-                    className={`input ${touched.fullName && errors.fullName ? "input-error" : ""}`}
+                    className={`input ${
+                      touched.fullName && errors.fullName
+                        ? "input-error"
+                        : ""
+                    }`}
                     id="fullName"
                     placeholder="Seu nome"
                     value={form.fullName}
-                    onChange={(e) => setField("fullName", e.target.value)}
+                    onChange={(e) =>
+                      setField("fullName", e.target.value)
+                    }
                     onBlur={() => touch("fullName")}
                   />
-                  {touched.fullName && errors.fullName ? <div className="error">{errors.fullName}</div> : null}
+                  {touched.fullName && errors.fullName && (
+                    <div className="error">{errors.fullName}</div>
+                  )}
                 </div>
 
                 <div className="field" id="field-company">
@@ -444,7 +454,9 @@ export default function SignInForm() {
                     id="company"
                     placeholder="Nome da empresa"
                     value={form.company}
-                    onChange={(e) => setField("company", e.target.value)}
+                    onChange={(e) =>
+                      setField("company", e.target.value)
+                    }
                     onBlur={() => touch("company")}
                   />
                 </div>
@@ -463,14 +475,20 @@ export default function SignInForm() {
                 </label>
 
                 <input
-                  className={`input ${touched.email && errors.email ? "input-error" : ""}`}
+                  className={`input ${
+                    touched.email && errors.email ? "input-error" : ""
+                  }`}
                   id="email"
                   placeholder="seu@email.com"
                   value={form.email}
-                  onChange={(e) => setField("email", e.target.value)}
+                  onChange={(e) =>
+                    setField("email", e.target.value)
+                  }
                   onBlur={() => touch("email")}
                 />
-                {touched.email && errors.email ? <div className="error">{errors.email}</div> : null}
+                {touched.email && errors.email && (
+                  <div className="error">{errors.email}</div>
+                )}
               </div>
 
               <div className="field" id="field-instagram">
@@ -488,10 +506,15 @@ export default function SignInForm() {
                   id="instagram"
                   placeholder="@seuinstagram"
                   value={form.instagram}
-                  onChange={(e) => setField("instagram", e.target.value)}
+                  onChange={(e) =>
+                    setField("instagram", e.target.value)
+                  }
                   onBlur={() => touch("instagram")}
                 />
-                <div className="hint">Após o envio, nossa equipe solicitará acesso via Meta Business Suite.</div>
+                <div className="hint">
+                  Após o envio, nossa equipe solicitará acesso via Meta
+                  Business Suite.
+                </div>
               </div>
 
               <div className="grid-2">
@@ -524,14 +547,22 @@ export default function SignInForm() {
                   </label>
 
                   <input
-                    className={`input ${touched.city && errors.city ? "input-error" : ""}`}
+                    className={`input ${
+                      touched.city && errors.city
+                        ? "input-error"
+                        : ""
+                    }`}
                     id="city"
                     placeholder="São Paulo - SP"
                     value={form.city}
-                    onChange={(e) => setField("city", e.target.value)}
+                    onChange={(e) =>
+                      setField("city", e.target.value)
+                    }
                     onBlur={() => touch("city")}
                   />
-                  {touched.city && errors.city ? <div className="error">{errors.city}</div> : null}
+                  {touched.city && errors.city && (
+                    <div className="error">{errors.city}</div>
+                  )}
                 </div>
               </div>
 
@@ -557,7 +588,9 @@ export default function SignInForm() {
                     <span className="label-icon">
                       <Users size={16} />
                     </span>
-                    <span className="label-text">Concorrentes (2-3 exemplos)</span>
+                    <span className="label-text">
+                      Concorrentes (2-3 exemplos)
+                    </span>
                   </span>
                 </label>
 
@@ -566,7 +599,9 @@ export default function SignInForm() {
                   id="competitors"
                   placeholder="Liste 2 ou 3 concorrentes que você admira ou gostaria de superar..."
                   value={form.competitors}
-                  onChange={(e) => setField("competitors", e.target.value)}
+                  onChange={(e) =>
+                    setField("competitors", e.target.value)
+                  }
                   onBlur={() => touch("competitors")}
                   rows={3}
                 />
@@ -578,7 +613,9 @@ export default function SignInForm() {
                     <span className="label-icon">
                       <Link2 size={16} />
                     </span>
-                    <span className="label-text">Link do Google Drive</span>
+                    <span className="label-text">
+                      Link do Google Drive
+                    </span>
                   </span>
                 </label>
 
@@ -587,10 +624,14 @@ export default function SignInForm() {
                   id="driveLink"
                   placeholder="https://drive.google.com/..."
                   value={form.driveLink}
-                  onChange={(e) => setField("driveLink", e.target.value)}
+                  onChange={(e) =>
+                    setField("driveLink", e.target.value)
+                  }
                   onBlur={() => touch("driveLink")}
                 />
-                <div className="hint">Compartilhe logos, fotos e materiais que possamos usar.</div>
+                <div className="hint">
+                  Compartilhe logos, fotos e materiais que possamos usar.
+                </div>
               </div>
 
               <Dropdown
@@ -607,7 +648,12 @@ export default function SignInForm() {
                 onBlur={() => touch("attendant")}
               />
 
-              <button className="button" id="submit" type="submit" disabled={isSubmitting}>
+              <button
+                className="button"
+                id="submit"
+                type="submit"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <span className="btn-row">
                     <Loader2 className="spin" size={18} />
@@ -618,7 +664,9 @@ export default function SignInForm() {
                 )}
               </button>
 
-              {submitError ? <div className="form-error">{submitError}</div> : null}
+              {submitError && (
+                <div className="form-error">{submitError}</div>
+              )}
             </div>
           </form>
         ) : (
@@ -626,21 +674,33 @@ export default function SignInForm() {
             <div className="success-icon" id="success-icon">
               <CheckCircle size={34} />
             </div>
+
             <div className="success-title" id="success-title">
               Cadastro enviado com sucesso!
             </div>
+
             <div className="success-subtitle" id="success-subtitle">
-              Agora vamos agendar sua reunião de Kick-off para alinhar próximos passos.
+              Agora vamos agendar sua reunião de Kick-off para alinhar
+              próximos passos.
             </div>
 
-            <button className="button button-secondary" id="kickoff" type="button">
+            <button
+              className="button button-secondary"
+              id="kickoff"
+              type="button"
+            >
               <span className="btn-row">
                 <Calendar size={18} />
                 Agendar Reunião de Kick-off
               </span>
             </button>
 
-            <button className="link-btn" id="reset" type="button" onClick={reset}>
+            <button
+              className="link-btn"
+              id="reset"
+              type="button"
+              onClick={reset}
+            >
               Voltar e editar
             </button>
           </div>
