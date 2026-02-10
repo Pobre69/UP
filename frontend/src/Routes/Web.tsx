@@ -6,7 +6,7 @@ export default function WebRoutes() {
   return (
     <Routes>
       <Route path="/" element={<StarterPage />} />
-      <Route path="/SignInPage" element={<SignInPage />} />
+      <Route path="/SignIn" element={<SignInPage />} />
     </Routes>
   );
 }

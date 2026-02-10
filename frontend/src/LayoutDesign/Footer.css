@@ -1,8 +1,7 @@
-/* Mobile-first approach */
 footer {
     color: white;
     background-color: rgb(20, 10, 40);
-    width: 145.3%;
+    width: 100%;
     padding: 40px 16px 0;
     box-sizing: border-box;
 }
