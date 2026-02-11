@@ -13,7 +13,7 @@ class UsuarioRepository
         $this->conn = $conn;
     }
 
-    public function add(string $email, string $nome, string $senha, ?string $empresa = null)
+    public function add(string $email, string $nome, ?string $senha = null, ?string $empresa = null)
     {
         $stmt = $this->conn->prepare('CALL USUARIO_CONTROLLER(:acao, :param_email, :param_nome, :param_senha, :param_empresa)');
         $stmt->execute([
