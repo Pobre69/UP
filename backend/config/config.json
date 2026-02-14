@@ -1,12 +1,12 @@
 {
-    "urlBase": "/",
+    "urlBase": "http://localhost:5173",
     "frontendUrl": "http://localhost:5173",
     "database": {
         "UP": {
-            "name": "UP_AltasAventuras",
+            "name": "UP",
             "host": "localhost",
             "username": "root",
-            "password": "",
+            "password": "arthurpro4",
             "database": "UP",
             "charset": "utf8mb4"
         }

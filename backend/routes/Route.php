@@ -182,7 +182,7 @@ class Route
             $controllerName = $parts[0] ?? '';
             $methodName = $parts[1] ?? 'index';
 
-            $controllerClass = 'Controllers\\' . $controllerName;
+            $controllerClass = 'App\Controllers\\' . $controllerName;
             if (!class_exists($controllerClass)) {
                 if ($this->controllerNotFoundHandler !== null) {
                     call_user_func($this->controllerNotFoundHandler, $controllerClass, '/');

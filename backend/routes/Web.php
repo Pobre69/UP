@@ -38,11 +38,11 @@ $route->notFound(
 );
 
 $route->group('/Home', function (Route $route) {
-    $route->get('indexController@index')->name([''])->parametros([]);
+    $route->post('indexController@index')->name(['']);
 });
 
 $route->group('/api', function (Route $route) {
-    $route->post('SignUpController@register')->name(['signup'])->parametros([]);
+    $route->post('SignUpController@register')->name(['']);
 });
 
 $route->execute();

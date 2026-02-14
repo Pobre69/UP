@@ -15,7 +15,7 @@ import {
   Calendar,
   ChevronDown,
 } from "lucide-react";
-import { API_ENDPOINTS } from "../../config/api";
+import config from "../../config.json";
 
 type Option = { value: string; label: string };
 
@@ -311,7 +311,7 @@ export default function SignInForm() {
 
   const hasErrors = Object.keys(errors).length > 0;
 
-  async function onSubmit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitError("");
 
@@ -333,31 +333,40 @@ export default function SignInForm() {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
+    setIsSubmitting(true);
 
-      const response = await fetch(API_ENDPOINTS.signup, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+    fetch(`${config.backRoute}/api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        fullName: form.fullName,
+        company: form.company,
+        email: form.email,
+        instagram: form.instagram,
+        segment: form.segment,
+        city: form.city,
+        mainGoal: form.mainGoal,
+        competitors: form.competitors,
+        driveLink: form.driveLink,
+        attendant: form.attendant
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSuccess(true);
+        } else {
+          setSubmitError(data.mensagem || "Erro ao enviar cadastro");
+        }
+      })
+      .catch(() => {
+        setSubmitError("Não foi possível enviar. Tente novamente.");
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Erro ao enviar cadastro");
-      }
-
-      setSuccess(true);
-    } catch (error) {
-      setSubmitError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível enviar. Tente novamente."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
   }
 
   function reset() {

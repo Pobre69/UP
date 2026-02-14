@@ -44,17 +44,24 @@ CREATE TABLE IF NOT EXISTS usuario_detalhes(
 		ON UPDATE CASCADE
 )ENGINE=INNODB;
 
-CREATE TABLE IF NOT EXISTS usuario_info(
-	email VARCHAR(200) PRIMARY KEY,
-    seguidores INT,
-    FOREIGN KEY (email) REFERENCES usuario(email)
-		ON UPDATE CASCADE
-)ENGINE=INNODB;
-
 CREATE TABLE IF NOT EXISTS usuario_posts(
 	email VARCHAR(200) PRIMARY KEY,
     post JSON,
     data_postada DATETIME NOT NULL,
+    FOREIGN KEY (email) REFERENCES usuario(email)
+		ON UPDATE CASCADE
+)ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS instagram_seguidores(
+	email VARCHAR(200) PRIMARY KEY,
+    seguidores INT NOT NULL,
+    FOREIGN KEY (email) REFERENCES usuario(email)
+		ON UPDATE CASCADE
+)ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS instagram_cliques(
+	email VARCHAR(200) PRIMARY KEY,
+    cliques INT NOT NULL,
     FOREIGN KEY (email) REFERENCES usuario(email)
 		ON UPDATE CASCADE
 )ENGINE=INNODB;

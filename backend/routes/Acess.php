@@ -37,6 +37,8 @@ class Acess
 
     protected static function ControllerAcess()
     {
+        require_once __DIR__ . '/../app/controllers/indexController.php';
+        require_once __DIR__ . '/../app/controllers/SignUpController.php';
         $controllerDir = __DIR__ . '/../app/controllers/';
         if (is_dir($controllerDir)) {
             $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($controllerDir));
