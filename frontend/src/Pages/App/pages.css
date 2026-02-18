@@ -1,0 +1,423 @@
+.page {
+  max-width: 1100px;
+}
+
+.accentText {
+  color: var(--accent);
+}
+
+.inlineTitle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inlineIcon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.profilePerf {
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+.profilePerfTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profilePerfIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+
+.profilePerfText {
+  flex: 1;
+}
+
+.profilePerfTitle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.profilePerfSub {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.progressTrack {
+  height: 10px;
+  border-radius: 999px;
+  background: #eef0fb;
+  border: 1px solid var(--border);
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.gridStats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.gridStats4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.gridStats6 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.gridCharts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.chartCard {
+  padding: 16px;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.chartBody {
+  padding-top: 6px;
+}
+
+.chartAxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.engSummary {
+  padding: 16px;
+}
+
+.engHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.engTitle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.engGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.miniStat {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fbfbfe;
+  padding: 14px;
+}
+
+.miniIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+
+.miniValue {
+  margin-top: 10px;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.miniLabel {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.emptyBox {
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 40px 18px;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.tableWrap {
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: 10px 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.table td {
+  padding: 14px 10px;
+  border-top: 1px solid var(--border);
+}
+
+.tableEmpty {
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.gridTwo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 10px;
+}
+
+.input {
+  border: 1px solid var(--border);
+  background: #fbfbfe;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 700;
+  color: #111827;
+  outline: none;
+}
+
+.input:focus {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.primaryBtn {
+  border: none;
+  background: var(--accent);
+  color: white;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  filter: brightness(1.05);
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.planCard {
+  padding: 16px;
+}
+
+.planCardActive {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 16px 34px rgba(124, 58, 237, 0.12);
+}
+
+.planHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.planName {
+  font-weight: 900;
+  font-size: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.planList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #374151;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.planList li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hintCard {
+  padding: 16px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.calendarCard {
+  padding: 16px;
+}
+
+.calendarTop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.calendarTitle {
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.iconBtn {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.calendarGridHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.calDow {
+  text-align: center;
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.calCell {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  height: 58px;
+  background: #fff;
+  padding: 8px;
+}
+
+.calCellMuted {
+  opacity: 0.45;
+}
+
+.calCellSelected {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.calNum {
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.calendarLegend {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.legendChip {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 1200px) {
+  .gridStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .engGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gridCharts {
+    grid-template-columns: 1fr;
+  }
+  .gridTwo {
+    grid-template-columns: 1fr;
+  }
+  .planGrid {
+    grid-template-columns: 1fr;
+  }
+}

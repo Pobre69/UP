@@ -1,0 +1,83 @@
+.sidebar {
+  width: 250px;
+  background: radial-gradient(1200px 600px at -200px -100px, #2b164c, #0b0b16);
+  color: #e7e7ff;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandMark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 4px;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: rgba(231, 231, 255, 0.75);
+  padding: 10px 10px;
+  border-radius: 12px;
+  transition: 160ms ease;
+}
+
+.navItem span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.navItem:hover {
+  background: rgba(124, 58, 237, 0.15);
+  color: rgba(231, 231, 255, 0.95);
+}
+
+.navItemActive {
+  background: rgba(124, 58, 237, 0.22);
+  color: rgba(231, 231, 255, 1);
+}
+
+.sidebarBottom {
+  padding: 10px 4px 6px;
+}
+
+.navItemLogout {
+  opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 86px;
+  }
+  .navItem span {
+    display: none;
+  }
+}

@@ -1,0 +1,177 @@
+.pageHeader {
+  margin-bottom: 18px;
+}
+
+.pageTitle {
+  font-size: 26px;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.pageSubtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(20, 20, 40, 0.06);
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.pill {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.pillUp {
+  background: rgba(22, 163, 74, 0.12);
+  color: var(--ok);
+  border-color: rgba(22, 163, 74, 0.25);
+}
+
+.pillDown {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--bad);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.pillFlat {
+  background: rgba(107, 114, 128, 0.12);
+  color: #4b5563;
+  border-color: rgba(107, 114, 128, 0.22);
+}
+
+.statCard {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+
+.statValue {
+  font-weight: 800;
+  font-size: 22px;
+}
+
+.statLabel {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chartSvg {
+  width: 100%;
+  height: auto;
+}
+
+.segmented {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fbfbfe;
+}
+
+.segBtn {
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.segBtnActive {
+  background: var(--accent);
+  color: white;
+}
+
+.donutWrap {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.donut {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.donut::after {
+  content: "";
+  position: absolute;
+  inset: 38px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.donutLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legendRow {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legendLabel {
+  color: #374151;
+  font-weight: 700;
+}
+
+.legendValue {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .donutWrap {
+    grid-template-columns: 1fr;
+  }
+}
