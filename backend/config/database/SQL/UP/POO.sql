@@ -99,4 +99,99 @@ BEGIN
 		SELECT 'Ação não indentificada' AS RESULTADO;
 	END IF;
 END%
+
+CREATE PROCEDURE USUARIO_POSTS_CONTROLLER(
+	IN acao TEXT,
+	IN param_email VARCHAR(200),
+	IN param_post JSON,
+	IN param_data_postada DATETIME)
+BEGIN
+	IF acao = 'add' THEN
+		CALL CREATE_USUARIO_POSTS(param_email,param_post,param_data_postada);
+	ELSEIF acao = 'update' THEN
+		CALL UPDATE_USUARIO_POSTS(param_email,param_post,param_data_postada);
+	ELSEIF acao = 'read' THEN
+		SELECT * FROM vw_usuario_posts;
+	ELSEIF acao = 'delete' THEN
+		CALL DELETE_USUARIO_POSTS(param_email);
+	ELSE
+		SELECT 'Ação não indentificada' AS RESULTADO;
+	END IF;
+END%
+
+CREATE PROCEDURE INSTAGRAM_SEGUIDORES_CONTROLLER(
+	IN acao TEXT,
+	IN param_email VARCHAR(200),
+	IN param_seguidores INT)
+BEGIN
+	IF acao = 'add' THEN
+		CALL CREATE_INSTAGRAM_SEGUIDORES(param_email,param_seguidores);
+	ELSEIF acao = 'update' THEN
+		CALL UPDATE_INSTAGRAM_SEGUIDORES(param_email,param_seguidores);
+	ELSEIF acao = 'read' THEN
+		SELECT * FROM vw_instagram_seguidores;
+	ELSEIF acao = 'delete' THEN
+		CALL DELETE_INSTAGRAM_SEGUIDORES(param_email);
+	ELSE
+		SELECT 'Ação não indentificada' AS RESULTADO;
+	END IF;
+END%
+
+CREATE PROCEDURE AJUDANTE_CONTROLLER(
+	IN acao TEXT,
+	IN param_id INT,
+	IN param_nome VARCHAR(100))
+BEGIN
+	IF acao = 'add' THEN
+		CALL CREATE_AJUDANTE(param_id,param_nome);
+	ELSEIF acao = 'update' THEN
+		CALL UPDATE_AJUDANTE(param_id,param_nome);
+	ELSEIF acao = 'read' THEN
+		SELECT * FROM vw_ajudante;
+	ELSEIF acao = 'delete' THEN
+		CALL DELETE_AJUDANTE(param_id);
+	ELSE
+		SELECT 'Ação não indentificada' AS RESULTADO;
+	END IF;
+END%
+
+CREATE PROCEDURE USUARIO_AJUDANTE_CONTROLLER(
+	IN acao TEXT,
+	IN param_email_usuario VARCHAR(200),
+	IN param_id_ajudante INT,
+	IN param_status TEXT)
+BEGIN
+	IF acao = 'add' THEN
+		CALL CREATE_USUARIO_AJUDANTE(param_email_usuario,param_id_ajudante,param_status);
+	ELSEIF acao = 'update' THEN
+		CALL UPDATE_USUARIO_AJUDANTE(param_email_usuario,param_id_ajudante,param_status);
+	ELSEIF acao = 'read' THEN
+		SELECT * FROM vw_usuario_ajudante;
+	ELSEIF acao = 'delete' THEN
+		CALL DELETE_USUARIO_AJUDANTE(param_email_usuario,param_id_ajudante);
+	ELSE
+		SELECT 'Ação não indentificada' AS RESULTADO;
+	END IF;
+END%
+
+CREATE PROCEDURE FEEDBACK_CONTROLLER(
+	IN acao TEXT,
+	IN param_id INT,
+	IN param_usuario_email VARCHAR(20),
+	IN param_titulo VARCHAR(40),
+	IN param_tipo VARCHAR(60),
+	IN param_texto TEXT)
+BEGIN
+	IF acao = 'add' THEN
+		CALL CREATE_FEEDBACK(param_id,param_usuario_email,param_titulo,param_tipo,param_texto);
+	ELSEIF acao = 'update' THEN
+		CALL UPDATE_FEEDBACK(param_id,param_titulo,param_tipo,param_texto);
+	ELSEIF acao = 'read' THEN
+		SELECT * FROM vw_feedback;
+	ELSEIF acao = 'delete' THEN
+		CALL DELETE_FEEDBACK(param_id);
+	ELSE
+		SELECT 'Ação não indentificada' AS RESULTADO;
+	END IF;
+END%
 DELIMITER ;
