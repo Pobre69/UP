@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers;
+namespace Controllers;
 
 use App\Repository\UsuarioRepository;
 use App\Repository\UsuarioDetalhesRepository;
@@ -13,38 +13,55 @@ class SignUpController
         
         $data = json_decode(file_get_contents('php://input'), true);
         
-        $fullName = $data['fullName'] ?? '';
-        $company = $data['company'] ?? '';
-        $email = $data['email'] ?? '';
-        $instagram = $data['instagram'] ?? '';
+        if (!$data) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'Dados inválidos']);
+            return;
+        }
+        
+        $fullName = trim($data['fullName'] ?? '');
+        $company = trim($data['company'] ?? '');
+        $email = trim($data['email'] ?? '');
+        $instagram = trim($data['instagram'] ?? '');
         $segment = $data['segment'] ?? '';
-        $city = $data['city'] ?? '';
+        $city = trim($data['city'] ?? '');
         $mainGoal = $data['mainGoal'] ?? '';
-        $competitors = $data['competitors'] ?? '';
-        $driveLink = $data['driveLink'] ?? '';
+        $competitors = trim($data['competitors'] ?? '');
+        $driveLink = trim($data['driveLink'] ?? '');
         $attendant = $data['attendant'] ?? '';
+        
+        if (empty($fullName) || empty($email) || empty($segment) || empty($city) || empty($mainGoal)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'Campos obrigatórios não preenchidos']);
+            return;
+        }
+        
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'E-mail inválido']);
+            return;
+        }
         
         try {
             $usuarioRepo = new UsuarioRepository();
             $detalhesRepo = new UsuarioDetalhesRepository();
             $concorrenteRepo = new ConcorrenteRepository();
             
-            $usuarioRepo->add($email, $fullName, null, $company);
-            $detalhesRepo->add($email, $mainGoal, $driveLink, $segment, $instagram, $attendant, $city);
+            $companyValue = !empty($company) ? $company : 'Não informado';
+            $localizacaoJson = json_encode(['cidade' => $city]);
+            
+            $usuarioRepo->add($email, $fullName, null, $companyValue);
+            $detalhesRepo->add($email, $mainGoal, $driveLink, $segment, $instagram, $attendant, $localizacaoJson);
             
             if (!empty($competitors)) {
                 $concorrenteRepo->add($email, $competitors);
             }
             
-            echo json_encode([
-                'success' => true,
-                'mensagem' => 'Cadastro realizado com sucesso!'
-            ]);
+            http_response_code(201);
+            echo json_encode(['success' => true, 'mensagem' => 'Cadastro realizado com sucesso!']);
         } catch (\Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'mensagem' => 'Erro ao cadastrar: ' . $e->getMessage()
-            ]);
+            http_response_code(500);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro ao cadastrar: ' . $e->getMessage()]);
         }
     }
 }

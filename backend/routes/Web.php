@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . "/Acess.php";
-require_once __DIR__ . "/Route.php";
-require_once __DIR__ . "/PageNotFound.php";
+require_once __DIR__ . "/../routes/Acess.php";
+require_once __DIR__ . "/../routes/Route.php";
+require_once __DIR__ . "/../routes/PageNotFound.php";
 
 use Routes\Acess;
 use Routes\Route;
@@ -38,7 +38,7 @@ $route->notFound(
 );
 
 $route->group('/Home', function (Route $route) {
-    $route->post('indexController@index')->name(['']);
+    $route->get('indexController@index')->name([''])->parametros([]);
 });
 
 $route->group('/api', function (Route $route) {
