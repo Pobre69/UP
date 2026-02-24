@@ -54,4 +54,11 @@ class UsuarioRepository
         ]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getByEmail(string $email)
+    {
+        $stmt = $this->getConnection()->prepare('SELECT email, nome, senha, empresa FROM usuario WHERE email = :email');
+        $stmt->execute([':email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

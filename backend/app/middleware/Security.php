@@ -50,48 +50,34 @@ class Security
             session_start();
         }
     }
-    public function VerificarUsuario(): array
-    {
-        if ($this->conn === null) {
-            $this->email_Usuario = '';
-            $this->isLogado = false;
-            return ['Logado' => $this->isLogado, 'Email' => $this->email_Usuario];
-        }
 
-        if (isset($_SESSION['email']) && !empty($_SESSION['email'])) {
-            $valor = $_SESSION['email'];
-            $stmt = $this->conn->prepare("SELECT COUNT(email) as total FROM usuario WHERE email = :pesquisa");
-            $stmt->execute([':pesquisa' => $valor]);
-            $count = (int) $stmt->fetchColumn();
-        } else {
-            $count = 0;
-        }
-
-        if ($count > 0) {
-            $this->email_Usuario = $_SESSION['email'];
-            $this->isLogado = true;
-        } else {
-            $this->email_Usuario = '';
-            $this->isLogado = false;
-        }
-        $return['Logado'] = $this->isLogado;
-        $return['Email'] = $this->email_Usuario;
-        return $return;
-    }
-    public function setUsuario(string $email)
-    {
-        $_SESSION['email'] = $email;
-        self::VerificarUsuario();
-    }
-    public function unsetUsuario()
-    {
-        unset($_SESSION['email']);
-        self::VerificarUsuario();
-    }
     public function getBasePath(): string
     {
         self::setConfig();
         $config = $this->config;
         return $config['urlBase'];
+    }
+
+    public static function checkAuth()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user_email']) || empty($_SESSION['user_email'])) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'mensagem' => 'Não autenticado']);
+            exit;
+        }
+    }
+
+    public static function getAuthUser()
+    {
+        self::checkAuth();
+        return [
+            'email' => $_SESSION['user_email'] ?? null,
+            'nome' => $_SESSION['user_name'] ?? null
+        ];
     }
 }

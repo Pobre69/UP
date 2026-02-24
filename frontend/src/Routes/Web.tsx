@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import StarterPage from "../Pages/StarterPage";
 import SignInPage from "../Pages/SignInPage";
+import LoginPage from "../Pages/LoginPage";
+import ProtectedRoute from "../Components/ProtectedRoute";
 
 import AppShell from "../Layout/AppShell";
 import DashboardPage from "../Pages/App/DashboardPage";
@@ -18,9 +20,10 @@ export default function WebRoutes() {
       {/* suas rotas atuais (mantidas) */}
       <Route path="/" element={<StarterPage />} />
       <Route path="/SignIn" element={<SignInPage />} />
+      <Route path="/login" element={<LoginPage />} />
 
       {/* NOVA área logada */}
-      <Route path="/app" element={<AppShell />}>
+      <Route path="/app" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="engajamento" element={<EngagementPage />} />
