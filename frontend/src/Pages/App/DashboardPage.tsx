@@ -186,7 +186,7 @@ function MiniStat({
   value: string;
 }) {
   return (
-    <div className="miniStat">
+    <div className="miniStat reveal">
       <div className="miniIcon">{icon}</div>
       <div className="miniValue">{value}</div>
       <div className="miniLabel">{label}</div>

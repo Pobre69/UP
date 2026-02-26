@@ -105,12 +105,19 @@
     font-family: "Inter", sans-serif;
     padding: 16px;
     box-sizing: border-box;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease-in-out;
     opacity: 1;
 }
 
 .BoxContainer3:hover {
     border: 2px solid #9B2BFF;
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(155, 43, 255, 0.25);
+}
+
+.BoxContainer3:hover .icon-holder {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 8px 16px rgba(155, 43, 255, 0.3);
 }
 
 .BoxContent3 {
@@ -141,6 +148,7 @@
     background: linear-gradient(120deg, #7f0ebd, #a718c4);
     border-radius: 12px;
     flex-shrink: 0;
+    transition: all 0.3s ease-in-out;
 }
 
 /* Tablet */

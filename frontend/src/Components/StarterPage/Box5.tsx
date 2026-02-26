@@ -57,7 +57,7 @@ const Planos = [
 
 export default function Box5() {
     return (
-        <div id="box5">
+        <div id="box5" className="reveal">
             <div id="Title-TrabalheConosco">
                 <h3>Venha <span className="text_purple_linear">trabalhar</span> conosco
                     <br />

@@ -87,8 +87,8 @@ export default function LoginForm() {
 
   return (
     <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
+      <div className="login-card reveal">
+        <div className="login-header reveal" style={{ "--reveal-delay": "80ms" } as any}>
           <h1 className="login-title">
             Bem-vindo de volta à <span className="purplegradient">UP!</span>
           </h1>
@@ -97,7 +97,7 @@ export default function LoginForm() {
           </p>
         </div>
 
-        <form className="login-form" onSubmit={onSubmit} noValidate>
+        <form className="login-form reveal" style={{ "--reveal-delay": "140ms" } as any} onSubmit={onSubmit} noValidate>
           <div className="field">
             <label className="label" htmlFor="email">
               <span className="label-row">

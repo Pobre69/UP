@@ -1,15 +1,30 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "../../Design/StarterPage/Box2.css";
 
 export default function Box2() {
-    let executado = false;
+    const executado = useRef(false);
     useEffect(() => {
         const ALTURA = 400;
 
+        function ExecutarEfeito() {
+            const elementos = document.getElementsByClassName("BoxContainer");
+
+            Array.from(elementos).forEach((element) => {
+                const el = element as HTMLElement;
+                el.style.opacity = "1";
+                el.style.transform = "translateY(0)";
+                el.style.transition = "all 0.7s ease-in-out";
+
+                setTimeout(() => {
+                    el.style.transition = "all 0.2s ease-in-out";
+                }, 700);
+            });
+        }
+
         const onScroll = () => {
-            if (!executado && window.scrollY >= ALTURA) {
+            if (!executado.current && window.scrollY >= ALTURA) {
                 ExecutarEfeito();
-                executado = true;
+                executado.current = true;
                 window.removeEventListener("scroll", onScroll);
             }
         };
@@ -17,25 +32,10 @@ export default function Box2() {
         window.addEventListener("scroll", onScroll);
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
-        
-    function ExecutarEfeito() {
-        const elementos = document.getElementsByClassName("BoxContainer");
-
-        Array.from(elementos).forEach((element) => {
-            const el = element as HTMLElement;
-            el.style.opacity = "1";
-            el.style.transform = "translateY(0)";
-            el.style.transition = "all 0.7s ease-in-out";
-
-            setTimeout(() => {
-                el.style.transition = "all 0.2s ease-in-out";
-            }, 700);
-        });
-    }
 
     return (
         
-        <div id="box2">
+        <div id="box2" className="reveal">
             <div id="Title-ComoTrabalhamos">
                 <h3> 
                     Como <span className="text_purple_linear">trabalhamos</span>

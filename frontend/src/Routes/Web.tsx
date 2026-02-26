@@ -20,7 +20,8 @@ export default function WebRoutes() {
       {/* suas rotas atuais (mantidas) */}
       <Route path="/" element={<StarterPage />} />
       <Route path="/SignIn" element={<SignInPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/Login" element={<LoginPage />} />
+      <Route path="/login" element={<Navigate to="/Login" replace />} />
 
       {/* NOVA área logada */}
       <Route path="/app" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>

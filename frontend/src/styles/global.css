@@ -1,0 +1,84 @@
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #121826;
+  --muted: #6b7280;
+  --border: #e7e9f2;
+  --accent: #7c3aed;
+  --accent-2: #9b5cff;
+  --ok: #16a34a;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* =========================
+   Scroll reveal
+   ========================= */
+
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  filter: blur(4px);
+  transition:
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform, filter;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+/* =========================
+   Subtle hover polish (global)
+   ========================= */
+
+:where(a, button, [role="button"]) {
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+:where(a, button, [role="button"]):hover {
+  transform: translateY(-1px);
+}
+
+:where(a, button, [role="button"]):active {
+  transform: translateY(0);
+}

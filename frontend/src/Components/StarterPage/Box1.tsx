@@ -24,7 +24,7 @@ export default function Box1() {
     }, []);
 
     return (
-        <div id="box1">
+        <div id="box1" className="reveal">
             <div id="box1_part1">
                 <div id="Card"><span id="Ponto"></span>Transformação Digital</div>
                 <p className="text_White">Elevando o Seu <br /><span className="text_purple_linear">Negócio</span></p>

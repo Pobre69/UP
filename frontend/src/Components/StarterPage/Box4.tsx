@@ -3,7 +3,7 @@ import { Shield, Award, HeartHandshake, CircleCheck } from "lucide-react";
 
 export default function Box4() {
     return (
-        <div id="box4">
+        <div id="box4" className="reveal">
             <div id="box4_part1">
                 <p style={{ marginBottom: "30px" }}>Por que escolher a <span className="text_Purple">UP</span>?</p>
                 <h3 id="box4_margin20">A UP não trata seu negócio como mais um perfil.</h3>
@@ -30,7 +30,7 @@ export default function Box4() {
                     </div>
                     <div>
                         <p>Confiança</p>
-                        <h3>Transparência em cada etapa — você sempre sabe o que está sendo feito e por quê.</h3>
+                        <h3>Transparência em cada etapa, você sempre sabe o que está sendo feito.</h3>
                     </div>
                 </div>
                 <div className="box4_boxes">

@@ -47,7 +47,7 @@
   color: rgba(231, 231, 255, 0.75);
   padding: 10px 10px;
   border-radius: 12px;
-  transition: 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
 .navItem span {
@@ -58,6 +58,7 @@
 .navItem:hover {
   background: rgba(124, 58, 237, 0.15);
   color: rgba(231, 231, 255, 0.95);
+  transform: translateX(2px);
 }
 
 .navItemActive {
@@ -79,5 +80,26 @@
   }
   .navItem span {
     display: none;
+  }
+  .brandMark {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    width: 70px;
+    padding: 12px 8px;
+  }
+  .brandMark {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  .navItem {
+    padding: 8px;
+    justify-content: center;
   }
 }

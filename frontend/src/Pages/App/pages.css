@@ -149,6 +149,13 @@
   border-radius: 14px;
   background: #fbfbfe;
   padding: 14px;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.miniStat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(20, 20, 40, 0.1);
+  border-color: rgba(124, 58, 237, 0.2);
 }
 
 .miniIcon {
@@ -239,11 +246,58 @@
   font-weight: 700;
   color: #111827;
   outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.input:hover {
+  border-color: rgba(124, 58, 237, 0.22);
 }
 
 .input:focus {
   border-color: rgba(124, 58, 237, 0.5);
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.customSelect {
+  position: relative;
+}
+
+.selectBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 100%;
+}
+
+.selectDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.selectOption {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #111827;
+  transition: background 160ms ease;
+}
+
+.selectOption:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.selectOptionActive {
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--accent);
 }
 
 .textarea {
@@ -259,10 +313,17 @@
   padding: 10px 14px;
   font-weight: 900;
   cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
 }
 
 .primaryBtn:hover {
   filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(124, 58, 237, 0.22);
+}
+
+.primaryBtn:active {
+  transform: translateY(0);
 }
 
 .planGrid {
@@ -343,6 +404,13 @@
   border-radius: 10px;
   padding: 6px 8px;
   cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.iconBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(20, 20, 40, 0.08);
+  border-color: rgba(124, 58, 237, 0.22);
 }
 
 .calendarGridHeader {
@@ -372,6 +440,13 @@
   height: 58px;
   background: #fff;
   padding: 8px;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.calCell:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(20, 20, 40, 0.08);
+  border-color: rgba(124, 58, 237, 0.18);
 }
 
 .calCellMuted {
@@ -419,5 +494,27 @@
   }
   .planGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .gridStats {
+    grid-template-columns: 1fr;
+  }
+  .engGrid {
+    grid-template-columns: 1fr;
+  }
+  .row {
+    grid-template-columns: 1fr;
+  }
+  .calendarGrid {
+    gap: 6px;
+  }
+  .calCell {
+    height: 48px;
+    padding: 6px;
+  }
+  .chartCard {
+    padding: 12px;
   }
 }

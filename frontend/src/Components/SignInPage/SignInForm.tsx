@@ -389,11 +389,11 @@ export default function SignInForm() {
 
     return (
     <div id="boxform">
-      <div id="title-icon">
+      <div id="title-icon" className="reveal" style={{ "--reveal-delay": "40ms" } as any}>
         <Rocket size={38} color="white" strokeWidth={2} />
       </div>
 
-      <div id="title">
+      <div id="title" className="reveal" style={{ "--reveal-delay": "90ms" } as any}>
         Bem-vindo(a) à <span className="purplegradient">UP!</span>
         <span id="titlePhrase">
           Preencha os dados abaixo para começarmos a trabalhar juntos.
@@ -403,7 +403,7 @@ export default function SignInForm() {
       <div id="form">
         {!success ? (
           <form id="signupForm" onSubmit={onSubmit} noValidate>
-            <div className="card" id="card">
+            <div className="card reveal" id="card" style={{ "--reveal-delay": "140ms" } as any}>
               <div className="section-title" id="section-title">
                 <span className="section-icon" id="section-icon">
                   <Target size={18} />
@@ -679,7 +679,7 @@ export default function SignInForm() {
             </div>
           </form>
         ) : (
-          <div className="card success" id="success">
+          <div className="card success reveal" id="success" style={{ "--reveal-delay": "120ms" } as any}>
             <div className="success-icon" id="success-icon">
               <CheckCircle size={34} />
             </div>

@@ -3,7 +3,7 @@ import { BarChart3, Rocket, Target, LucideMegaphone, TrendingUp, Globe } from "l
 
 export default function Box3() {
     return (
-        <div id="box3">
+        <div id="box3" className="reveal">
             <div id="Title-OqueFazemos">
                 <h3>
                     O que <span className="text_purple_linear">fazemos</span> por você<br />

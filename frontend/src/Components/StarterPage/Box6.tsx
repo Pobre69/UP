@@ -47,7 +47,7 @@ export default function Box6() {
     };
 
     return (
-        <div id="box6">
+        <div id="box6" className="reveal">
             <div id="box6_comentario">
                 <p>
                     Questões <span className="text_Purple">Frequentes</span>

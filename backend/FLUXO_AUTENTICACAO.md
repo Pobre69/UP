@@ -20,7 +20,7 @@ Body: { email, access_token }
 
 ## 3. Login do Usuário
 ```
-POST /auth/login
+POST /auth/Login
 Body: { email, senha }
 ```
 

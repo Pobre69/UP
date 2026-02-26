@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Inbox } from "lucide-react";
+import { Inbox, ChevronDown } from "lucide-react";
 import { Card, CardTitle, PageHeader } from "../../Components/UI/Cards";
 import "./pages.css";
 
@@ -7,6 +7,9 @@ export default function RequestsPage() {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("Alteração");
   const [details, setDetails] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const types = ["Alteração", "Ideia", "Feedback"];
 
   return (
     <div className="page">
@@ -41,15 +44,32 @@ export default function RequestsPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
-              <select
-                className="input"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-              >
-                <option>Alteração</option>
-                <option>Ideia</option>
-                <option>Feedback</option>
-              </select>
+              <div className="customSelect">
+                <button
+                  type="button"
+                  className="input selectBtn"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  {type}
+                  <ChevronDown size={16} />
+                </button>
+                {dropdownOpen && (
+                  <div className="selectDropdown">
+                    {types.map((t) => (
+                      <div
+                        key={t}
+                        className={`selectOption ${type === t ? "selectOptionActive" : ""}`}
+                        onClick={() => {
+                          setType(t);
+                          setDropdownOpen(false);
+                        }}
+                      >
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <textarea

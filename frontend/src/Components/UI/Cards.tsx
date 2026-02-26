@@ -10,7 +10,7 @@ export function PageHeader({
   subtitle?: string;
 }) {
   return (
-    <div className="pageHeader">
+    <div className="pageHeader reveal">
       <h1 className="pageTitle">{title}</h1>
       {subtitle ? <p className="pageSubtitle">{subtitle}</p> : null}
     </div>
@@ -23,7 +23,7 @@ export function Card({
   ...rest
 }: React.PropsWithChildren<{ className?: string } & React.HTMLAttributes<HTMLElement>>) {
   return (
-    <section className={`card ${className}`} {...rest}>
+    <section className={`card reveal ${className}`} {...rest}>
       {children}
     </section>
   );
