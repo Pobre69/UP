@@ -49,9 +49,19 @@ class SignUpController
             
             $companyValue = !empty($company) ? $company : 'Não informado';
             $localizacaoJson = json_encode(['cidade' => $city]);
+            $instagramValue = !empty($instagram) ? $instagram : null;
+            $driveLinkValue = !empty($driveLink) ? $driveLink : null;
+            $attendantValue = !empty($attendant) ? $attendant : null;
             
-            $usuarioRepo->add($email, $fullName, null, $companyValue);
-            $detalhesRepo->add($email, $mainGoal, $driveLink, $segment, $instagram, $attendant, $localizacaoJson);
+            $resultUsuario = $usuarioRepo->add($email, $fullName, null, $companyValue);
+            
+            if (isset($resultUsuario[0]['RESULTADO']) && strpos($resultUsuario[0]['RESULTADO'], 'sucesso') === false) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'mensagem' => $resultUsuario[0]['RESULTADO']]);
+                return;
+            }
+            
+            $detalhesRepo->add($email, $mainGoal, $driveLinkValue, $segment, $instagramValue, $attendantValue, $localizacaoJson);
             
             if (!empty($competitors)) {
                 $concorrenteRepo->add($email, $competitors);
