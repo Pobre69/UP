@@ -7,6 +7,7 @@ use Facebook\Exceptions\FacebookSDKException;
 use App\Repository\InstagramTokenRepository;
 use App\Repository\InstagramMetricsRepository;
 use App\Repository\InstagramPostRepository;
+use App\Config\StorageConfig;
 
 class InstagramService
 {
@@ -22,7 +23,9 @@ class InstagramService
     {
         $this->appId = $_ENV['INSTAGRAM_APP_ID'] ?? '';
         $this->appSecret = $_ENV['INSTAGRAM_APP_SECRET'] ?? '';
-        $this->storagePath = __DIR__ . '/../../storage/instagram/';
+        $this->storagePath = StorageConfig::getInstagramPath();
+        
+        StorageConfig::ensureDirectoriesExist();
         
         $this->fb = new Facebook([
             'app_id' => $this->appId,

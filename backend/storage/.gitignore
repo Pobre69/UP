@@ -1,3 +1,14 @@
 *
 !.gitignore
 !README.md
+!INSTAGRAM_API_README.md
+!FLUXO_AUTENTICACAO.md
+!instagram/
+!cache/
+!logs/
+instagram/*
+!instagram/.gitkeep
+cache/*
+!cache/.gitkeep
+logs/*
+!logs/.gitkeep

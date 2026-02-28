@@ -55,6 +55,32 @@ class Acess
         require_once __DIR__ . '/../app/middleware/Security.php';
     }
 
+    protected static function ConfigAcess()
+    {
+        $configDir = __DIR__ . '/../app/config/';
+        if (is_dir($configDir)) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($configDir));
+            foreach ($iterator as $file) {
+                if ($file->isFile() && $file->getExtension() === 'php') {
+                    require_once $file->getPathname();
+                }
+            }
+        }
+    }
+
+    protected static function ServiceAcess()
+    {
+        $serviceDir = __DIR__ . '/../app/services/';
+        if (is_dir($serviceDir)) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($serviceDir));
+            foreach ($iterator as $file) {
+                if ($file->isFile() && $file->getExtension() === 'php') {
+                    require_once $file->getPathname();
+                }
+            }
+        }
+    }
+
     public static function sqlAcess(): array
     {
         $values = [];
@@ -71,9 +97,11 @@ class Acess
 
     public function GetAll()
     {
+        self::ConfigAcess();
         self::ModelAcess();
         self::DataBaseAcess();
         self::RepositoryAcess();
+        self::ServiceAcess();
         self::ControllerAcess();
         self::MiddlewareAcess();
     }

@@ -13,8 +13,8 @@ BEGIN
         SELECT 'Email inválido' AS RESULTADO;
     ELSEIF param_senha IS NOT NULL AND NOT (param_senha REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[^\\s]{8,}$') THEN
         SELECT 'Senha inválida. A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais.' AS RESULTADO;
-    ELSEIF param_nome IS NULL OR NOT (param_nome REGEXP '^[A-Za-zÀ-ÖØ-öø-ÿ ]{2,100}$') THEN
-        SELECT 'Nome inválido. O nome deve ter entre 2 e 100 caracteres e conter apenas letras.' AS RESULTADO;
+    ELSEIF param_nome IS NULL OR LENGTH(TRIM(param_nome)) < 2 OR LENGTH(TRIM(param_nome)) > 120 THEN
+        SELECT 'Nome inválido. O nome deve ter entre 2 e 120 caracteres.' AS RESULTADO;
     ELSEIF EXISTS (SELECT 1 FROM usuario WHERE email = param_email) THEN
         SELECT 'Email já cadastrado' AS RESULTADO;
     ELSE
