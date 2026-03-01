@@ -71,9 +71,19 @@ export default function LoginForm() {
     })
       .then(async (res) => {
         const text = await res.text();
-        const data = JSON.parse(text);
         
-        if (data.success) {
+        if (!text) {
+          throw new Error("Resposta vazia do servidor");
+        }
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error("Resposta inválida do servidor");
+        }
+        
+        if (res.ok && data.success) {
           localStorage.setItem("userEmail", form.email);
           navigate("/app");
         } else {
@@ -81,7 +91,8 @@ export default function LoginForm() {
         }
       })
       .catch((error) => {
-        setSubmitError("Não foi possível fazer login. Tente novamente.");
+        console.error("Erro no login:", error);
+        setSubmitError("Não foi possível fazer login. Verifique sua conexão.");
       })
       .finally(() => {
         setIsSubmitting(false);

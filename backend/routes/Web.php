@@ -42,11 +42,11 @@ $route->group('/Home', function (Route $route) {
 });
 
 $route->group('/auth', function (Route $route) {
-    $route->post('LoginController@authenticate')->name([]);
+    $route->get('LoginController@authenticate')->name(['']);
 });
 
 $route->group('/api', function (Route $route) {
-    $route->post('SignUpController@register')->name([]);
+    $route->post('SignUpController@register')->name(['']);
     
     
     // Dashboard
