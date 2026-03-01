@@ -9,26 +9,38 @@ use App\Services\InstagramService;
 class LoginController
 {
     public function authenticate() {
+        error_log("[Login] Iniciando autenticação");
         header('Content-Type: application/json');
         
-        $data = json_decode(file_get_contents('php://input'), true);
+        $rawInput = file_get_contents('php://input');
+        error_log("[Login] Input recebido: " . $rawInput);
+        
+        $data = json_decode($rawInput, true);
         
         if (!$data) {
+            error_log("[Login] ERRO: JSON inválido");
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Dados inválidos']);
             return;
         }
         
+        error_log("[Login] Dados parseados: " . json_encode($data));
+        
         $email = trim($data['email'] ?? '');
         $senha = trim($data['senha'] ?? '');
         
+        error_log("[Login] Email: " . $email);
+        error_log("[Login] Senha length: " . strlen($senha));
+        
         if (empty($email) || empty($senha)) {
+            error_log("[Login] ERRO: Campos vazios");
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Email e senha são obrigatórios']);
             return;
         }
         
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            error_log("[Login] ERRO: Email inválido");
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'E-mail inválido']);
             return;
@@ -38,24 +50,34 @@ class LoginController
             $usuarioRepo = new UsuarioRepository();
             $usuario = $usuarioRepo->getByEmail($email);
             
-            if (!$usuario) {
+            error_log("[Login] Usuario encontrado: " . ($usuario ? 'SIM' : 'NAO'));
+            
+            if ($usuario) {
+                error_log("[Login] Usuario data: " . json_encode($usuario));
+                error_log("[Login] Senha no banco existe: " . (!empty($usuario['senha']) ? 'SIM' : 'NAO'));
+            }
+            
+            if (!$usuario || empty($usuario['senha'])) {
+                error_log("[Login] ERRO: Usuario não encontrado ou sem senha");
                 http_response_code(401);
-                echo json_encode(['success' => false, 'mensagem' => 'Credenciais inválidas']);
+                echo json_encode(['success' => false, 'mensagem' => 'E-mail ou senha incorretos']);
                 return;
             }
             
-            if (empty($usuario['senha'])) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'mensagem' => 'Usuário sem senha cadastrada']);
-                return;
-            }
+            $verifica = password_verify($senha, $usuario['senha']);
+            error_log("[Login] Password verify result: " . ($verifica ? 'TRUE' : 'FALSE'));
+            error_log("[Login] Senha fornecida: " . $senha);
+            error_log("[Login] Hash no banco: " . $usuario['senha']);
             
-            if (password_verify($senha, $usuario['senha'])) {
-                session_start();
+            if ($verifica) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
                 $_SESSION['user_email'] = $email;
                 $_SESSION['user_name'] = $usuario['nome'];
                 
-                // Buscar dados do Instagram automaticamente
+                error_log("[Login] Sessão criada com sucesso");
+                
                 $this->syncInstagramData($email);
                 
                 http_response_code(200);
@@ -69,10 +91,13 @@ class LoginController
                     ]
                 ]);
             } else {
+                error_log("[Login] ERRO: Senha incorreta");
                 http_response_code(401);
-                echo json_encode(['success' => false, 'mensagem' => 'Credenciais inválidas']);
+                echo json_encode(['success' => false, 'mensagem' => 'E-mail ou senha incorretos']);
             }
         } catch (\Exception $e) {
+            error_log("[Login] EXCEÇÃO: " . $e->getMessage());
+            error_log("[Login] Stack: " . $e->getTraceAsString());
             http_response_code(500);
             echo json_encode(['success' => false, 'mensagem' => 'Erro ao fazer login: ' . $e->getMessage()]);
         }

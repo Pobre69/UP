@@ -1,6 +1,6 @@
 import "../../Design/LoginPage/LoginForm.css";
 import { useState } from "react";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import config from "../../config.json";
 
@@ -58,26 +58,29 @@ export default function LoginForm() {
 
     setIsSubmitting(true);
 
-    fetch(`${config.backRoute}/auth/login`, {
+    fetch(`${config.backRoute}/auth`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
-        email: form.email,
+        email: form.email.trim(),
         senha: form.senha,
       }),
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(async (res) => {
+        const text = await res.text();
+        const data = JSON.parse(text);
+        
         if (data.success) {
           localStorage.setItem("userEmail", form.email);
           navigate("/app");
         } else {
-          setSubmitError(data.mensagem || "Credenciais inválidas");
+          setSubmitError(data.mensagem || "E-mail ou senha incorretos");
         }
       })
-      .catch(() => {
+      .catch((error) => {
         setSubmitError("Não foi possível fazer login. Tente novamente.");
       })
       .finally(() => {
@@ -87,6 +90,11 @@ export default function LoginForm() {
 
   return (
     <div className="login-container">
+      <a href="/" className="back-link reveal" style={{ "--reveal-delay": "20ms" } as any}>
+        <ArrowLeft size={18} />
+        <span>Voltar ao início</span>
+      </a>
+
       <div className="login-card reveal">
         <div className="login-header reveal" style={{ "--reveal-delay": "80ms" } as any}>
           <h1 className="login-title">

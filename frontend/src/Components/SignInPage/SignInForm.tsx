@@ -6,6 +6,7 @@ import {
   Users,
   Building2,
   Mail,
+  Lock,
   Instagram,
   MapPin,
   Link2,
@@ -23,6 +24,7 @@ type FormState = {
   fullName: string;
   company: string;
   email: string;
+  password: string;
   instagram: string;
   segment: string;
   city: string;
@@ -272,6 +274,7 @@ export default function SignInForm() {
     fullName: "",
     company: "",
     email: "",
+    password: "",
     instagram: "",
     segment: "",
     city: "São Paulo - SP",
@@ -303,6 +306,8 @@ export default function SignInForm() {
     if (!form.fullName.trim()) e.fullName = "Obrigatório.";
     if (!form.email.trim()) e.email = "Obrigatório.";
     if (form.email && !validateEmail(form.email)) e.email = "E-mail inválido.";
+    if (!form.password.trim()) e.password = "Obrigatório.";
+    if (form.password && form.password.length < 6) e.password = "Mínimo 6 caracteres.";
     if (!form.segment) e.segment = "Obrigatório.";
     if (!form.city.trim()) e.city = "Obrigatório.";
     if (!form.mainGoal) e.mainGoal = "Obrigatório.";
@@ -319,6 +324,7 @@ export default function SignInForm() {
       fullName: true,
       company: true,
       email: true,
+      password: true,
       instagram: true,
       segment: true,
       city: true,
@@ -335,15 +341,17 @@ export default function SignInForm() {
 
     setIsSubmitting(true);
 
-    fetch(`${config.backRoute}/api/`, {
+    fetch(`${config.backRoute}/api`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
+      credentials: "include",
       body: JSON.stringify({
         fullName: form.fullName,
         company: form.company,
         email: form.email,
+        password: form.password,
         instagram: form.instagram,
         segment: form.segment,
         city: form.city,
@@ -353,16 +361,25 @@ export default function SignInForm() {
         attendant: form.attendant
       })
     })
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.mensagem || "Erro ao enviar cadastro");
+        }
+        return res.json();
+      })
       .then(data => {
         if (data.success) {
           setSuccess(true);
+          setTimeout(() => {
+            window.location.href = data.redirect || '/app';
+          }, 1500);
         } else {
           setSubmitError(data.mensagem || "Erro ao enviar cadastro");
         }
       })
-      .catch(() => {
-        setSubmitError("Não foi possível enviar. Tente novamente.");
+      .catch((error) => {
+        setSubmitError(error.message || "Não foi possível enviar. Tente novamente.");
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -377,6 +394,7 @@ export default function SignInForm() {
       fullName: "",
       company: "",
       email: "",
+      password: "",
       instagram: "",
       segment: "",
       city: "São Paulo - SP",
@@ -488,6 +506,7 @@ export default function SignInForm() {
                     touched.email && errors.email ? "input-error" : ""
                   }`}
                   id="email"
+                  type="email"
                   placeholder="seu@email.com"
                   value={form.email}
                   onChange={(e) =>
@@ -497,6 +516,36 @@ export default function SignInForm() {
                 />
                 {touched.email && errors.email && (
                   <div className="error">{errors.email}</div>
+                )}
+              </div>
+
+              <div className="field" id="field-password">
+                <label className="label" htmlFor="password">
+                  <span className="label-row">
+                    <span className="label-icon">
+                      <Lock size={16} />
+                    </span>
+                    <span className="label-text">
+                      Senha <span className="req">*</span>
+                    </span>
+                  </span>
+                </label>
+
+                <input
+                  className={`input ${
+                    touched.password && errors.password ? "input-error" : ""
+                  }`}
+                  id="password"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={form.password}
+                  onChange={(e) =>
+                    setField("password", e.target.value)
+                  }
+                  onBlur={() => touch("password")}
+                />
+                {touched.password && errors.password && (
+                  <div className="error">{errors.password}</div>
                 )}
               </div>
 

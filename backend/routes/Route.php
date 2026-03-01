@@ -80,6 +80,12 @@ class Route
     private function verifyInfo()
     {
         foreach ($this->info as $i => $info){
+            if (empty($info['name'])) {
+                $this->controller = $info['controller'];
+                $this->parametros = $info['parametros'] ?? [];
+                return;
+            }
+            
             $verify = false;
             foreach ($info['name'] as $n =>$name){
                 if ($name !== ltrim($this->partes[$n + 2] ?? '', '/')) {
@@ -176,8 +182,18 @@ class Route
     
     public function execute()
     {
+        error_log("DEBUG ROUTE - execute chamado");
+        error_log("DEBUG ROUTE - founded: " . ($this->founded ? 'true' : 'false'));
+        error_log("DEBUG ROUTE - pathVerification: " . ($this->pathVerification ? 'true' : 'false'));
+        error_log("DEBUG ROUTE - controller antes verifyInfo: " . $this->controller);
+        
         self::verifyInfo();
+        
+        error_log("DEBUG ROUTE - controller depois verifyInfo: " . $this->controller);
+        error_log("DEBUG ROUTE - founded depois verifyInfo: " . ($this->founded ? 'true' : 'false'));
+        
         if ($this->founded && $this->pathVerification) {
+            error_log("DEBUG ROUTE - Executando controller: " . $this->controller);
             $parts = explode('@', $this->controller);
             $controllerName = $parts[0] ?? '';
             $methodName = $parts[1] ?? 'index';
@@ -207,6 +223,7 @@ class Route
                 call_user_func([$controllerInstance, $methodName]);
             }
         } else {
+            error_log("DEBUG ROUTE - Rota não encontrada ou método incorreto");
             if ($this->notFound !== null) {
                 call_user_func($this->notFound);
             }
