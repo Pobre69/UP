@@ -335,7 +335,7 @@ export default function SignInForm() {
 
     setIsSubmitting(true);
 
-    fetch(`${config.backRoute}/api`, {
+    fetch(`${config.backRoute}/api/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
