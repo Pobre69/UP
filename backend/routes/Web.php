@@ -42,7 +42,7 @@ $route->group('/Home', function (Route $route) {
 });
 
 $route->group('/auth', function (Route $route) {
-    $route->get('LoginController@authenticate')->name(['']);
+    $route->post('LoginController@authenticate')->name(['']);
 });
 
 $route->group('/api', function (Route $route) {
