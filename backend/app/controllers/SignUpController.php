@@ -74,7 +74,6 @@ class SignUpController
             $attendantValue = !empty($attendant) ? $attendant : null;
             
             error_log("[SignUp] Adicionando usuário: " . $email);
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $resultUsuario = $usuarioRepo->add($email, $fullName, $hashedPassword, $companyValue);
             error_log("[SignUp] Resultado usuário: " . json_encode($resultUsuario));
             
