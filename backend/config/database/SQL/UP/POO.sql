@@ -3,7 +3,7 @@ CREATE PROCEDURE USUARIO_CONTROLLER(
 	IN acao TEXT,
     IN param_email VARCHAR(200),
     IN param_nome VARCHAR(120),
-    IN param_senha VARCHAR(60),
+    IN param_senha VARCHAR(255),
     IN param_empresa TEXT)
 BEGIN
 	IF acao = 'add' THEN

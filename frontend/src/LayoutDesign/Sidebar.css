@@ -72,6 +72,80 @@
 
 .navItemLogout {
   opacity: 0.9;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.modalContent h3 {
+  margin: 0 0 12px;
+  color: #e7e7ff;
+  font-size: 18px;
+}
+
+.modalContent p {
+  margin: 0 0 24px;
+  color: rgba(231, 231, 255, 0.75);
+  font-size: 14px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btnCancel,
+.btnConfirm {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.btnCancel {
+  background: rgba(231, 231, 255, 0.1);
+  color: #e7e7ff;
+}
+
+.btnCancel:hover {
+  background: rgba(231, 231, 255, 0.15);
+}
+
+.btnConfirm {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+}
+
+.btnConfirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
 }
 
 @media (max-width: 900px) {

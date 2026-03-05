@@ -37,7 +37,6 @@ export default function LoginForm() {
 
   const errors: Partial<Record<keyof LoginFormState, string>> = {};
   if (!form.email.trim()) errors.email = "Obrigatório.";
-  if (form.email && !validateEmail(form.email)) errors.email = "E-mail inválido.";
   if (!form.senha.trim()) errors.senha = "Obrigatório.";
 
   const hasErrors = Object.keys(errors).length > 0;
@@ -52,7 +51,6 @@ export default function LoginForm() {
     });
 
     if (hasErrors) {
-      setSubmitError("Confira os campos obrigatórios.");
       return;
     }
 
@@ -92,7 +90,7 @@ export default function LoginForm() {
       })
       .catch((error) => {
         console.error("Erro no login:", error);
-        setSubmitError("Não foi possível fazer login. Verifique sua conexão.");
+        setSubmitError("E-mail ou senha incorretos");
       })
       .finally(() => {
         setIsSubmitting(false);

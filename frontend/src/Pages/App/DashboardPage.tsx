@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   BarChart3,
   Users,
@@ -16,27 +16,111 @@ import {
 import { Card, CardTitle, PageHeader, StatCard } from "../../Components/UI/Cards";
 import { SimpleBarChart, SimpleLineChart } from "../../Components/UI/Charts";
 import { Segmented } from "../../Components/UI/Tabs";
-import { dashboard, demoUser } from "../../mock/data";
+import { InstagramAlert } from "../../Components/UI/InstagramAlert";
+import { InstagramConnectModal } from "../../Components/UI/InstagramConnectModal";
+import { dashboardService, type DashboardData } from "../../services/dashboardService";
+import { instagramService } from "../../services/instagramService";
+import { dashboard as mockDashboard, demoUser } from "../../mock/data";
 import { formatNumber } from "../../utils/format";
 import "./pages.css";
 
 export default function DashboardPage() {
   const [range, setRange] = useState<"diario" | "semanal" | "mensal">("diario");
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showInstagramAlert, setShowInstagramAlert] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [instagramStatus, setInstagramStatus] = useState<any>(null);
+
+  useEffect(() => {
+    // Verificar status da conexão do Instagram
+    instagramService.getConnectionStatus()
+      .then(res => setInstagramStatus(res.data))
+      .catch(console.error);
+
+    // Carregar dados do dashboard
+    dashboardService.getDashboardData()
+      .then(setDashboard)
+      .catch((err) => {
+        console.error('Erro ao carregar dashboard:', err);
+        setError(err.message);
+        setShowInstagramAlert(true);
+        // Usar dados mockados como fallback
+        setDashboard({
+          user: demoUser,
+          profileGrowthPct: mockDashboard.profileGrowthPct,
+          stats: mockDashboard.stats,
+          seguidoresSerie: mockDashboard.seguidoresSerie,
+          alcanceSerie: mockDashboard.alcanceSerie,
+          engajamentoResumo: mockDashboard.engajamentoResumo
+        });
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleConnectInstagram = () => {
+    setShowConnectModal(true);
+  };
+
+  const handleChangeAccount = () => {
+    setShowConnectModal(true);
+  };
+
+  const handleInstagramConnect = async (accessToken: string) => {
+    try {
+      await instagramService.connectAccount(accessToken);
+      setShowInstagramAlert(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao conectar Instagram:', error);
+      alert('Erro ao conectar Instagram. Verifique o token e tente novamente.');
+    }
+  };
+
+  const handleInstagramDisconnect = async () => {
+    try {
+      await instagramService.disconnectAccount();
+      setShowInstagramAlert(true);
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao desconectar Instagram:', error);
+      alert('Erro ao desconectar Instagram.');
+    }
+  };
 
   const growthWidth = useMemo(() => {
-    const pct = Math.min(Math.max(dashboard.profileGrowthPct, 0), 100);
+    const pct = Math.min(Math.max(dashboard?.profileGrowthPct ?? 0, 0), 100);
     return `${pct}%`;
-  }, []);
+  }, [dashboard]);
+
+  if (loading) return <div className="page">Carregando...</div>;
+  if (!dashboard) return <div className="page">Erro ao carregar dados</div>;
 
   const followers = dashboard.seguidoresSerie;
   const reach = dashboard.alcanceSerie;
 
   return (
     <div className="page">
+      {showInstagramAlert && (
+        <InstagramAlert 
+          onConnect={handleConnectInstagram}
+          onChangeAccount={handleChangeAccount}
+          hasAccount={instagramStatus?.connected}
+        />
+      )}
+
+      <InstagramConnectModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        onConnect={handleInstagramConnect}
+        onDisconnect={handleInstagramDisconnect}
+        currentUsername={instagramStatus?.username}
+      />
       <PageHeader
         title={
           <>
-            Olá, <span className="accentText">{demoUser.handle}</span> 👋
+            Olá, <span className="accentText">{dashboard.user.handle}</span> 👋
           </>
         }
         subtitle="Aqui está o resumo do seu desempenho."

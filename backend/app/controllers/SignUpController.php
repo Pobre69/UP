@@ -47,7 +47,6 @@ class SignUpController
         }
         
         if (strlen($password) < 6) {
-            error_log("[SignUp] ERRO: Senha muito curta");
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Senha deve ter no mínimo 6 caracteres']);
             return;
@@ -72,6 +71,8 @@ class SignUpController
             $instagramValue = !empty($instagram) ? $instagram : null;
             $driveLinkValue = !empty($driveLink) ? $driveLink : null;
             $attendantValue = !empty($attendant) ? $attendant : null;
+            
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
             
             error_log("[SignUp] Adicionando usuário: " . $email);
             $resultUsuario = $usuarioRepo->add($email, $fullName, $hashedPassword, $companyValue);

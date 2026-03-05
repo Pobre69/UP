@@ -5,6 +5,7 @@ namespace Controllers;
 use App\Services\InstagramService;
 use App\Repository\InstagramMetricsRepository;
 use App\Repository\InstagramPostRepository;
+use App\Middleware\Security;
 
 class InstagramController
 {
@@ -23,16 +24,20 @@ class InstagramController
     {
         header('Content-Type: application/json');
         
+        Security::checkAuth();
+        $user = Security::getAuthUser();
+        $email = $user['email'];
+        
         $data = json_decode(file_get_contents('php://input'), true);
         
-        if (!isset($data['email']) || !isset($data['access_token'])) {
+        if (!isset($data['access_token'])) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'mensagem' => 'Email e access_token são obrigatórios']);
+            echo json_encode(['success' => false, 'mensagem' => 'Access token é obrigatório']);
             return;
         }
 
         try {
-            $this->service->saveToken($data['email'], $data['access_token']);
+            $this->service->saveToken($email, $data['access_token']);
             http_response_code(200);
             echo json_encode(['success' => true, 'mensagem' => 'Conta conectada com sucesso']);
         } catch (\Exception $e) {
@@ -45,13 +50,9 @@ class InstagramController
     {
         header('Content-Type: application/json');
         
-        $email = $_GET['email'] ?? null;
-        
-        if (!$email) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'mensagem' => 'Email é obrigatório']);
-            return;
-        }
+        Security::checkAuth();
+        $user = Security::getAuthUser();
+        $email = $user['email'];
 
         try {
             $metrics = $this->service->getAccountMetrics($email);
@@ -67,14 +68,10 @@ class InstagramController
     {
         header('Content-Type: application/json');
         
-        $email = $_GET['email'] ?? null;
+        Security::checkAuth();
+        $user = Security::getAuthUser();
+        $email = $user['email'];
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
-        
-        if (!$email) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'mensagem' => 'Email é obrigatório']);
-            return;
-        }
 
         try {
             $posts = $this->service->getRecentPosts($email, $limit);
@@ -90,13 +87,9 @@ class InstagramController
     {
         header('Content-Type: application/json');
         
-        $email = $_GET['email'] ?? null;
-        
-        if (!$email) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'mensagem' => 'Email é obrigatório']);
-            return;
-        }
+        Security::checkAuth();
+        $user = Security::getAuthUser();
+        $email = $user['email'];
 
         try {
             $history = $this->metricsRepo->getHistoryByEmail($email);
@@ -112,18 +105,59 @@ class InstagramController
     {
         header('Content-Type: application/json');
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (!isset($data['email'])) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'mensagem' => 'Email é obrigatório']);
-            return;
-        }
+        Security::checkAuth();
+        $user = Security::getAuthUser();
+        $email = $user['email'];
 
         try {
-            $newToken = $this->service->refreshToken($data['email']);
+            $newToken = $this->service->refreshToken($email);
             http_response_code(200);
             echo json_encode(['success' => true, 'data' => $newToken]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+        }
+    }
+
+    public function disconnectAccount()
+    {
+        header('Content-Type: application/json');
+        
+        Security::checkAuth();
+        $user = Security::getAuthUser();
+        $email = $user['email'];
+
+        try {
+            $this->tokenRepo->delete($email);
+            http_response_code(200);
+            echo json_encode(['success' => true, 'mensagem' => 'Conta desconectada com sucesso']);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+        }
+    }
+
+    public function getConnectionStatus()
+    {
+        header('Content-Type: application/json');
+        
+        Security::checkAuth();
+        $user = Security::getAuthUser();
+        $email = $user['email'];
+
+        try {
+            $tokenData = $this->tokenRepo->getByEmail($email);
+            $isConnected = $tokenData !== false && !empty($tokenData);
+            
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'connected' => $isConnected,
+                    'username' => $isConnected ? $tokenData['instagram_username'] : null,
+                    'user_id' => $isConnected ? $tokenData['instagram_user_id'] : null
+                ]
+            ]);
         } catch (\Exception $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);

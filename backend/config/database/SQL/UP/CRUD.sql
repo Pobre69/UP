@@ -5,14 +5,12 @@ DELIMITER %
 CREATE PROCEDURE CREATE_USUARIO(
     IN param_email VARCHAR(200),
     IN param_nome VARCHAR(120),
-    IN param_senha VARCHAR(60),
+    IN param_senha VARCHAR(255),
     IN param_empresa TEXT
 )
 BEGIN
     IF param_email IS NULL OR NOT (param_email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$') THEN
         SELECT 'Email inválido' AS RESULTADO;
-    ELSEIF param_senha IS NOT NULL AND NOT (param_senha REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[^\\s]{8,}$') THEN
-        SELECT 'Senha inválida. A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais.' AS RESULTADO;
     ELSEIF param_nome IS NULL OR LENGTH(TRIM(param_nome)) < 2 OR LENGTH(TRIM(param_nome)) > 120 THEN
         SELECT 'Nome inválido. O nome deve ter entre 2 e 120 caracteres.' AS RESULTADO;
     ELSEIF EXISTS (SELECT 1 FROM usuario WHERE email = param_email) THEN
@@ -27,7 +25,7 @@ END%
 CREATE PROCEDURE UPDATE_USUARIO(
     IN param_email VARCHAR(200),
     IN param_nome VARCHAR(120),
-    IN param_senha VARCHAR(60),
+    IN param_senha VARCHAR(255),
     IN param_empresa TEXT
 )
 BEGIN
@@ -36,7 +34,7 @@ BEGIN
     SELECT COUNT(email) INTO VAR_VERIFICAR FROM usuario WHERE email = param_email;
     
     IF (VAR_VERIFICAR > 0) THEN
-        IF param_senha IS NOT NULL AND (param_senha REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[^\\s]{8,}$') THEN
+        IF param_senha IS NOT NULL THEN
             UPDATE usuario
             SET senha = param_senha
             WHERE email = param_email;

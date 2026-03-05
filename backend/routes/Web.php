@@ -43,6 +43,7 @@ $route->group('/Home', function (Route $route) {
 
 $route->group('/auth', function (Route $route) {
     $route->post('LoginController@authenticate')->name(['']);
+    $route->post('LogoutController@logout')->name(['']);
 });
 
 $route->group('/api', function (Route $route) {
@@ -86,6 +87,8 @@ $route->group('/api', function (Route $route) {
     $route->get('InstagramController@getPosts')->name(['instagram', 'posts']);
     $route->get('InstagramController@getMetricsHistory')->name(['instagram', 'metrics', 'history']);
     $route->post('InstagramController@refreshToken')->name(['instagram', 'refresh']);
+    $route->post('InstagramController@disconnectAccount')->name(['instagram', 'disconnect']);
+    $route->get('InstagramController@getConnectionStatus')->name(['instagram', 'status']);
 });
 
 $route->execute();

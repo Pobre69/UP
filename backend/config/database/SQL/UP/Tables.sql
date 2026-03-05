@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS usuario(
 	email VARCHAR(200) PRIMARY KEY,
     nome VARCHAR(120) NOT NULL,
-    senha VARCHAR(60),
+    senha VARCHAR(255),
     empresa TEXT NOT NULL
 )ENGINE=INNODB;
 
