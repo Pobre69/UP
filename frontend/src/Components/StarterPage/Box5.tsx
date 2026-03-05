@@ -1,5 +1,6 @@
 import "../../Design/StarterPage/Box5.css";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Planos = [
     {
@@ -56,6 +57,8 @@ const Planos = [
 ]
 
 export default function Box5() {
+    const navigate = useNavigate();
+
     return (
         <div id="box5" className="reveal">
             <div id="Title-TrabalheConosco">
@@ -85,6 +88,7 @@ export default function Box5() {
                         <button 
                             className="planoButton" 
                             id={`${plano.especial ? "planoButtonEspecial" : ""}`}
+                            onClick={() => navigate('/SignUp')}
                         >
                             Quero esse plano
                         </button>

@@ -85,14 +85,14 @@ export default function Sidebar() {
       {showLogoutModal && (
         <div className="modalOverlay" onClick={() => setShowLogoutModal(false)}>
           <div className="modalContent" onClick={(e) => e.stopPropagation()}>
-            <h3>Confirmar saída</h3>
-            <p>Tem certeza que deseja sair?</p>
+            <h3>Deseja realmente sair?</h3>
+            <p>Ao sair, você será desconectado e precisará fazer login novamente para acessar sua conta.</p>
             <div className="modalActions">
               <button onClick={() => setShowLogoutModal(false)} className="btnCancel">
                 Cancelar
               </button>
               <button onClick={handleLogout} className="btnConfirm">
-                Sair
+                Confirmar Saída
               </button>
             </div>
           </div>
