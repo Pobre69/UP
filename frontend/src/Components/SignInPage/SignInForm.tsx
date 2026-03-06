@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Calendar,
   ChevronDown,
+  ArrowLeft,
 } from "lucide-react";
 import config from "../../config.json";
 
@@ -333,10 +334,28 @@ export default function SignInForm() {
     });
 
     if (hasErrors) {
+      console.log("Erros de validação:", errors);
       return;
     }
 
     setIsSubmitting(true);
+
+    const payload = {
+      fullName: form.fullName,
+      company: form.company,
+      email: form.email,
+      password: form.password,
+      instagram: form.instagram,
+      segment: form.segment,
+      city: form.city,
+      mainGoal: form.mainGoal,
+      competitors: form.competitors,
+      driveLink: form.driveLink,
+      attendant: form.attendant
+    };
+
+    console.log("Enviando dados:", payload);
+    console.log("URL:", `${config.backRoute}/api`);
 
     fetch(`${config.backRoute}/api`, {
       method: "POST",
@@ -344,28 +363,27 @@ export default function SignInForm() {
         "Content-Type": "application/json"
       },
       credentials: "include",
-      body: JSON.stringify({
-        fullName: form.fullName,
-        company: form.company,
-        email: form.email,
-        password: form.password,
-        instagram: form.instagram,
-        segment: form.segment,
-        city: form.city,
-        mainGoal: form.mainGoal,
-        competitors: form.competitors,
-        driveLink: form.driveLink,
-        attendant: form.attendant
-      })
+      body: JSON.stringify(payload)
     })
       .then(async res => {
+        console.log("Status da resposta:", res.status);
+        const text = await res.text();
+        console.log("Resposta do servidor:", text);
+        
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
+          let errorData;
+          try {
+            errorData = JSON.parse(text);
+          } catch {
+            throw new Error("Erro ao processar resposta do servidor");
+          }
           throw new Error(errorData.mensagem || "Erro ao enviar cadastro");
         }
-        return res.json();
+        
+        return JSON.parse(text);
       })
       .then(data => {
+        console.log("Dados recebidos:", data);
         if (data.success) {
           setSuccess(true);
           setTimeout(() => {
@@ -376,6 +394,7 @@ export default function SignInForm() {
         }
       })
       .catch((error) => {
+        console.error("Erro no cadastro:", error);
         setSubmitError(error.message || "Não foi possível realizar o cadastro");
       })
       .finally(() => {
@@ -404,6 +423,11 @@ export default function SignInForm() {
 
     return (
     <div id="boxform">
+      <a href="/" className="back-link reveal" style={{ "--reveal-delay": "20ms" } as any}>
+        <ArrowLeft size={18} />
+        <span>Voltar ao início</span>
+      </a>
+
       <div id="title-icon" className="reveal" style={{ "--reveal-delay": "40ms" } as any}>
         <Rocket size={38} color="white" strokeWidth={2} />
       </div>
@@ -535,6 +559,7 @@ export default function SignInForm() {
                   id="password"
                   type="password"
                   placeholder="Mínimo 6 caracteres"
+                  autoComplete="new-password"
                   value={form.password}
                   onChange={(e) =>
                     setField("password", e.target.value)

@@ -92,24 +92,27 @@
 }
 
 .modalContent {
-  background: #1a1a2e;
+  background: #ffffff;
   border-radius: 16px;
   padding: 24px;
   max-width: 400px;
   width: 90%;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  color: #000000;
 }
 
 .modalContent h3 {
   margin: 0 0 12px;
-  color: #e7e7ff;
+  color: #000000;
   font-size: 18px;
+  font-weight: 700;
 }
 
 .modalContent p {
   margin: 0 0 24px;
-  color: rgba(231, 231, 255, 0.75);
+  color: #333333;
   font-size: 14px;
+  line-height: 1.6;
 }
 
 .modalActions {
@@ -130,12 +133,15 @@
 }
 
 .btnCancel {
-  background: rgba(231, 231, 255, 0.1);
-  color: #e7e7ff;
+  background: #f3f4f6;
+  color: #000000;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
 }
 
 .btnCancel:hover {
-  background: rgba(231, 231, 255, 0.15);
+  background: #e5e7eb;
+  border-color: #9ca3af;
 }
 
 .btnConfirm {

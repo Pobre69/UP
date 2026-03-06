@@ -88,7 +88,7 @@ export default function Box5() {
                         <button 
                             className="planoButton" 
                             id={`${plano.especial ? "planoButtonEspecial" : ""}`}
-                            onClick={() => navigate('/SignUp')}
+                            onClick={() => navigate('/SignIn')}
                         >
                             Quero esse plano
                         </button>
