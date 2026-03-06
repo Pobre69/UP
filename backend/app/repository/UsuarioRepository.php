@@ -14,7 +14,8 @@ class UsuarioRepository
 
     public function add(string $email, string $nome, ?string $senha = null, ?string $empresa = null)
     {
-        $stmt = $this->getConnection()->prepare('CALL USUARIO_CONTROLLER(:acao, :param_email, :param_nome, :param_senha, :param_empresa)');
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('CALL USUARIO_CONTROLLER(:acao, :param_email, :param_nome, :param_senha, :param_empresa)');
         $stmt->execute([
             ':acao' => 'add',
             ':param_email' => $email,
@@ -22,7 +23,9 @@ class UsuarioRepository
             ':param_senha' => $senha,
             ':param_empresa' => $empresa
         ]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
 
     public function update(string $email, ?string $nome = null, ?string $senha = null, ?string $empresa = null)

@@ -181,17 +181,7 @@ class Route
     }
     
     public function execute()
-    {
-        error_log("DEBUG ROUTE - execute chamado");
-        error_log("DEBUG ROUTE - founded: " . ($this->founded ? 'true' : 'false'));
-        error_log("DEBUG ROUTE - pathVerification: " . ($this->pathVerification ? 'true' : 'false'));
-        error_log("DEBUG ROUTE - controller antes verifyInfo: " . $this->controller);
-        
-        self::verifyInfo();
-        
-        error_log("DEBUG ROUTE - controller depois verifyInfo: " . $this->controller);
-        error_log("DEBUG ROUTE - founded depois verifyInfo: " . ($this->founded ? 'true' : 'false'));
-        
+    {        
         if ($this->founded && $this->pathVerification) {
             error_log("DEBUG ROUTE - Executando controller: " . $this->controller);
             $parts = explode('@', $this->controller);

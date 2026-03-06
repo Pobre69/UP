@@ -14,13 +14,16 @@ class ConcorrenteRepository
 
     public function add(string $email, ?string $descricao = null)
     {
-        $stmt = $this->getConnection()->prepare('CALL CONCORRENTE_CONTROLLER(:acao, :param_email, :param_descricao)');
+        $conn = $this->getConnection();
+        $stmt = $conn->prepare('CALL CONCORRENTE_CONTROLLER(:acao, :param_email, :param_descricao)');
         $stmt->execute([
             ':acao' => 'add',
             ':param_email' => $email,
             ':param_descricao' => $descricao
         ]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
     }
 
     public function update(string $email, ?string $descricao = null)
