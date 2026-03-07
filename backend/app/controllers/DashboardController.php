@@ -27,11 +27,26 @@ class DashboardController
 
         try {
             $stats = $this->dashboardRepo->getDashboardStats($email);
+            
+            // Se não houver dados, retornar estrutura vazia
+            if (!$stats) {
+                $stats = [
+                    'followers_count' => 0,
+                    'profile_views' => 0,
+                    'reach' => 0,
+                    'impressions' => 0,
+                    'engagement_rate' => 0
+                ];
+            }
+            
             $delta = $this->dashboardRepo->getStatsDelta($email);
             $growthPct = $this->dashboardRepo->getGrowthPercentile($email);
             $followersSeries = $this->dashboardRepo->getFollowersGrowth($email, 30);
             $reachSeries = $this->dashboardRepo->getReachSeries($email, 30);
             $engagement = $this->dashboardRepo->getEngagementSummary($email);
+            
+            // Gerar datas para os gráficos
+            $chartDates = $this->generateChartDates(count($followersSeries));
 
             $response = [
                 'success' => true,
@@ -65,12 +80,13 @@ class DashboardController
                     ],
                     'seguidoresSerie' => array_column($followersSeries, 'followers_count'),
                     'alcanceSerie' => array_column($reachSeries, 'reach'),
+                    'chartDates' => $chartDates,
                     'engajamentoResumo' => [
                         'curtidasMedia' => round($engagement['avg_likes'] ?? 0),
                         'comentariosMedios' => round($engagement['avg_comments'] ?? 0),
-                        'compartilhamentos' => 0,
+                        'compartilhamentos' => round($engagement['avg_shares'] ?? 0),
                         'alcanceMedio' => round(($stats['reach'] ?? 0) / max($engagement['total_posts'] ?? 1, 1)),
-                        'melhorStory' => 0
+                        'melhorStory' => 0 // Instagram Basic Display não fornece dados de stories
                     ]
                 ]
             ];
@@ -81,6 +97,15 @@ class DashboardController
             http_response_code(500);
             echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
         }
+    }
+    
+    private function generateChartDates(int $count)
+    {
+        $dates = [];
+        for ($i = $count - 1; $i >= 0; $i--) {
+            $dates[] = date('d/m', strtotime("-$i days"));
+        }
+        return $dates;
     }
 
     private function calculateDelta($current, $previous)

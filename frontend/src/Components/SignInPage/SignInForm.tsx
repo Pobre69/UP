@@ -305,8 +305,16 @@ export default function SignInForm() {
   const errors = useMemo(() => {
     const e: Partial<Record<keyof FormState, string>> = {};
     if (!form.fullName.trim()) e.fullName = "Obrigatório.";
-    if (!form.email.trim()) e.email = "Obrigatório.";
-    if (!form.password.trim()) e.password = "Obrigatório.";
+    if (!form.email.trim()) {
+      e.email = "Obrigatório.";
+    } else if (!validateEmail(form.email)) {
+      e.email = "E-mail inválido.";
+    }
+    if (!form.password.trim()) {
+      e.password = "Obrigatório.";
+    } else if (form.password.length < 6) {
+      e.password = "Mínimo 6 caracteres.";
+    }
     if (!form.segment) e.segment = "Obrigatório.";
     if (!form.city.trim()) e.city = "Obrigatório.";
     if (!form.mainGoal) e.mainGoal = "Obrigatório.";
@@ -353,9 +361,6 @@ export default function SignInForm() {
       driveLink: form.driveLink,
       attendant: form.attendant
     };
-
-    console.log("Enviando dados:", payload);
-    console.log("URL:", `${config.backRoute}/api`);
 
     fetch(`${config.backRoute}/api`, {
       method: "POST",

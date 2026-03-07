@@ -2,26 +2,50 @@ import { API_BASE_URL } from '../config/api';
 
 export const instagramService = {
   async connectAccount(accessToken: string) {
-    const response = await fetch(`${API_BASE_URL}/api/instagram/connect`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: accessToken })
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/instagram/connect`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: accessToken })
+      });
 
-    if (!response.ok) throw new Error('Erro ao conectar conta do Instagram');
-    return response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.mensagem || 'Erro ao conectar conta do Instagram');
+      }
+      
+      return data;
+    } catch (error: any) {
+      if (error.message.includes('JSON')) {
+        throw new Error('Erro de comunicação com o servidor.\n\nVerifique se o backend está rodando corretamente.');
+      }
+      throw error;
+    }
   },
 
   async disconnectAccount() {
-    const response = await fetch(`${API_BASE_URL}/api/instagram/disconnect`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' }
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/instagram/disconnect`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-    if (!response.ok) throw new Error('Erro ao desconectar conta do Instagram');
-    return response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.mensagem || 'Erro ao desconectar conta do Instagram');
+      }
+      
+      return data;
+    } catch (error: any) {
+      if (error.message.includes('JSON')) {
+        throw new Error('Erro de comunicação com o servidor.\n\nVerifique se o backend está rodando corretamente.');
+      }
+      throw error;
+    }
   },
 
   async getConnectionStatus() {
@@ -31,8 +55,13 @@ export const instagramService = {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) throw new Error('Erro ao verificar status da conexão');
-    return response.json();
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.mensagem || 'Erro ao verificar status da conexão');
+    }
+    
+    return data;
   },
 
   async getMetrics() {
@@ -42,8 +71,13 @@ export const instagramService = {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) throw new Error('Erro ao buscar métricas do Instagram');
-    return response.json();
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.mensagem || 'Erro ao buscar métricas do Instagram');
+    }
+    
+    return data;
   },
 
   async getPosts() {
@@ -53,8 +87,13 @@ export const instagramService = {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) throw new Error('Erro ao buscar posts do Instagram');
-    return response.json();
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.mensagem || 'Erro ao buscar posts do Instagram');
+    }
+    
+    return data;
   },
 
   async getMetricsHistory() {
@@ -64,8 +103,13 @@ export const instagramService = {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) throw new Error('Erro ao buscar histórico de métricas');
-    return response.json();
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.mensagem || 'Erro ao buscar histórico de métricas');
+    }
+    
+    return data;
   },
 
   async refreshToken() {
@@ -75,7 +119,12 @@ export const instagramService = {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) throw new Error('Erro ao renovar token');
-    return response.json();
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.mensagem || 'Erro ao renovar token');
+    }
+    
+    return data;
   }
 };

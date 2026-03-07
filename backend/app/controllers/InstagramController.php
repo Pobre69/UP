@@ -5,6 +5,7 @@ namespace Controllers;
 use App\Services\InstagramService;
 use App\Repository\InstagramMetricsRepository;
 use App\Repository\InstagramPostRepository;
+use App\Repository\InstagramTokenRepository;
 use App\Middleware\Security;
 
 class InstagramController
@@ -12,12 +13,14 @@ class InstagramController
     private InstagramService $service;
     private InstagramMetricsRepository $metricsRepo;
     private InstagramPostRepository $postRepo;
+    private InstagramTokenRepository $tokenRepo;
 
     public function __construct()
     {
         $this->service = new InstagramService();
         $this->metricsRepo = new InstagramMetricsRepository();
         $this->postRepo = new InstagramPostRepository();
+        $this->tokenRepo = new InstagramTokenRepository();
     }
 
     public function connectAccount()

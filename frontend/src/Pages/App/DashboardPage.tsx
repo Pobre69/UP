@@ -18,6 +18,7 @@ import { SimpleBarChart, SimpleLineChart } from "../../Components/UI/Charts";
 import { Segmented } from "../../Components/UI/Tabs";
 import { InstagramAlert } from "../../Components/UI/InstagramAlert";
 import { InstagramConnectModal } from "../../Components/UI/InstagramConnectModal";
+import { ErrorModal } from "../../Components/UI/ErrorModal";
 import { dashboardService, type DashboardData } from "../../services/dashboardService";
 import { instagramService } from "../../services/instagramService";
 import { dashboard as mockDashboard, demoUser } from "../../mock/data";
@@ -32,6 +33,11 @@ export default function DashboardPage() {
   const [showInstagramAlert, setShowInstagramAlert] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [instagramStatus, setInstagramStatus] = useState<any>(null);
+  const [errorModal, setErrorModal] = useState<{ show: boolean; title: string; message: string; onRetry?: () => void }>({ 
+    show: false, 
+    title: '', 
+    message: '' 
+  });
 
   useEffect(() => {
     // Verificar status da conexão do Instagram
@@ -72,9 +78,17 @@ export default function DashboardPage() {
       await instagramService.connectAccount(accessToken);
       setShowInstagramAlert(false);
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao conectar Instagram:', error);
-      alert('Erro ao conectar Instagram. Verifique o token e tente novamente.');
+      setErrorModal({
+        show: true,
+        title: 'Erro ao Conectar Instagram',
+        message: error.message || 'Não foi possível conectar sua conta. Verifique se o token está correto e tente novamente.',
+        onRetry: () => {
+          setErrorModal({ show: false, title: '', message: '' });
+          setShowConnectModal(true);
+        }
+      });
     }
   };
 
@@ -83,9 +97,13 @@ export default function DashboardPage() {
       await instagramService.disconnectAccount();
       setShowInstagramAlert(true);
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao desconectar Instagram:', error);
-      alert('Erro ao desconectar Instagram.');
+      setErrorModal({
+        show: true,
+        title: 'Erro ao Desconectar',
+        message: error.message || 'Não foi possível desconectar sua conta do Instagram. Tente novamente mais tarde.'
+      });
     }
   };
 
@@ -99,9 +117,22 @@ export default function DashboardPage() {
 
   const followers = dashboard.seguidoresSerie;
   const reach = dashboard.alcanceSerie;
+  const chartDates = dashboard.chartDates || [];
+  
+  // Determinar nível de desempenho baseado no crescimento
+  const performanceLevel = dashboard.profileGrowthPct >= 50 ? 'Alto' : dashboard.profileGrowthPct >= 20 ? 'Médio' : 'Baixo';
+  const performancePill = dashboard.profileGrowthPct >= 50 ? 'pillUp' : dashboard.profileGrowthPct >= 20 ? 'pillNeutral' : 'pillDown';
 
   return (
     <div className="page">
+      <ErrorModal
+        isOpen={errorModal.show}
+        title={errorModal.title}
+        message={errorModal.message}
+        onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        onRetry={errorModal.onRetry}
+      />
+
       {showInstagramAlert && (
         <InstagramAlert 
           onConnect={handleConnectInstagram}
@@ -133,7 +164,7 @@ export default function DashboardPage() {
           </div>
           <div className="profilePerfText">
             <div className="profilePerfTitle">
-              Desempenho do Perfil <span className="pill pillUp">Alto</span>
+              Desempenho do Perfil <span className={`pill ${performancePill}`}>{performanceLevel}</span>
             </div>
             <div className="profilePerfSub">
               Seu perfil cresceu mais que <b>{dashboard.profileGrowthPct}%</b> dos
@@ -196,10 +227,12 @@ export default function DashboardPage() {
           <div className="chartBody">
             <SimpleLineChart points={followers} />
             <div className="chartAxis">
-              {["01/01", "05/01", "10/01", "15/01", "20/01", "25/01", "30/01"].map(
-                (d) => (
-                  <span key={d}>{d}</span>
-                )
+              {chartDates.length > 0 ? (
+                chartDates.map((d, i) => (
+                  <span key={i}>{d}</span>
+                ))
+              ) : (
+                <span>Sem dados</span>
               )}
             </div>
           </div>
@@ -212,10 +245,12 @@ export default function DashboardPage() {
           <div className="chartBody">
             <SimpleBarChart values={reach} />
             <div className="chartAxis">
-              {["01/01", "05/01", "10/01", "15/01", "20/01", "25/01", "30/01"].map(
-                (d) => (
-                  <span key={d}>{d}</span>
-                )
+              {chartDates.length > 0 ? (
+                chartDates.map((d, i) => (
+                  <span key={i}>{d}</span>
+                ))
+              ) : (
+                <span>Sem dados</span>
               )}
             </div>
           </div>

@@ -56,8 +56,27 @@ class InstagramService
     public function saveToken(string $email, string $accessToken)
     {
         try {
-            $response = $this->fb->get('/me?fields=id,username', $accessToken);
-            $user = $response->getGraphUser();
+            // Usar API do Instagram Basic Display diretamente
+            $url = 'https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=' . urlencode($accessToken);
+            $response = file_get_contents($url);
+            
+            if ($response === false) {
+                throw new \Exception('Não foi possível conectar ao Instagram.');
+            }
+            
+            $user = json_decode($response, true);
+            
+            if (isset($user['error'])) {
+                $errorMsg = $user['error']['message'] ?? 'Erro desconhecido';
+                
+                if (strpos($errorMsg, 'Invalid') !== false || strpos($errorMsg, 'token') !== false) {
+                    throw new \Exception('Token inválido ou expirado.\n\nPor favor, gere um novo token de acesso e tente novamente.');
+                } elseif (strpos($errorMsg, 'permissions') !== false) {
+                    throw new \Exception('Permissões insuficientes.\n\nO token precisa ter as permissões necessárias do Instagram Basic Display.');
+                } else {
+                    throw new \Exception('Erro de autenticação: ' . $errorMsg);
+                }
+            }
             
             $expiresAt = date('Y-m-d H:i:s', strtotime('+60 days'));
             
@@ -66,7 +85,7 @@ class InstagramService
                 'access_token' => $accessToken,
                 'expires_at' => $expiresAt,
                 'instagram_user_id' => $user['id'],
-                'instagram_username' => $user['username']
+                'instagram_username' => $user['username'] ?? 'unknown'
             ];
             
             $this->saveToStorage($email . '_token.json', $tokenData);
@@ -76,10 +95,10 @@ class InstagramService
                 $accessToken,
                 $expiresAt,
                 $user['id'],
-                $user['username']
+                $user['username'] ?? 'unknown'
             );
-        } catch (FacebookSDKException $e) {
-            throw new \Exception('Erro ao salvar token: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 
@@ -87,80 +106,55 @@ class InstagramService
     {
         $tokenData = $this->tokenRepo->getByEmail($email);
         if (!$tokenData) {
-            throw new \Exception('Token não encontrado');
+            throw new \Exception('Instagram não conectado.\n\nConecte sua conta do Instagram para visualizar as métricas.');
         }
 
         try {
-            // Buscar dados básicos da conta
-            $response = $this->fb->get(
-                '/' . $tokenData['instagram_user_id'] . '?fields=followers_count,follows_count,media_count',
-                $tokenData['access_token']
-            );
+            // Buscar dados básicos da conta usando Instagram Basic Display API
+            $url = 'https://graph.instagram.com/' . $tokenData['instagram_user_id'] . '?fields=id,username,account_type,media_count&access_token=' . urlencode($tokenData['access_token']);
+            $response = file_get_contents($url);
             
-            $data = $response->getDecodedBody();
-            
-            // Buscar insights da conta (requer permissões especiais)
-            $profileViews = 0;
-            $reach = 0;
-            $impressions = 0;
-            
-            try {
-                $insightsResponse = $this->fb->get(
-                    '/' . $tokenData['instagram_user_id'] . '/insights?metric=profile_views,reach,impressions&period=day',
-                    $tokenData['access_token']
-                );
-                $insights = $insightsResponse->getDecodedBody()['data'] ?? [];
-                
-                foreach ($insights as $insight) {
-                    if ($insight['name'] === 'profile_views') {
-                        $profileViews = end($insight['values'])['value'] ?? 0;
-                    } elseif ($insight['name'] === 'reach') {
-                        $reach = end($insight['values'])['value'] ?? 0;
-                    } elseif ($insight['name'] === 'impressions') {
-                        $impressions = end($insight['values'])['value'] ?? 0;
-                    }
-                }
-            } catch (\Exception $e) {
-                error_log('Erro ao buscar insights: ' . $e->getMessage());
+            if ($response === false) {
+                throw new \Exception('Não foi possível conectar ao Instagram.');
             }
             
-            // Calcular taxa de engajamento
-            $posts = $this->postRepo->getByEmail($email, 10);
-            $totalEngagement = 0;
-            $totalFollowers = $data['followers_count'] ?? 1;
+            $data = json_decode($response, true);
             
-            foreach ($posts as $post) {
-                $totalEngagement += ($post['like_count'] + $post['comments_count']);
+            if (isset($data['error'])) {
+                $this->handleApiError($data['error']);
             }
             
-            $engagementRate = count($posts) > 0 ? ($totalEngagement / (count($posts) * $totalFollowers)) * 100 : 0;
+            // Instagram Basic Display não fornece followers_count, usar valores padrão
+            $metrics = [
+                'id' => $data['id'],
+                'username' => $data['username'],
+                'account_type' => $data['account_type'] ?? 'PERSONAL',
+                'media_count' => $data['media_count'] ?? 0,
+                'followers_count' => 0,
+                'follows_count' => 0,
+                'profile_views' => 0,
+                'reach' => 0,
+                'impressions' => 0,
+                'engagement_rate' => 0
+            ];
             
+            // Salvar métricas no banco de dados
             $this->metricsRepo->save(
                 $email,
-                $data['followers_count'] ?? 0,
-                $data['follows_count'] ?? 0,
-                $data['media_count'] ?? 0,
-                round($engagementRate, 2),
-                $profileViews,
-                $reach,
-                $impressions
+                $metrics['followers_count'],
+                $metrics['follows_count'],
+                $metrics['media_count'],
+                $metrics['engagement_rate'],
+                $metrics['profile_views'],
+                $metrics['reach'],
+                $metrics['impressions']
             );
 
-            $this->saveToStorage($email . '_metrics_' . date('Y-m-d') . '.json', array_merge($data, [
-                'profile_views' => $profileViews,
-                'reach' => $reach,
-                'impressions' => $impressions,
-                'engagement_rate' => $engagementRate
-            ]));
+            $this->saveToStorage($email . '_metrics_' . date('Y-m-d') . '.json', $metrics);
 
-            return array_merge($data, [
-                'profile_views' => $profileViews,
-                'reach' => $reach,
-                'impressions' => $impressions,
-                'engagement_rate' => $engagementRate
-            ]);
-        } catch (FacebookSDKException $e) {
-            throw new \Exception('Erro ao buscar métricas: ' . $e->getMessage());
+            return $metrics;
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 
@@ -168,46 +162,27 @@ class InstagramService
     {
         $tokenData = $this->tokenRepo->getByEmail($email);
         if (!$tokenData) {
-            throw new \Exception('Token não encontrado');
+            throw new \Exception('Instagram não conectado.\n\nConecte sua conta do Instagram para visualizar seus posts.');
         }
 
         try {
-            $response = $this->fb->get(
-                '/' . $tokenData['instagram_user_id'] . '/media?fields=id,caption,media_type,media_url,permalink,timestamp,like_count,comments_count&limit=' . $limit,
-                $tokenData['access_token']
-            );
+            $url = 'https://graph.instagram.com/' . $tokenData['instagram_user_id'] . '/media?fields=id,caption,media_type,media_url,permalink,timestamp&access_token=' . urlencode($tokenData['access_token']);
+            $response = file_get_contents($url);
             
-            $posts = $response->getDecodedBody()['data'] ?? [];
+            if ($response === false) {
+                throw new \Exception('Não foi possível conectar ao Instagram.');
+            }
             
+            $result = json_decode($response, true);
+            
+            if (isset($result['error'])) {
+                $this->handleApiError($result['error']);
+            }
+            
+            $posts = $result['data'] ?? [];
+            
+            // Salvar posts no banco de dados
             foreach ($posts as $post) {
-                // Buscar insights do post
-                $sharesCount = 0;
-                $savedCount = 0;
-                $reach = 0;
-                $impressions = 0;
-                
-                try {
-                    $insightsResponse = $this->fb->get(
-                        '/' . $post['id'] . '/insights?metric=shares,saved,reach,impressions',
-                        $tokenData['access_token']
-                    );
-                    $insights = $insightsResponse->getDecodedBody()['data'] ?? [];
-                    
-                    foreach ($insights as $insight) {
-                        if ($insight['name'] === 'shares') {
-                            $sharesCount = $insight['values'][0]['value'] ?? 0;
-                        } elseif ($insight['name'] === 'saved') {
-                            $savedCount = $insight['values'][0]['value'] ?? 0;
-                        } elseif ($insight['name'] === 'reach') {
-                            $reach = $insight['values'][0]['value'] ?? 0;
-                        } elseif ($insight['name'] === 'impressions') {
-                            $impressions = $insight['values'][0]['value'] ?? 0;
-                        }
-                    }
-                } catch (\Exception $e) {
-                    error_log('Erro ao buscar insights do post: ' . $e->getMessage());
-                }
-                
                 $this->postRepo->save(
                     $post['id'],
                     $email,
@@ -216,23 +191,18 @@ class InstagramService
                     $post['media_url'] ?? null,
                     $post['permalink'] ?? null,
                     $post['timestamp'] ?? null,
-                    $post['like_count'] ?? 0,
-                    $post['comments_count'] ?? 0,
-                    $sharesCount,
-                    $savedCount
+                    0, // like_count não disponível no Basic Display
+                    0, // comments_count não disponível no Basic Display
+                    0, // shares_count
+                    0  // saved_count
                 );
-                
-                // Salvar insights separadamente
-                if ($reach > 0 || $impressions > 0) {
-                    $this->savePostInsights($post['id'], $reach, $impressions, $savedCount);
-                }
             }
 
             $this->saveToStorage($email . '_posts_' . date('Y-m-d') . '.json', $posts);
 
             return $posts;
-        } catch (FacebookSDKException $e) {
-            throw new \Exception('Erro ao buscar posts: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 
@@ -258,15 +228,23 @@ class InstagramService
     {
         $tokenData = $this->tokenRepo->getByEmail($email);
         if (!$tokenData) {
-            throw new \Exception('Token não encontrado');
+            throw new \Exception('Instagram não conectado.\n\nConecte sua conta do Instagram primeiro.');
         }
 
         try {
-            $response = $this->fb->get(
-                '/oauth/access_token?grant_type=ig_refresh_token&access_token=' . $tokenData['access_token']
-            );
+            $url = 'https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=' . urlencode($tokenData['access_token']);
+            $response = file_get_contents($url);
             
-            $newToken = $response->getDecodedBody();
+            if ($response === false) {
+                throw new \Exception('Não foi possível renovar o token.');
+            }
+            
+            $newToken = json_decode($response, true);
+            
+            if (isset($newToken['error'])) {
+                throw new \Exception('Não foi possível renovar o token automaticamente.\n\nPor favor, reconecte sua conta do Instagram manualmente.');
+            }
+            
             $expiresAt = date('Y-m-d H:i:s', strtotime('+60 days'));
             
             $this->tokenRepo->save(
@@ -278,8 +256,37 @@ class InstagramService
             );
 
             return $newToken;
-        } catch (FacebookSDKException $e) {
-            throw new \Exception('Erro ao renovar token: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+    
+    private function handleApiError(array $error)
+    {
+        $errorMsg = $error['message'] ?? 'Erro desconhecido';
+        $errorCode = $error['code'] ?? 0;
+        
+        if (strpos($errorMsg, 'Invalid') !== false || strpos($errorMsg, 'token') !== false || $errorCode == 190) {
+            throw new \Exception('Sua sessão expirou.\n\nPor favor, reconecte sua conta do Instagram.');
+        } elseif (strpos($errorMsg, 'permissions') !== false || $errorCode == 10) {
+            throw new \Exception('Sem permissão para acessar este recurso.\n\nVerifique as permissões do token.');
+        } elseif (strpos($errorMsg, 'rate limit') !== false || $errorCode == 4) {
+            throw new \Exception('Muitas requisições.\n\nAguarde alguns minutos antes de tentar novamente.');
+        } else {
+            throw new \Exception('Erro ao acessar Instagram: ' . $errorMsg);
+        }
+    }
+}age'] ?? 'Erro desconhecido';
+        $errorCode = $error['code'] ?? 0;
+        
+        if (strpos($errorMsg, 'Invalid') !== false || strpos($errorMsg, 'token') !== false || $errorCode == 190) {
+            throw new \Exception('Sua sessão expirou.\n\nPor favor, reconecte sua conta do Instagram.');
+        } elseif (strpos($errorMsg, 'permissions') !== false || $errorCode == 10) {
+            throw new \Exception('Sem permissão para acessar este recurso.\n\nVerifique as permissões do token.');
+        } elseif (strpos($errorMsg, 'rate limit') !== false || $errorCode == 4) {
+            throw new \Exception('Muitas requisições.\n\nAguarde alguns minutos antes de tentar novamente.');
+        } else {
+            throw new \Exception('Erro ao acessar Instagram: ' . $errorMsg);
         }
     }
 }

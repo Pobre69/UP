@@ -48,6 +48,12 @@
   border-color: rgba(22, 163, 74, 0.25);
 }
 
+.pillNeutral {
+  background: rgba(251, 146, 60, 0.12);
+  color: #ea580c;
+  border-color: rgba(251, 146, 60, 0.25);
+}
+
 .pillDown {
   background: rgba(239, 68, 68, 0.12);
   color: var(--bad);

@@ -14,6 +14,7 @@ export interface DashboardData {
   stats: DashboardStats;
   seguidoresSerie: number[];
   alcanceSerie: number[];
+  chartDates: string[];
   engajamentoResumo: {
     curtidasMedia: number;
     comentariosMedios: number;
