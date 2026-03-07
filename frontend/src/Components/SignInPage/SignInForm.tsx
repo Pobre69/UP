@@ -362,7 +362,7 @@ export default function SignInForm() {
       attendant: form.attendant
     };
 
-    fetch(`${config.backRoute}/api`, {
+    fetch(`${config.backRoute}/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

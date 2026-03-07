@@ -56,7 +56,7 @@ export default function LoginForm() {
 
     setIsSubmitting(true);
 
-    fetch(`${config.backRoute}/auth`, {
+    fetch(`${config.backRoute}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

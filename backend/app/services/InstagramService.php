@@ -276,17 +276,4 @@ class InstagramService
             throw new \Exception('Erro ao acessar Instagram: ' . $errorMsg);
         }
     }
-}age'] ?? 'Erro desconhecido';
-        $errorCode = $error['code'] ?? 0;
-        
-        if (strpos($errorMsg, 'Invalid') !== false || strpos($errorMsg, 'token') !== false || $errorCode == 190) {
-            throw new \Exception('Sua sessão expirou.\n\nPor favor, reconecte sua conta do Instagram.');
-        } elseif (strpos($errorMsg, 'permissions') !== false || $errorCode == 10) {
-            throw new \Exception('Sem permissão para acessar este recurso.\n\nVerifique as permissões do token.');
-        } elseif (strpos($errorMsg, 'rate limit') !== false || $errorCode == 4) {
-            throw new \Exception('Muitas requisições.\n\nAguarde alguns minutos antes de tentar novamente.');
-        } else {
-            throw new \Exception('Erro ao acessar Instagram: ' . $errorMsg);
-        }
-    }
 }

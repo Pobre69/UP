@@ -42,14 +42,12 @@ $route->group('/Home', function (Route $route) {
 });
 
 $route->group('/auth', function (Route $route) {
-    $route->post('LoginController@authenticate')->name(['']);
-    $route->post('LogoutController@logout')->name(['']);
+    $route->post('LoginController@authenticate')->name(['login']);
+    $route->post('LogoutController@logout')->name(['logout']);
+    $route->post('SignUpController@register')->name(['signup']);
 });
 
 $route->group('/api', function (Route $route) {
-    $route->post('SignUpController@register')->name(['']);
-    
-    
     // Dashboard
     $route->get('DashboardController@getDashboardData')->name(['dashboard']);
     

@@ -21,6 +21,7 @@ class SignUpController
         $fullName = trim($data['fullName'] ?? '');
         $company = trim($data['company'] ?? '');
         $email = trim($data['email'] ?? '');
+        $password = $data['password'] ?? '';
         $instagram = trim($data['instagram'] ?? '');
         $segment = $data['segment'] ?? '';
         $city = trim($data['city'] ?? '');
@@ -29,9 +30,15 @@ class SignUpController
         $driveLink = trim($data['driveLink'] ?? '');
         $attendant = $data['attendant'] ?? '';
         
-        if (empty($fullName) || empty($email) || empty($segment) || empty($city) || empty($mainGoal)) {
+        if (empty($fullName) || empty($email) || empty($password) || empty($segment) || empty($city) || empty($mainGoal)) {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Campos obrigatórios não preenchidos']);
+            return;
+        }
+        
+        if (strlen($password) < 6) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'A senha deve ter no mínimo 6 caracteres']);
             return;
         }
         
@@ -49,7 +56,8 @@ class SignUpController
             $companyValue = !empty($company) ? $company : 'Não informado';
             $localizacaoJson = json_encode(['cidade' => $city]);
             
-            $usuarioRepo->add($email, $fullName, null, $companyValue);
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $usuarioRepo->add($email, $fullName, $hashedPassword, $companyValue);
             $detalhesRepo->add($email, $mainGoal, $driveLink, $segment, $instagram, $attendant, $localizacaoJson);
             
             if (!empty($competitors)) {

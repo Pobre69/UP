@@ -80,18 +80,27 @@ class Route
     private function verifyInfo()
     {
         foreach ($this->info as $i => $info){
-            $verify = false;
-            foreach ($info['name'] as $n =>$name){
+            // Se name é [''], aceitar apenas o grupo
+            if (isset($info['name'][0]) && $info['name'][0] === '') {
+                $this->controller = $info['controller'];
+                $this->parametros = $info['parametros'] ?? [];
+                $this->founded = true;
+                return;
+            }
+            
+            // Verificar partes do name
+            $verify = true;
+            foreach ($info['name'] as $n => $name){
                 if ($name !== ltrim($this->partes[$n + 2] ?? '', '/')) {
                     $verify = false;
                     break;
-                } else {
-                    $verify = true;
                 }
             }
+            
             if ($verify) {
                 $this->controller = $info['controller'];
                 $this->parametros = $info['parametros'] ?? [];
+                $this->founded = true;
                 return;
             }
         }
