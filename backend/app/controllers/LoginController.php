@@ -54,10 +54,15 @@ class LoginController
                 
                 $this->syncInstagramData($email);
                 
+                $ativo = $usuario['ativo'] ?? false;
+                $planoSelecionado = $usuario['plano_selecionado'] ?? null;
+                
                 http_response_code(200);
                 echo json_encode([
                     'success' => true, 
                     'mensagem' => 'Login realizado com sucesso',
+                    'ativo' => $ativo,
+                    'planoSelecionado' => $planoSelecionado,
                     'usuario' => [
                         'email' => $usuario['email'],
                         'nome' => $usuario['nome'],

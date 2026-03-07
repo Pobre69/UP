@@ -1,5 +1,6 @@
 import "../../Design/SignInPage/SignInForm.css";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Rocket,
   Target,
@@ -16,6 +17,7 @@ import {
   Calendar,
   ChevronDown,
   ArrowLeft,
+  AlertCircle,
 } from "lucide-react";
 import config from "../../config.json";
 
@@ -228,6 +230,31 @@ function Dropdown({
 }
 
 export default function SignInForm() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const planoSelecionado = searchParams.get('plano');
+
+  useEffect(() => {
+    if (!planoSelecionado) {
+      navigate('/');
+    }
+  }, [planoSelecionado, navigate]);
+
+  if (!planoSelecionado) {
+    return (
+      <div id="boxform">
+        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+          <AlertCircle size={48} color="#ff6b6b" style={{ margin: '0 auto 1rem' }} />
+          <h2>Acesso Negado</h2>
+          <p>Você precisa selecionar um plano antes de se cadastrar.</p>
+          <button onClick={() => navigate('/')} className="button" style={{ marginTop: '1rem' }}>
+            Voltar para página inicial
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const [openId, setOpenId] = useState<string | null>(null);
 
   const segmentOptions = useMemo<Option[]>(
@@ -359,7 +386,8 @@ export default function SignInForm() {
       mainGoal: form.mainGoal,
       competitors: form.competitors,
       driveLink: form.driveLink,
-      attendant: form.attendant
+      attendant: form.attendant,
+      planoSelecionado: planoSelecionado
     };
 
     fetch(`${config.backRoute}/auth/signup`, {

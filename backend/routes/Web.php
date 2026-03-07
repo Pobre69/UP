@@ -47,6 +47,11 @@ $route->group('/auth', function (Route $route) {
     $route->post('SignUpController@register')->name(['signup']);
 });
 
+$route->group('/payment', function (Route $route) {
+    $route->post('PaymentWebhookController@handleWebhook')->name(['webhook']);
+    $route->get('PaymentWebhookController@verificarPagamento')->name(['verificar']);
+});
+
 $route->group('/api', function (Route $route) {
     // Dashboard
     $route->get('DashboardController@getDashboardData')->name(['dashboard']);

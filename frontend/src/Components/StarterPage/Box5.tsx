@@ -8,6 +8,7 @@ const Planos = [
         especial: false,
         titulo: "Gestão de Instagram",
         dinheiro: "R$ 250",
+        paymentLink: "https://pay.cakto.com.br/qq5rz6e_752674",
         subtitulo: "Ideal para empresas que precisam marcar presença, se organizar e começar a crescer no digital.",
         detalhes: [
             "Gestão completa do Instagram",
@@ -25,6 +26,7 @@ const Planos = [
         especial: true,
         titulo: "Instagram + Tráfego Pago",
         dinheiro: "R$ 499",
+        paymentLink: "https://pay.cakto.com.br/3mz49rp_754011",
         subtitulo: "Perfeito para negócios que querem alcance, mensagens e vendas.",
         detalhes: [
             "Tudo do Plano 1",
@@ -42,6 +44,7 @@ const Planos = [
         especial: false,
         titulo: "Site + Instagram + Tráfego",
         dinheiro: "R$ 999",
+        paymentLink: "https://pay.cakto.com.br/4sgtxw3_754018",
         subtitulo: "A solução completa para empresas que querem uma estrutura digital sólida.",
         detalhes: [
             "Tudo do Plano 2",
@@ -88,7 +91,7 @@ export default function Box5() {
                         <button 
                             className="planoButton" 
                             id={`${plano.especial ? "planoButtonEspecial" : ""}`}
-                            onClick={() => navigate('/SignIn')}
+                            onClick={() => navigate(`/SignIn?plano=${plano.id}`)}
                         >
                             Quero esse plano
                         </button>
