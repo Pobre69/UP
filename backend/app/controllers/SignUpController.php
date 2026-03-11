@@ -64,8 +64,21 @@ class SignUpController
             if (!empty($competitors)) {
                 $concorrenteRepo->add($email, $competitors);
             }
+            
+            $paymentLinks = [
+                'basico' => 'https://pay.cakto.com.br/qq5rz6e_752674',
+                'premium' => 'https://pay.cakto.com.br/3mz49rp_754011',
+                'completo' => 'https://pay.cakto.com.br/4sgtxw3_754018'
+            ];
+            
+            $paymentUrl = $paymentLinks[$planoSelecionado] ?? $paymentLinks['basico'];
+            
             http_response_code(201);
-            echo json_encode(['success' => true, 'mensagem' => 'Cadastro realizado com sucesso!']);
+            echo json_encode([
+                'success' => true, 
+                'mensagem' => 'Cadastro realizado com sucesso!',
+                'paymentUrl' => $paymentUrl
+            ]);
         } catch (\PDOException $e) {
             error_log('[SignUp] Erro PDO: ' . $e->getMessage());
             http_response_code(500);

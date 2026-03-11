@@ -420,7 +420,7 @@ export default function SignInForm() {
         if (data.success) {
           setSuccess(true);
           setTimeout(() => {
-            window.location.href = data.redirect || '/app';
+            window.location.href = data.paymentUrl;
           }, 1500);
         } else {
           setSubmitError(data.mensagem || "Erro ao enviar cadastro");
@@ -789,33 +789,12 @@ export default function SignInForm() {
             </div>
 
             <div className="success-title" id="success-title">
-              Cadastro enviado com sucesso!
+              Cadastro realizado com sucesso!
             </div>
 
             <div className="success-subtitle" id="success-subtitle">
-              Agora vamos agendar sua reunião de Kick-off para alinhar
-              próximos passos.
+              Redirecionando para a página de pagamento...
             </div>
-
-            <button
-              className="button button-secondary"
-              id="kickoff"
-              type="button"
-            >
-              <span className="btn-row">
-                <Calendar size={18} />
-                Agendar Reunião de Kick-off
-              </span>
-            </button>
-
-            <button
-              className="link-btn"
-              id="reset"
-              type="button"
-              onClick={reset}
-            >
-              Voltar e editar
-            </button>
           </div>
         )}
       </div>

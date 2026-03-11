@@ -21,7 +21,7 @@ class PaymentWebhookController
         }
         
         $status = $data['status'] ?? '';
-        $customerEmail = $data['customer']['email'] ?? '';
+        $customerEmail = $data['customer']['email'] ?? $data['email'] ?? $data['customer_email'] ?? '';
         
         if (empty($customerEmail)) {
             http_response_code(400);
