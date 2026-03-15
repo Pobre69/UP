@@ -10,7 +10,7 @@ export default function PaymentVerificationPage() {
   const [planoSelecionado, setPlanoSelecionado] = useState<string | null>(null);
 
   const paymentLinks: Record<string, string> = {
-    'basico': 'https://pay.cakto.com.br/qq5rz6e_752674',
+    'basico': 'https://pay.cakto.com.br/nvtso3j_754042',  //'https://pay.cakto.com.br/qq5rz6e_752674',
     'premium': 'https://pay.cakto.com.br/3mz49rp_754011',
     'completo': 'https://pay.cakto.com.br/4sgtxw3_754018'
   };
