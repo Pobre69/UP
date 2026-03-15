@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Inbox, ChevronDown } from "lucide-react";
 import { Card, CardTitle, PageHeader } from "../../Components/UI/Cards";
+import { requestsService } from "../../services";
+import Toast from "../../Components/UI/Toast";
 import "./pages.css";
 
 export default function RequestsPage() {
@@ -8,11 +10,67 @@ export default function RequestsPage() {
   const [type, setType] = useState("Alteração");
   const [details, setDetails] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const types = ["Alteração", "Ideia", "Feedback"];
 
+  useEffect(() => {
+    loadRequests();
+  }, []);
+
+  const loadRequests = async () => {
+    try {
+      const response = await requestsService.getRequests();
+      if (response.success) {
+        setRequests(response.data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar solicitações:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !details) {
+      setToast({ message: 'Preencha todos os campos', type: 'error' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await requestsService.createRequest({
+        titulo: title,
+        tipo: type,
+        texto: details
+      });
+
+      if (response.success) {
+        setToast({ message: 'Solicitação enviada com sucesso!', type: 'success' });
+        setTitle("");
+        setDetails("");
+        loadRequests();
+      } else {
+        setToast({ message: response.mensagem || 'Erro ao enviar solicitação', type: 'error' });
+      }
+    } catch (error: any) {
+      setToast({ message: error.message || 'Erro ao enviar solicitação', type: 'error' });
+      console.error('Erro completo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <PageHeader
         title={
           <span className="inlineTitle">
@@ -27,16 +85,7 @@ export default function RequestsPage() {
           <div className="chartHeader">
             <CardTitle>Nova Solicitação</CardTitle>
           </div>
-          <form
-            className="form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              // front-end only
-              alert("Solicitação enviada (mock).");
-              setTitle("");
-              setDetails("");
-            }}
-          >
+          <form className="form" onSubmit={handleSubmit}>
             <div className="row">
               <input
                 className="input"
@@ -79,8 +128,8 @@ export default function RequestsPage() {
               onChange={(e) => setDetails(e.target.value)}
             />
 
-            <button className="primaryBtn" type="submit">
-              Enviar Solicitação
+            <button className="primaryBtn" type="submit" disabled={loading}>
+              {loading ? 'Enviando...' : 'Enviar Solicitação'}
             </button>
           </form>
         </Card>
@@ -89,7 +138,25 @@ export default function RequestsPage() {
           <div className="chartHeader">
             <CardTitle>Minhas Solicitações</CardTitle>
           </div>
-          <div className="emptyBox">Nenhuma solicitação enviada ainda.</div>
+          {requests.length === 0 ? (
+            <div className="emptyBox">Nenhuma solicitação enviada ainda.</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {requests.map((req) => (
+                <div key={req.id} style={{ padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <strong>{req.titulo}</strong>
+                    <span style={{ fontSize: '12px', color: '#6b7280' }}>{req.tipo}</span>
+                  </div>
+                  <p style={{ fontSize: '14px', color: '#4b5563', marginBottom: '8px' }}>{req.texto}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#9ca3af' }}>
+                    <span>Status: {req.status}</span>
+                    <span>{new Date(req.created_at).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
     </div>

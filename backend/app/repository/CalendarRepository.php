@@ -7,11 +7,6 @@ use DataBase\Connection\database;
 
 class CalendarRepository
 {
-    private function getConnection(): PDO
-    {
-        return database::getConnection();
-    }
-
     public function getConnection(): PDO
     {
         return database::getConnection();

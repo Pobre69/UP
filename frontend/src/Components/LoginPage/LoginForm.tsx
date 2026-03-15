@@ -1,6 +1,6 @@
 import "../../Design/LoginPage/LoginForm.css";
 import { useState } from "react";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import config from "../../config.json";
 
@@ -37,7 +37,6 @@ export default function LoginForm() {
 
   const errors: Partial<Record<keyof LoginFormState, string>> = {};
   if (!form.email.trim()) errors.email = "Obrigatório.";
-  if (form.email && !validateEmail(form.email)) errors.email = "E-mail inválido.";
   if (!form.senha.trim()) errors.senha = "Obrigatório.";
 
   const hasErrors = Object.keys(errors).length > 0;
@@ -52,7 +51,6 @@ export default function LoginForm() {
     });
 
     if (hasErrors) {
-      setSubmitError("Confira os campos obrigatórios.");
       return;
     }
 
@@ -63,22 +61,41 @@ export default function LoginForm() {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
-        email: form.email,
+        email: form.email.trim(),
         senha: form.senha,
       }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
+      .then(async (res) => {
+        const text = await res.text();
+        
+        if (!text) {
+          throw new Error("Resposta vazia do servidor");
+        }
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error("Resposta inválida do servidor");
+        }
+        
+        if (res.ok && data.success) {
           localStorage.setItem("userEmail", form.email);
-          navigate("/app");
+          
+          if (!data.ativo && data.planoSelecionado) {
+            navigate("/payment-verification");
+          } else {
+            navigate("/app");
+          }
         } else {
-          setSubmitError(data.mensagem || "Credenciais inválidas");
+          setSubmitError(data.mensagem || "E-mail ou senha incorretos");
         }
       })
-      .catch(() => {
-        setSubmitError("Não foi possível fazer login. Tente novamente.");
+      .catch((error) => {
+        console.error("Erro no login:", error);
+        setSubmitError("E-mail ou senha incorretos");
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -87,6 +104,11 @@ export default function LoginForm() {
 
   return (
     <div className="login-container">
+      <a href="/" className="back-link reveal" style={{ "--reveal-delay": "20ms" } as any}>
+        <ArrowLeft size={18} />
+        <span>Voltar ao início</span>
+      </a>
+
       <div className="login-card reveal">
         <div className="login-header reveal" style={{ "--reveal-delay": "80ms" } as any}>
           <h1 className="login-title">

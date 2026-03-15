@@ -68,6 +68,7 @@ class DashboardRepository
             'SELECT 
                 AVG(like_count) as avg_likes,
                 AVG(comments_count) as avg_comments,
+                AVG(shares_count) as avg_shares,
                 SUM(like_count + comments_count) as total_engagement,
                 COUNT(*) as total_posts
              FROM instagram_posts 

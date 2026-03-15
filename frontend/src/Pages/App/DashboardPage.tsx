@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   BarChart3,
   Users,
@@ -16,27 +16,142 @@ import {
 import { Card, CardTitle, PageHeader, StatCard } from "../../Components/UI/Cards";
 import { SimpleBarChart, SimpleLineChart } from "../../Components/UI/Charts";
 import { Segmented } from "../../Components/UI/Tabs";
-import { dashboard, demoUser } from "../../mock/data";
+import { InstagramAlert } from "../../Components/UI/InstagramAlert";
+import { InstagramConnectModal } from "../../Components/UI/InstagramConnectModal";
+import { ErrorModal } from "../../Components/UI/ErrorModal";
+import { dashboardService, type DashboardData } from "../../services/dashboardService";
+import { instagramService } from "../../services/instagramService";
+import { dashboard as mockDashboard, demoUser } from "../../mock/data";
 import { formatNumber } from "../../utils/format";
 import "./pages.css";
 
 export default function DashboardPage() {
   const [range, setRange] = useState<"diario" | "semanal" | "mensal">("diario");
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showInstagramAlert, setShowInstagramAlert] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [instagramStatus, setInstagramStatus] = useState<any>(null);
+  const [errorModal, setErrorModal] = useState<{ show: boolean; title: string; message: string; onRetry?: () => void }>({ 
+    show: false, 
+    title: '', 
+    message: '' 
+  });
+
+  useEffect(() => {
+    // Verificar status da conexão do Instagram
+    instagramService.getConnectionStatus()
+      .then(res => setInstagramStatus(res.data))
+      .catch(console.error);
+
+    // Carregar dados do dashboard
+    dashboardService.getDashboardData()
+      .then(setDashboard)
+      .catch((err) => {
+        console.error('Erro ao carregar dashboard:', err);
+        setError(err.message);
+        setShowInstagramAlert(true);
+        // Usar dados mockados como fallback
+        setDashboard({
+          user: demoUser,
+          profileGrowthPct: mockDashboard.profileGrowthPct,
+          stats: mockDashboard.stats,
+          seguidoresSerie: mockDashboard.seguidoresSerie,
+          alcanceSerie: mockDashboard.alcanceSerie,
+          engajamentoResumo: mockDashboard.engajamentoResumo
+        });
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleConnectInstagram = () => {
+    setShowConnectModal(true);
+  };
+
+  const handleChangeAccount = () => {
+    setShowConnectModal(true);
+  };
+
+  const handleInstagramConnect = async (accessToken: string) => {
+    try {
+      await instagramService.connectAccount(accessToken);
+      setShowInstagramAlert(false);
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Erro ao conectar Instagram:', error);
+      setErrorModal({
+        show: true,
+        title: 'Erro ao Conectar Instagram',
+        message: error.message || 'Não foi possível conectar sua conta. Verifique se o token está correto e tente novamente.',
+        onRetry: () => {
+          setErrorModal({ show: false, title: '', message: '' });
+          setShowConnectModal(true);
+        }
+      });
+    }
+  };
+
+  const handleInstagramDisconnect = async () => {
+    try {
+      await instagramService.disconnectAccount();
+      setShowInstagramAlert(true);
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Erro ao desconectar Instagram:', error);
+      setErrorModal({
+        show: true,
+        title: 'Erro ao Desconectar',
+        message: error.message || 'Não foi possível desconectar sua conta do Instagram. Tente novamente mais tarde.'
+      });
+    }
+  };
 
   const growthWidth = useMemo(() => {
-    const pct = Math.min(Math.max(dashboard.profileGrowthPct, 0), 100);
+    const pct = Math.min(Math.max(dashboard?.profileGrowthPct ?? 0, 0), 100);
     return `${pct}%`;
-  }, []);
+  }, [dashboard]);
+
+  if (loading) return <div className="page">Carregando...</div>;
+  if (!dashboard) return <div className="page">Erro ao carregar dados</div>;
 
   const followers = dashboard.seguidoresSerie;
   const reach = dashboard.alcanceSerie;
+  const chartDates = dashboard.chartDates || [];
+  
+  // Determinar nível de desempenho baseado no crescimento
+  const performanceLevel = dashboard.profileGrowthPct >= 50 ? 'Alto' : dashboard.profileGrowthPct >= 20 ? 'Médio' : 'Baixo';
+  const performancePill = dashboard.profileGrowthPct >= 50 ? 'pillUp' : dashboard.profileGrowthPct >= 20 ? 'pillNeutral' : 'pillDown';
 
   return (
     <div className="page">
+      <ErrorModal
+        isOpen={errorModal.show}
+        title={errorModal.title}
+        message={errorModal.message}
+        onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        onRetry={errorModal.onRetry}
+      />
+
+      {showInstagramAlert && (
+        <InstagramAlert 
+          onConnect={handleConnectInstagram}
+          onChangeAccount={handleChangeAccount}
+          hasAccount={instagramStatus?.connected}
+        />
+      )}
+
+      <InstagramConnectModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        onConnect={handleInstagramConnect}
+        onDisconnect={handleInstagramDisconnect}
+        currentUsername={instagramStatus?.username}
+      />
       <PageHeader
         title={
           <>
-            Olá, <span className="accentText">{demoUser.handle}</span> 👋
+            Olá, <span className="accentText">{dashboard.user.handle}</span> 👋
           </>
         }
         subtitle="Aqui está o resumo do seu desempenho."
@@ -49,7 +164,7 @@ export default function DashboardPage() {
           </div>
           <div className="profilePerfText">
             <div className="profilePerfTitle">
-              Desempenho do Perfil <span className="pill pillUp">Alto</span>
+              Desempenho do Perfil <span className={`pill ${performancePill}`}>{performanceLevel}</span>
             </div>
             <div className="profilePerfSub">
               Seu perfil cresceu mais que <b>{dashboard.profileGrowthPct}%</b> dos
@@ -112,10 +227,12 @@ export default function DashboardPage() {
           <div className="chartBody">
             <SimpleLineChart points={followers} />
             <div className="chartAxis">
-              {["01/01", "05/01", "10/01", "15/01", "20/01", "25/01", "30/01"].map(
-                (d) => (
-                  <span key={d}>{d}</span>
-                )
+              {chartDates.length > 0 ? (
+                chartDates.map((d, i) => (
+                  <span key={i}>{d}</span>
+                ))
+              ) : (
+                <span>Sem dados</span>
               )}
             </div>
           </div>
@@ -128,10 +245,12 @@ export default function DashboardPage() {
           <div className="chartBody">
             <SimpleBarChart values={reach} />
             <div className="chartAxis">
-              {["01/01", "05/01", "10/01", "15/01", "20/01", "25/01", "30/01"].map(
-                (d) => (
-                  <span key={d}>{d}</span>
-                )
+              {chartDates.length > 0 ? (
+                chartDates.map((d, i) => (
+                  <span key={i}>{d}</span>
+                ))
+              ) : (
+                <span>Sem dados</span>
               )}
             </div>
           </div>

@@ -1,11 +1,13 @@
 import "../../Design/SignInPage/SignInForm.css";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Rocket,
   Target,
   Users,
   Building2,
   Mail,
+  Lock,
   Instagram,
   MapPin,
   Link2,
@@ -14,6 +16,8 @@ import {
   CheckCircle,
   Calendar,
   ChevronDown,
+  ArrowLeft,
+  AlertCircle,
 } from "lucide-react";
 import config from "../../config.json";
 
@@ -23,6 +27,7 @@ type FormState = {
   fullName: string;
   company: string;
   email: string;
+  password: string;
   instagram: string;
   segment: string;
   city: string;
@@ -225,6 +230,31 @@ function Dropdown({
 }
 
 export default function SignInForm() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const planoSelecionado = searchParams.get('plano');
+
+  useEffect(() => {
+    if (!planoSelecionado) {
+      navigate('/');
+    }
+  }, [planoSelecionado, navigate]);
+
+  if (!planoSelecionado) {
+    return (
+      <div id="boxform">
+        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+          <AlertCircle size={48} color="#ff6b6b" style={{ margin: '0 auto 1rem' }} />
+          <h2>Acesso Negado</h2>
+          <p>Você precisa selecionar um plano antes de se cadastrar.</p>
+          <button onClick={() => navigate('/')} className="button" style={{ marginTop: '1rem' }}>
+            Voltar para página inicial
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const [openId, setOpenId] = useState<string | null>(null);
 
   const segmentOptions = useMemo<Option[]>(
@@ -272,6 +302,7 @@ export default function SignInForm() {
     fullName: "",
     company: "",
     email: "",
+    password: "",
     instagram: "",
     segment: "",
     city: "São Paulo - SP",
@@ -301,8 +332,16 @@ export default function SignInForm() {
   const errors = useMemo(() => {
     const e: Partial<Record<keyof FormState, string>> = {};
     if (!form.fullName.trim()) e.fullName = "Obrigatório.";
-    if (!form.email.trim()) e.email = "Obrigatório.";
-    if (form.email && !validateEmail(form.email)) e.email = "E-mail inválido.";
+    if (!form.email.trim()) {
+      e.email = "Obrigatório.";
+    } else if (!validateEmail(form.email)) {
+      e.email = "E-mail inválido.";
+    }
+    if (!form.password.trim()) {
+      e.password = "Obrigatório.";
+    } else if (form.password.length < 6) {
+      e.password = "Mínimo 6 caracteres.";
+    }
     if (!form.segment) e.segment = "Obrigatório.";
     if (!form.city.trim()) e.city = "Obrigatório.";
     if (!form.mainGoal) e.mainGoal = "Obrigatório.";
@@ -319,6 +358,7 @@ export default function SignInForm() {
       fullName: true,
       company: true,
       email: true,
+      password: true,
       instagram: true,
       segment: true,
       city: true,
@@ -329,40 +369,66 @@ export default function SignInForm() {
     });
 
     if (hasErrors) {
-      setSubmitError("Confira os campos obrigatórios.");
+      console.log("Erros de validação:", errors);
       return;
     }
 
     setIsSubmitting(true);
 
-    fetch(`${config.backRoute}/api`, {
+    const payload = {
+      fullName: form.fullName,
+      company: form.company,
+      email: form.email,
+      password: form.password,
+      instagram: form.instagram,
+      segment: form.segment,
+      city: form.city,
+      mainGoal: form.mainGoal,
+      competitors: form.competitors,
+      driveLink: form.driveLink,
+      attendant: form.attendant,
+      planoSelecionado: planoSelecionado
+    };
+
+    fetch(`${config.backRoute}/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        fullName: form.fullName,
-        company: form.company,
-        email: form.email,
-        instagram: form.instagram,
-        segment: form.segment,
-        city: form.city,
-        mainGoal: form.mainGoal,
-        competitors: form.competitors,
-        driveLink: form.driveLink,
-        attendant: form.attendant
-      })
+      credentials: "include",
+      body: JSON.stringify(payload)
     })
-      .then(res => res.json())
+      .then(async res => {
+        console.log("Status da resposta:", res.status);
+        const text = await res.text();
+        console.log("Resposta do servidor:", text);
+        
+        if (!res.ok) {
+          let errorData;
+          try {
+            errorData = JSON.parse(text);
+          } catch {
+            throw new Error("Erro ao processar resposta do servidor");
+          }
+          throw new Error(errorData.mensagem || "Erro ao enviar cadastro");
+        }
+        
+        return JSON.parse(text);
+      })
       .then(data => {
+        console.log("Dados recebidos:", data);
         if (data.success) {
           setSuccess(true);
+          setTimeout(() => {
+            window.location.href = data.redirect || '/app';
+          }, 1500);
         } else {
           setSubmitError(data.mensagem || "Erro ao enviar cadastro");
         }
       })
-      .catch(() => {
-        setSubmitError("Não foi possível enviar. Tente novamente.");
+      .catch((error) => {
+        console.error("Erro no cadastro:", error);
+        setSubmitError(error.message || "Não foi possível realizar o cadastro");
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -377,6 +443,7 @@ export default function SignInForm() {
       fullName: "",
       company: "",
       email: "",
+      password: "",
       instagram: "",
       segment: "",
       city: "São Paulo - SP",
@@ -389,6 +456,11 @@ export default function SignInForm() {
 
     return (
     <div id="boxform">
+      <a href="/" className="back-link reveal" style={{ "--reveal-delay": "20ms" } as any}>
+        <ArrowLeft size={18} />
+        <span>Voltar ao início</span>
+      </a>
+
       <div id="title-icon" className="reveal" style={{ "--reveal-delay": "40ms" } as any}>
         <Rocket size={38} color="white" strokeWidth={2} />
       </div>
@@ -488,6 +560,7 @@ export default function SignInForm() {
                     touched.email && errors.email ? "input-error" : ""
                   }`}
                   id="email"
+                  type="email"
                   placeholder="seu@email.com"
                   value={form.email}
                   onChange={(e) =>
@@ -497,6 +570,37 @@ export default function SignInForm() {
                 />
                 {touched.email && errors.email && (
                   <div className="error">{errors.email}</div>
+                )}
+              </div>
+
+              <div className="field" id="field-password">
+                <label className="label" htmlFor="password">
+                  <span className="label-row">
+                    <span className="label-icon">
+                      <Lock size={16} />
+                    </span>
+                    <span className="label-text">
+                      Senha <span className="req">*</span>
+                    </span>
+                  </span>
+                </label>
+
+                <input
+                  className={`input ${
+                    touched.password && errors.password ? "input-error" : ""
+                  }`}
+                  id="password"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) =>
+                    setField("password", e.target.value)
+                  }
+                  onBlur={() => touch("password")}
+                />
+                {touched.password && errors.password && (
+                  <div className="error">{errors.password}</div>
                 )}
               </div>
 

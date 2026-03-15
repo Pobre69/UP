@@ -72,6 +72,86 @@
 
 .navItemLogout {
   opacity: 0.9;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  color: #000000;
+}
+
+.modalContent h3 {
+  margin: 0 0 12px;
+  color: #000000;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modalContent p {
+  margin: 0 0 24px;
+  color: #333333;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btnCancel,
+.btnConfirm {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.btnCancel {
+  background: #f3f4f6;
+  color: #000000;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+}
+
+.btnCancel:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.btnConfirm {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+}
+
+.btnConfirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
 }
 
 @media (max-width: 900px) {

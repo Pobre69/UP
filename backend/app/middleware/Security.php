@@ -27,12 +27,15 @@ class Security
         
         $DB_info = $config['database']['UP'] ?? [];
         try {
-            $this->conn = new PDO(
-                "mysql:host={$DB_info['host']};dbname={$DB_info['database']};charset={$DB_info['charset']}",
+            $db = new \DataBase\Connection\database();
+            $db->setConnection(
+                $DB_info['host'],
                 $DB_info['username'],
-                $DB_info['password']
+                $DB_info['password'],
+                $DB_info['database'],
+                'default'
             );
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn = \DataBase\Connection\database::getConnection();
         } catch (\PDOException $e) {
             error_log("Falha ao conectar ao banco: " . $e->getMessage());
             $this->conn = null;

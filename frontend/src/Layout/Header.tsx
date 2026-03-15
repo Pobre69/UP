@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../LayoutDesign/Header.css";
 import Up_Logo from "../Images/UP_logo.png";
 
 export default function Header() {
+    const navigate = useNavigate();
     const [visible, setVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
     const [hidePoint, setHidePoint] = useState(0);
@@ -34,6 +36,15 @@ export default function Header() {
         }
     };
 
+    const handleLoginClick = () => {
+        const userEmail = localStorage.getItem("userEmail");
+        if (userEmail) {
+            navigate('/app');
+        } else {
+            navigate('/Login');
+        }
+    };
+
     return (
         <header className={visible ? 'header-visible' : 'header-hidden'}>
             <div><img src={ Up_Logo } id="logo" alt="UP Logo" /></div>
@@ -41,6 +52,7 @@ export default function Header() {
                 <div onClick={() => scrollToSection('box1')} style={{ cursor: 'pointer' }}>Inicio</div>
                 <div onClick={() => scrollToSection('box3')} style={{ cursor: 'pointer' }}>Serviçoes</div>
                 <div onClick={() => scrollToSection('box4')} style={{ cursor: 'pointer' }}>Sobre</div>
+                <div onClick={handleLoginClick} style={{ cursor: 'pointer' }}>Login</div>
             </div>
             <div style={{ display: "flex", justifyContent: "right", marginRight: "50px" }}>
                 <a id="Consultoria_Button" href="https://wa.me/5511999999999?text=Olá,%20vim%20pelo%20site!"

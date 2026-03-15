@@ -4,6 +4,30 @@
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
+  position: relative;
+}
+
+.back-link {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b6b6b;
+  text-decoration: none;
+  background: transparent;
+  transition: all 180ms ease;
+}
+
+.back-link:hover {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.08);
+  transform: translateX(-2px);
 }
 
 .login-card {

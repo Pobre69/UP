@@ -14,16 +14,21 @@ class RequestsRepository
 
     public function createRequest(string $email, string $titulo, string $tipo, string $texto)
     {
-        $stmt = $this->getConnection()->prepare(
-            'INSERT INTO feedBack (usuario_email, titulo, tipo, texto) 
-             VALUES (:email, :titulo, :tipo, :texto)'
-        );
-        return $stmt->execute([
-            ':email' => $email,
-            ':titulo' => $titulo,
-            ':tipo' => $tipo,
-            ':texto' => $texto
-        ]);
+        try {
+            $stmt = $this->getConnection()->prepare(
+                'INSERT INTO feedBack (usuario_email, titulo, tipo, texto) 
+                 VALUES (:email, :titulo, :tipo, :texto)'
+            );
+            return $stmt->execute([
+                ':email' => $email,
+                ':titulo' => $titulo,
+                ':tipo' => $tipo,
+                ':texto' => $texto
+            ]);
+        } catch (\PDOException $e) {
+            error_log('Erro SQL em createRequest: ' . $e->getMessage());
+            throw new \Exception('Erro ao criar solicitação: ' . $e->getMessage());
+        }
     }
 
     public function getUserRequests(string $email)

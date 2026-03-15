@@ -1,14 +1,10 @@
-import Header from "../Layout/Header";
-import Footer from "../Layout/Footer";
 import Form from "../Components/SignInPage/SignInForm";
+import ScrollRevealProvider from "../Components/UI/ScrollRevealProvider";
 
 export default function SignInPage() {
     return (
-        <>
-            <Header />
+        <ScrollRevealProvider>
             <Form />
-            <Footer />
-        </>
-        
-    )
+        </ScrollRevealProvider>
+    );
 }

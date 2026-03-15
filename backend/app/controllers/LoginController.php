@@ -11,7 +11,8 @@ class LoginController
     public function authenticate() {
         header('Content-Type: application/json');
         
-        $data = json_decode(file_get_contents('php://input'), true);
+        $rawInput = file_get_contents('php://input');
+        $data = json_decode($rawInput, true);
         
         if (!$data) {
             http_response_code(400);
@@ -20,7 +21,7 @@ class LoginController
         }
         
         $email = trim($data['email'] ?? '');
-        $senha = trim($data['senha'] ?? '');
+        $senha = $data['senha'] ?? '';
         
         if (empty($email) || empty($senha)) {
             http_response_code(400);
@@ -38,43 +39,44 @@ class LoginController
             $usuarioRepo = new UsuarioRepository();
             $usuario = $usuarioRepo->getByEmail($email);
             
-            if (!$usuario) {
+            if (!$usuario || empty($usuario['senha'])) {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'mensagem' => 'Credenciais inválidas']);
-                return;
-            }
-            
-            if (empty($usuario['senha'])) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'mensagem' => 'Usuário sem senha cadastrada']);
+                echo json_encode(['success' => false, 'mensagem' => 'E-mail ou senha incorretos']);
                 return;
             }
             
             if (password_verify($senha, $usuario['senha'])) {
-                session_start();
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
                 $_SESSION['user_email'] = $email;
                 $_SESSION['user_name'] = $usuario['nome'];
                 
-                // Buscar dados do Instagram automaticamente
                 $this->syncInstagramData($email);
+                
+                $ativo = $usuario['ativo'] ?? false;
+                $planoSelecionado = $usuario['plano_selecionado'] ?? null;
                 
                 http_response_code(200);
                 echo json_encode([
                     'success' => true, 
                     'mensagem' => 'Login realizado com sucesso',
+                    'ativo' => $ativo,
+                    'planoSelecionado' => $planoSelecionado,
                     'usuario' => [
                         'email' => $usuario['email'],
                         'nome' => $usuario['nome'],
-                        'empresa' => $usuario['empresa']
+                        'empresa' => $usuario['empresa'] ?? null
                     ]
                 ]);
             } else {
                 http_response_code(401);
-                echo json_encode(['success' => false, 'mensagem' => 'Credenciais inválidas']);
+                echo json_encode(['success' => false, 'mensagem' => 'E-mail ou senha incorretos']);
             }
         } catch (\Exception $e) {
+            error_log('[Login] Erro: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => 'Erro ao fazer login: ' . $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro ao processar login']);
         }
     }
 
