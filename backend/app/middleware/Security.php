@@ -41,11 +41,11 @@ class Security
             $this->conn = null;
         }
         
-        if(!isset($_SESSION)) {
+        if(session_status() === PHP_SESSION_NONE) {
             session_set_cookie_params([
                 'lifetime' => 60 * 60 * 24 * 30,
                 'path' => '/',
-                'domain' => $_SERVER['HTTP_HOST'],
+                'domain' => '',
                 'secure' => isset($_SERVER['HTTPS']),
                 'httponly' => true,
                 'samesite' => 'Lax'
