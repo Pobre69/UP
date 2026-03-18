@@ -44,35 +44,47 @@ class LoginController
                 echo json_encode(['success' => false, 'mensagem' => 'E-mail ou senha incorretos']);
                 return;
             }
-            
-            if (password_verify($senha, $usuario['senha'])) {
-                if (session_status() === PHP_SESSION_NONE) {
-                    session_start();
-                }
-                $_SESSION['user_email'] = $email;
-                $_SESSION['user_name'] = $usuario['nome'];
-                
-                $this->syncInstagramData($email);
-                
-                $ativo = $usuario['ativo'] ?? false;
-                $planoSelecionado = $usuario['plano_selecionado'] ?? null;
-                
-                http_response_code(200);
-                echo json_encode([
-                    'success' => true, 
-                    'mensagem' => 'Login realizado com sucesso',
-                    'ativo' => $ativo,
-                    'planoSelecionado' => $planoSelecionado,
-                    'usuario' => [
-                        'email' => $usuario['email'],
-                        'nome' => $usuario['nome'],
-                        'empresa' => $usuario['empresa'] ?? null
-                    ]
-                ]);
-            } else {
+
+            if (!password_verify($senha, $usuario['senha'])) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'mensagem' => 'E-mail ou senha incorretos']);
+                return;
             }
+
+            $ativo = $usuario['ativo'] ?? false;
+            $planoSelecionado = $usuario['plano_selecionado'] ?? null;
+
+            if (!$ativo) {
+                http_response_code(403);
+                echo json_encode([
+                    'success' => false,
+                    'inativo' => true,
+                    'planoSelecionado' => $planoSelecionado,
+                    'mensagem' => 'Sua conta ainda não foi ativada. Por favor, conclua o pagamento para ativar sua conta.'
+                ]);
+                return;
+            }
+
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['user_email'] = $email;
+            $_SESSION['user_name'] = $usuario['nome'];
+
+            $this->syncInstagramData($email);
+
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'mensagem' => 'Login realizado com sucesso',
+                'ativo' => $ativo,
+                'planoSelecionado' => $planoSelecionado,
+                'usuario' => [
+                    'email' => $usuario['email'],
+                    'nome' => $usuario['nome'],
+                    'empresa' => $usuario['empresa'] ?? null
+                ]
+            ]);
         } catch (\Exception $e) {
             error_log('[Login] Erro: ' . $e->getMessage());
             http_response_code(500);

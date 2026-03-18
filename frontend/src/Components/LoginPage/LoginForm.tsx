@@ -83,12 +83,10 @@ export default function LoginForm() {
         
         if (res.ok && data.success) {
           localStorage.setItem("userEmail", form.email);
-          
-          if (!data.ativo && data.planoSelecionado) {
-            navigate("/payment-verification");
-          } else {
-            navigate("/app");
-          }
+          navigate("/app");
+        } else if (data.inativo) {
+          localStorage.setItem("userEmail", form.email);
+          navigate("/payment-verification");
         } else {
           setSubmitError(data.mensagem || "E-mail ou senha incorretos");
         }
