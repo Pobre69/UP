@@ -1,6 +1,6 @@
 import "../../Design/LoginPage/LoginForm.css";
 import { useState } from "react";
-import { Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
+import { Mail, Lock, Loader2, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import config from "../../config.json";
 
@@ -19,6 +19,7 @@ export default function LoginForm() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   function setField<K extends keyof LoginFormState>(
     key: K,
@@ -35,11 +36,23 @@ export default function LoginForm() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   }
 
-  const errors: Partial<Record<keyof LoginFormState, string>> = {};
-  if (!form.email.trim()) errors.email = "Obrigatório.";
-  if (!form.senha.trim()) errors.senha = "Obrigatório.";
+  function getFormErrors() {
+    const currentErrors: Partial<Record<keyof LoginFormState, string>> = {};
 
-  const hasErrors = Object.keys(errors).length > 0;
+    if (!form.email.trim()) {
+      currentErrors.email = "Obrigatório.";
+    } else if (!validateEmail(form.email)) {
+      currentErrors.email = "Formato de e-mail inválido.";
+    }
+
+    if (!form.senha.trim()) {
+      currentErrors.senha = "Obrigatório.";
+    }
+
+    return currentErrors;
+  }
+
+  const errors = getFormErrors();
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,13 +63,17 @@ export default function LoginForm() {
       senha: true,
     });
 
-    if (hasErrors) {
+    const currentErrors = getFormErrors();
+    if (Object.keys(currentErrors).length > 0) {
       return;
     }
 
     setIsSubmitting(true);
 
-    fetch(`${config.backRoute}/auth/login`, {
+    const apiUrl = `${config.backRoute.replace(/\/+$/, "")}/auth/login`;
+    console.debug("Login submit", { apiUrl, form });
+
+    fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,19 +85,17 @@ export default function LoginForm() {
       }),
     })
       .then(async (res) => {
-        const text = await res.text();
-        
-        if (!text) {
-          throw new Error("Resposta vazia do servidor");
-        }
-        
         let data;
         try {
-          data = JSON.parse(text);
+          data = await res.json();
         } catch (e) {
           throw new Error("Resposta inválida do servidor");
         }
-        
+
+        if (!data || typeof data !== "object") {
+          throw new Error("Resposta inexistente do servidor");
+        }
+
         if (res.ok && data.success) {
           localStorage.setItem("userEmail", form.email);
           navigate("/app");
@@ -158,17 +173,28 @@ export default function LoginForm() {
               </span>
             </label>
 
-            <input
-              className={`input ${
-                touched.senha && errors.senha ? "input-error" : ""
-              }`}
-              id="senha"
-              type="password"
-              placeholder="Sua senha"
-              value={form.senha}
-              onChange={(e) => setField("senha", e.target.value)}
-              onBlur={() => touch("senha")}
-            />
+            <div className="input-wrapper">
+              <input
+                className={`input ${
+                  touched.senha && errors.senha ? "input-error" : ""
+                }`}
+                id="senha"
+                type={showPassword ? "text" : "password"}
+                placeholder="Sua senha"
+                value={form.senha}
+                onChange={(e) => setField("senha", e.target.value)}
+                onBlur={() => touch("senha")}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((val) => !val)}
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
             {touched.senha && errors.senha && (
               <div className="error">{errors.senha}</div>
             )}

@@ -125,6 +125,46 @@
   box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
 }
 
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper .input {
+  padding-right: 44px; /* reserva espaço para o botão de eye */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+  pointer-events: auto;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.08);
+  transform: translateY(-50%);
+}
+
+.password-toggle:active {
+  transform: translateY(-50%);
+}
+
 .error {
   font-size: 13px;
   color: #e74c3c;
