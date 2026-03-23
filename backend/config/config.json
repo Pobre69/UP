@@ -4,12 +4,25 @@
     "database": {
         "UP": {
             "name": "UP",
-            "host": "localhost",
-            "username": "root",
-            "password": "arthurpro4",
+            "host": "${DB_HOST:localhost}",
+            "username": "${DB_USER:root}",
+            "password": "${DB_PASSWORD:}",
             "database": "UP",
             "charset": "utf8mb4"
         }
     },
-    "firstController": "indexController@index"
+    "firstController": "indexController@index",
+    "session": {
+        "lifetime": 2592000,
+        "secure": false,
+        "httponly": true,
+        "samesite": "Lax"
+    },
+    "security": {
+        "rateLimit": {
+            "enabled": true,
+            "maxAttempts": 5,
+            "windowMs": 900000
+        }
+    }
 }

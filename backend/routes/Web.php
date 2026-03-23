@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . "/../routes/Acess.php";
 require_once __DIR__ . "/../routes/Route.php";
 require_once __DIR__ . "/../routes/PageNotFound.php";
@@ -10,10 +9,12 @@ use App\Middleware\Security;
 
 $acess = new Acess();
 $acess->GetAll();
+
 $security = new Security();
 $security->startSession();
 
 $route = new Route();
+
 $route->notFound(
     function() use ($route, $security) {
         renderPageNotFound(
@@ -43,6 +44,7 @@ $route->group('/Home', function (Route $route) {
 
 $route->group('/auth', function (Route $route) {
     $route->post('LoginController@authenticate')->name(['login']);
+    $route->get('LoginController@validate')->name(['validate']);
     $route->post('LogoutController@logout')->name(['logout']);
     $route->post('SignUpController@register')->name(['signup']);
 });

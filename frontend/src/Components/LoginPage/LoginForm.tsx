@@ -1,223 +1,217 @@
-import "../../Design/LoginPage/LoginForm.css";
 import { useState } from "react";
-import { Mail, Lock, Loader2, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import config from "../../config.json";
+import { Mail, Lock, AlertCircle, Loader } from "lucide-react";
+import { API_BASE_URL, fetchWithRetry } from "../../config/api";
+import "../../Design/LoginPage/LoginForm.css";
 
-type LoginFormState = {
-  email: string;
-  senha: string;
-};
+interface LoginFormProps {
+  onLoginSuccess?: () => void;
+}
 
-export default function LoginForm() {
+export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const navigate = useNavigate();
-  const [form, setForm] = useState<LoginFormState>({
-    email: "",
-    senha: "",
-  });
-
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  function setField<K extends keyof LoginFormState>(
-    key: K,
-    value: LoginFormState[K]
-  ) {
-    setForm((p) => ({ ...p, [key]: value }));
-  }
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-  function touch(name: keyof LoginFormState) {
-    setTouched((p) => ({ ...p, [name]: true }));
-  }
-
-  function validateEmail(email: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  }
-
-  function getFormErrors() {
-    const currentErrors: Partial<Record<keyof LoginFormState, string>> = {};
-
-    if (!form.email.trim()) {
-      currentErrors.email = "Obrigatório.";
-    } else if (!validateEmail(form.email)) {
-      currentErrors.email = "Formato de e-mail inválido.";
-    }
-
-    if (!form.senha.trim()) {
-      currentErrors.senha = "Obrigatório.";
-    }
-
-    return currentErrors;
-  }
-
-  const errors = getFormErrors();
-
-  function onSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError("");
+    setError(null);
 
-    setTouched({
-      email: true,
-      senha: true,
-    });
-
-    const currentErrors = getFormErrors();
-    if (Object.keys(currentErrors).length > 0) {
+    // Validação de entrada
+    if (!email.trim()) {
+      setError("Por favor, insira seu e-mail");
       return;
     }
 
-    setIsSubmitting(true);
+    if (!validateEmail(email)) {
+      setError("Por favor, insira um e-mail válido");
+      return;
+    }
 
-    const apiUrl = `${config.backRoute.replace(/\/+$/, "")}/auth/login`;
-    console.debug("Login submit", { apiUrl, form });
+    if (!password) {
+      setError("Por favor, insira sua senha");
+      return;
+    }
 
-    fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        email: form.email.trim(),
-        senha: form.senha,
-      }),
-    })
-      .then(async (res) => {
-        let data;
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Resposta inválida do servidor");
+    if (password.length < 6) {
+      setError("Senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetchWithRetry(
+        `${API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.toLowerCase().trim(),
+            senha: password,
+          }),
         }
+      );
 
-        if (!data || typeof data !== "object") {
-          throw new Error("Resposta inexistente do servidor");
-        }
+      const data = await response.json();
 
-        if (res.ok && data.success) {
-          localStorage.setItem("userEmail", form.email);
-          navigate("/app");
-        } else if (data.inativo) {
-          localStorage.setItem("userEmail", form.email);
-          navigate("/payment-verification");
+      if (!response.ok) {
+        if (response.status === 429) {
+          setError(
+            "Muitas tentativas de login. Por favor, tente novamente em alguns minutos."
+          );
+        } else if (response.status === 403) {
+          // Conta não ativada
+          setError(
+            data.mensagem ||
+            "Sua conta ainda não foi ativada. Por favor, conclua o pagamento."
+          );
+          // Redirecionar para página de pagamento se necessário
+          if (data.planoSelecionado) {
+            // Aqui você pode redirecionar para a página de pagamento
+            console.log("Plano selecionado:", data.planoSelecionado);
+          }
+        } else if (response.status === 401) {
+          setError("E-mail ou senha incorretos");
         } else {
-          setSubmitError(data.mensagem || "E-mail ou senha incorretos");
+          setError(
+            data.mensagem || "Erro ao fazer login. Por favor, tente novamente."
+          );
         }
-      })
-      .catch((error) => {
-        console.error("Erro no login:", error);
-        setSubmitError("E-mail ou senha incorretos");
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
-  }
+        return;
+      }
+
+      if (!data.success) {
+        setError(data.mensagem || "Erro ao fazer login");
+        return;
+      }
+
+      // Login bem-sucedido
+      localStorage.setItem("userEmail", data.usuario.email);
+      localStorage.setItem("user", JSON.stringify(data.usuario));
+
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      }
+
+      // Redirecionar para /app
+      navigate("/app/dashboard", { replace: true });
+    } catch (err) {
+      console.error("Erro ao fazer login:", err);
+
+      if (err instanceof Error) {
+        if (err.message.includes("timeout")) {
+          setError("Tempo limite de conexão excedido. Tente novamente.");
+        } else if (err.message.includes("Failed to fetch")) {
+          setError(
+            "Erro de conexão. Verifique se o servidor está disponível."
+          );
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("Erro desconhecido ao fazer login. Tente novamente.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="login-container">
-      <a href="/" className="back-link reveal" style={{ "--reveal-delay": "20ms" } as any}>
-        <ArrowLeft size={18} />
-        <span>Voltar ao início</span>
-      </a>
-
-      <div className="login-card reveal">
-        <div className="login-header reveal" style={{ "--reveal-delay": "80ms" } as any}>
-          <h1 className="login-title">
-            Bem-vindo de volta à <span className="purplegradient">UP!</span>
-          </h1>
-          <p className="login-subtitle">
-            Faça login para acessar sua conta
-          </p>
+    <form onSubmit={handleSubmit} className="loginForm">
+      {error && (
+        <div className="errorAlert">
+          <AlertCircle size={20} />
+          <span>{error}</span>
         </div>
+      )}
 
-        <form className="login-form reveal" style={{ "--reveal-delay": "140ms" } as any} onSubmit={onSubmit} noValidate>
-          <div className="field">
-            <label className="label" htmlFor="email">
-              <span className="label-row">
-                <span className="label-icon">
-                  <Mail size={16} />
-                </span>
-                <span className="label-text">
-                  E-mail <span className="req">*</span>
-                </span>
-              </span>
-            </label>
-
-            <input
-              className={`input ${
-                touched.email && errors.email ? "input-error" : ""
-              }`}
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={form.email}
-              onChange={(e) => setField("email", e.target.value)}
-              onBlur={() => touch("email")}
-            />
-            {touched.email && errors.email && (
-              <div className="error">{errors.email}</div>
-            )}
-          </div>
-
-          <div className="field">
-            <label className="label" htmlFor="senha">
-              <span className="label-row">
-                <span className="label-icon">
-                  <Lock size={16} />
-                </span>
-                <span className="label-text">
-                  Senha <span className="req">*</span>
-                </span>
-              </span>
-            </label>
-
-            <div className="input-wrapper">
-              <input
-                className={`input ${
-                  touched.senha && errors.senha ? "input-error" : ""
-                }`}
-                id="senha"
-                type={showPassword ? "text" : "password"}
-                placeholder="Sua senha"
-                value={form.senha}
-                onChange={(e) => setField("senha", e.target.value)}
-                onBlur={() => touch("senha")}
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword((val) => !val)}
-                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-
-            {touched.senha && errors.senha && (
-              <div className="error">{errors.senha}</div>
-            )}
-          </div>
-
-          <button
-            className="button"
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="btn-row">
-                <Loader2 className="spin" size={18} />
-                Entrando...
-              </span>
-            ) : (
-              "Entrar"
-            )}
-          </button>
-
-          {submitError && <div className="form-error">{submitError}</div>}
-        </form>
+      <div className="formGroup">
+        <label htmlFor="email">E-mail</label>
+        <div className="inputWrapper">
+          <Mail size={18} />
+          <input
+            id="email"
+            type="email"
+            placeholder="seu@email.com"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError(null);
+            }}
+            disabled={isLoading}
+            required
+            autoComplete="email"
+          />
+        </div>
       </div>
-    </div>
+
+      <div className="formGroup">
+        <label htmlFor="password">Senha</label>
+        <div className="inputWrapper">
+          <Lock size={18} />
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Sua senha"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError(null);
+            }}
+            disabled={isLoading}
+            required
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            className="togglePassword"
+            onClick={() => setShowPassword(!showPassword)}
+            disabled={isLoading}
+            tabIndex={-1}
+          >
+            {showPassword ? "Ocultar" : "Mostrar"}
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        className="submitButton"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader size={18} className="spinner" />
+            Entrando...
+          </>
+        ) : (
+          "Entrar"
+        )}
+      </button>
+
+      <div className="formFooter">
+        <p>
+          Não tem conta?{" "}
+          <a href="/signup" onClick={(e) => {
+            e.preventDefault();
+            navigate("/signup");
+          }}>
+            Cadastre-se
+          </a>
+        </p>
+      </div>
+    </form>
   );
 }
