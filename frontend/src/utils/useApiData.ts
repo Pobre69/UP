@@ -8,9 +8,9 @@ export function useApiData<T>(fetchFn: () => Promise<T>) {
   useEffect(() => {
     fetchFn()
       .then(setData)
-      .catch((err) => setError(err.message))
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Erro ao carregar dados'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [fetchFn]);
 
   return { data, loading, error };
 }

@@ -1,5 +1,7 @@
 import { API_BASE_URL } from '../config/api';
 
+type ContentPayload = Record<string, unknown>;
+
 export const serviceStatusService = {
   async getServiceStatus() {
     const response = await fetch(`${API_BASE_URL}/api/service-status`, {
@@ -12,7 +14,7 @@ export const serviceStatusService = {
     return response.json();
   },
 
-  async createContent(data: any) {
+  async createContent(data: ContentPayload) {
     const response = await fetch(`${API_BASE_URL}/api/service-status/create`, {
       method: 'POST',
       credentials: 'include',
@@ -24,7 +26,7 @@ export const serviceStatusService = {
     return response.json();
   },
 
-  async updateContentStatus(data: any) {
+  async updateContentStatus(data: ContentPayload) {
     const response = await fetch(`${API_BASE_URL}/api/service-status/update`, {
       method: 'POST',
       credentials: 'include',

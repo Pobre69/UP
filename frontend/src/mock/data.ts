@@ -1,5 +1,6 @@
 export const demoUser = {
   handle: "Usuario",
+  email: "usuario@example.com",
 };
 
 export const dashboard = {
@@ -13,6 +14,7 @@ export const dashboard = {
   },
   seguidoresSerie: [10500, 10750, 10900, 11150, 11310, 11540, 11720],
   alcanceSerie: [3200, 4100, 3800, 5200, 4800, 5600, 6100],
+  chartDates: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
   engajamentoResumo: {
     curtidasMedia: 847,
     comentariosMedios: 62,

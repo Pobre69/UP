@@ -4,25 +4,21 @@ namespace DataBase\Connection;
 
 use PDO;
 use PDOException;
+use Routes\Acess;
 
-class database {
-
+class database
+{
     private static ?PDO $conn = null;
     private static array $conns = [];
     private static array $settings = [];
-    private static string $host;
-    private static string $usuario;
-    private static string $senha;
-    private static string $banco;
+    private static string $host = 'localhost';
+    private static string $usuario = 'root';
+    private static string $senha = '';
+    private static string $banco = 'UP';
 
     public function setConnection(string $host, string $usuario, string $senha, string $banco, string $name = 'default'): PDO
     {
-        self::$settings[$name] = [
-            'host' => $host,
-            'usuario' => $usuario,
-            'senha' => $senha,
-            'banco' => $banco
-        ];
+        self::$settings[$name] = compact('host', 'usuario', 'senha', 'banco');
 
         if ($name === 'default') {
             self::$host = $host;
@@ -34,114 +30,81 @@ class database {
         return self::getConnection($name);
     }
 
-    public static function getConnection(string $name = 'default'): PDO 
+    public static function getConnection(string $name = 'default'): PDO
     {
-        if ($name === 'default' && self::$conn !== null) {
+        if ($name === 'default' && self::$conn instanceof PDO) {
             return self::$conn;
         }
-
         if ($name !== 'default' && isset(self::$conns[$name]) && self::$conns[$name] instanceof PDO) {
             return self::$conns[$name];
         }
 
-        try {
-            if ($name === 'default') {
-                $host = self::$host;
-                $usuario = self::$usuario;
-                $senha = self::$senha;
-                $banco = self::$banco;
-            } else {
-                if (!isset(self::$settings[$name])) {
-                    throw new \InvalidArgumentException("Configuração para conexão '$name' não encontrada.");
-                }
-                $s = self::$settings[$name];
-                $host = $s['host'];
-                $usuario = $s['usuario'];
-                $senha = $s['senha'];
-                $banco = $s['banco'];
-            }
+        $settings = $name === 'default'
+            ? ['host' => self::$host, 'usuario' => self::$usuario, 'senha' => self::$senha, 'banco' => self::$banco]
+            : (self::$settings[$name] ?? null);
 
-            try {
-                $tempConn = new PDO("mysql:host=$host", $usuario, $senha);
-                $tempConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (PDOException $e) {
-                if (strpos($e->getMessage(), 'Access denied') !== false && $usuario === 'root') {
-                    try {
-                        $tempConn = new PDO("mysql:host=$host", $usuario, '');
-                        $tempConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                        $senha = '';
-                        if ($name === 'default') {
-                            self::$senha = '';
-                        } else {
-                            self::$settings[$name]['senha'] = '';
-                        }
-                    } catch (PDOException $e2) {
-                        throw $e2;
-                    }
-                } else {
-                    throw $e;
-                }
-            }
+        if ($settings === null) {
+            throw new \InvalidArgumentException("Configuração para conexão '{$name}' não encontrada.");
+        }
 
-            $dsn = "mysql:host=$host;dbname=$banco;charset=utf8mb4";
-            $pdo = new PDO($dsn, $usuario, $senha, [
+        $host = $settings['host'];
+        $usuario = $settings['usuario'];
+        $senha = $settings['senha'];
+        $banco = $settings['banco'];
+
+        self::ensureDatabaseExists($host, $usuario, $senha, $banco);
+
+        $pdo = new PDO(
+            "mysql:host={$host};dbname={$banco};charset=utf8mb4",
+            $usuario,
+            $senha,
+            [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
-            ]);
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]
+        );
 
-            if ($name === 'default') {
-                self::$conn = $pdo;
-                self::$conns['default'] = $pdo;
-            } else {
-                self::$conns[$name] = $pdo;
-            }
-
-            return $pdo;
-
-        } catch (PDOException $e) {
-            error_log("Erro na conexão com o banco: " . $e->getMessage());
-            throw new \RuntimeException("Erro na conexão com o banco de dados. Verifique se o MySQL está rodando e as credenciais estão corretas.");
+        if ($name === 'default') {
+            self::$conn = $pdo;
+        } else {
+            self::$conns[$name] = $pdo;
         }
+
+        return $pdo;
     }
-    public static function Start_DataBase(array $Routes): void{
-        $host = self::$host;
-        $usuario = self::$usuario;
-        $senha = self::$senha;
-        $banco = self::$banco;
+
+    private static function ensureDatabaseExists(string $host, string $usuario, string $senha, string $banco): void
+    {
         try {
-            $tempConn = new PDO("mysql:host=$host", $usuario, $senha);
-            $tempConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $tempConn = new PDO("mysql:host={$host};charset=utf8mb4", $usuario, $senha, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
         } catch (PDOException $e) {
-            error_log("Start_DataBase: falha ao conectar ao servidor MySQL: " . $e->getMessage());
-            
-            if (strpos($e->getMessage(), 'Access denied') !== false && $usuario === 'root') {
-                try {
-                    $tempConn = new PDO("mysql:host=$host", $usuario, '');
-                    $tempConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    $senha = '';
-                    self::$senha = '';
-                } catch (PDOException $e2) {
-                    error_log("Start_DataBase: fallback também falhou: " . $e2->getMessage());
-                    return;
-                }
-            } else {
-                return;
-            }
+            throw $e;
         }
 
-        $dbExists = $tempConn->query("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$banco'")->fetchColumn();
-        
-        if (!$dbExists) {
-            $tempConn->exec("CREATE DATABASE IF NOT EXISTS `$banco` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            $tempConn->exec("USE `$banco`");
-            
-            foreach ($Routes as $file) {
-                if (file_exists($file)) {
-                    $sql = file_get_contents($file);
-                    $tempConn->exec($sql);
-                }
+        $stmt = $tempConn->prepare('SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :schema');
+        $stmt->execute([':schema' => $banco]);
+        $exists = (bool) $stmt->fetchColumn();
+
+        if ($exists) {
+            return;
+        }
+
+        $tempConn->exec("CREATE DATABASE `{$banco}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $tempConn->exec("USE `{$banco}`");
+
+        foreach (Acess::sqlAcess() as $sqlFile) {
+            if (!is_file($sqlFile)) {
+                continue;
             }
+            $sql = file_get_contents($sqlFile);
+            if ($sql === false || trim($sql) === '') {
+                continue;
+            }
+            $tempConn->exec($sql);
         }
     }
 }

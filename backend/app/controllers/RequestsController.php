@@ -34,7 +34,7 @@ class RequestsController
             echo json_encode($response);
         } catch (\Exception $e) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro ao carregar solicitações']);
         }
     }
 
@@ -78,9 +78,9 @@ class RequestsController
                 echo json_encode(['success' => false, 'mensagem' => 'Erro ao salvar solicitação']);
             }
         } catch (\Exception $e) {
-            error_log('Erro em createRequest: ' . $e->getMessage());
+            error_log('Erro em createRequest: ' . 'Erro ao carregar solicitações');
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => 'Erro: ' . $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro ao processar solicitação']);
         }
     }
 }

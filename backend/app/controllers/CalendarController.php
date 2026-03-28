@@ -2,8 +2,8 @@
 
 namespace Controllers;
 
-use App\Repository\CalendarRepository;
 use App\Middleware\Security;
+use App\Repository\CalendarRepository;
 
 class CalendarController
 {
@@ -14,72 +14,85 @@ class CalendarController
         $this->calendarRepo = new CalendarRepository();
     }
 
-    public function getCalendarData()
+    public function getCalendarData(): void
     {
         header('Content-Type: application/json');
-        
-        Security::checkAuth();
-        $user = Security::getAuthUser();
-        $email = $user['email'];
 
-        $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
-        $month = isset($_GET['month']) ? (int)$_GET['month'] : date('n');
+        Security::checkAuth();
+        $email = (string) Security::getAuthUser()['email'];
+
+        $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
+        $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
+
+        if ($month < 1 || $month > 12) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'Mês inválido']);
+            return;
+        }
 
         try {
             $contentByDate = $this->calendarRepo->getAllContentByMonth($email, $year, $month);
-
-            $response = [
+            http_response_code(200);
+            echo json_encode([
                 'success' => true,
                 'data' => [
                     'year' => $year,
                     'month' => $month,
-                    'content' => $contentByDate
+                    'content' => $contentByDate,
                 ]
-            ];
-
-            http_response_code(200);
-            echo json_encode($response);
-        } catch (\Exception $e) {
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[Calendar] ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro ao carregar calendário']);
         }
     }
 
-    public function schedulePost()
+    public function schedulePost(): void
     {
         header('Content-Type: application/json');
-        
-        Security::checkAuth();
-        $user = Security::getAuthUser();
-        $email = $user['email'];
 
+        Security::checkAuth();
+        $email = (string) Security::getAuthUser()['email'];
         $data = json_decode(file_get_contents('php://input'), true);
 
-        if (!isset($data['content_type']) || !isset($data['scheduled_date'])) {
+        if (!is_array($data)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'Dados inválidos']);
+            return;
+        }
+
+        $contentType = strtoupper(trim((string)($data['content_type'] ?? '')));
+        $scheduledDate = trim((string)($data['scheduled_date'] ?? ''));
+        $caption = isset($data['caption']) ? trim((string)$data['caption']) : null;
+        $mediaUrl = isset($data['media_url']) ? trim((string)$data['media_url']) : null;
+
+        if ($contentType === '' || $scheduledDate === '') {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Dados obrigatórios faltando']);
             return;
         }
 
-        try {
-            $stmt = $this->calendarRepo->getConnection()->prepare(
-                'INSERT INTO scheduled_posts (email, content_type, caption, media_url, scheduled_date) 
-                 VALUES (:email, :content_type, :caption, :media_url, :scheduled_date)'
-            );
-            
-            $stmt->execute([
-                ':email' => $email,
-                ':content_type' => $data['content_type'],
-                ':caption' => $data['caption'] ?? null,
-                ':media_url' => $data['media_url'] ?? null,
-                ':scheduled_date' => $data['scheduled_date']
-            ]);
+        if (!in_array($contentType, ['POST', 'STORY', 'REEL', 'CAROUSEL'], true)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'Tipo de conteúdo inválido']);
+            return;
+        }
 
+        if (strtotime($scheduledDate) === false) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'Data de agendamento inválida']);
+            return;
+        }
+
+        try {
+            $this->calendarRepo->schedulePost($email, $contentType, $caption ?: null, $mediaUrl ?: null, $scheduledDate);
             http_response_code(201);
             echo json_encode(['success' => true, 'mensagem' => 'Post agendado com sucesso']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            error_log('[Calendar Schedule] ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro ao agendar post']);
         }
     }
 }

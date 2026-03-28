@@ -1,5 +1,7 @@
 import { API_BASE_URL } from '../config/api';
 
+type CampaignPayload = Record<string, unknown>;
+
 export const adsService = {
   async getAdsData() {
     const response = await fetch(`${API_BASE_URL}/api/ads`, {
@@ -12,7 +14,7 @@ export const adsService = {
     return response.json();
   },
 
-  async createCampaign(data: any) {
+  async createCampaign(data: CampaignPayload) {
     const response = await fetch(`${API_BASE_URL}/api/ads/create`, {
       method: 'POST',
       credentials: 'include',
@@ -24,7 +26,7 @@ export const adsService = {
     return response.json();
   },
 
-  async updateCampaign(data: any) {
+  async updateCampaign(data: CampaignPayload) {
     const response = await fetch(`${API_BASE_URL}/api/ads/update`, {
       method: 'POST',
       credentials: 'include',

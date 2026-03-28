@@ -2,70 +2,43 @@
 
 namespace App\Middleware;
 
-use PDO;
+use App\Config\AppConfig;
 
 class Security
 {
-    private bool $isLogado;
-    private string $email_Usuario;
-    private array $config;
-    private ?PDO $conn = null;
-
-    private function setConfig()
+    public static function startSession(): void
     {
-        $configPath = __DIR__ . '/../../config/config.json';
-        $configJson = file_get_contents($configPath);
-        $this->config = json_decode($configJson, true);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        $lifetime = (int) AppConfig::get('session.lifetime', 2592000);
+        $secure = (bool) AppConfig::get('session.secure', false);
+        $httpOnly = (bool) AppConfig::get('session.httponly', true);
+        $sameSite = (string) AppConfig::get('session.samesite', 'Lax');
+        $sessionName = (string) AppConfig::get('session.name', 'UPSESSID');
+
+        session_name($sessionName);
+        session_set_cookie_params([
+            'lifetime' => $lifetime,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $secure || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+            'httponly' => $httpOnly,
+            'samesite' => $sameSite,
+        ]);
+
+        session_start();
     }
 
-    public function startSession()
+    public static function getBasePath(): string
     {
-        self::setConfig();
-        $config = $this->config;
-        
-        require_once __DIR__ . '/../../config/database/database.php';
-        
-        $DB_info = $config['database']['UP'] ?? [];
-        try {
-            $db = new \DataBase\Connection\database();
-            $db->setConnection(
-                $DB_info['host'],
-                $DB_info['username'],
-                $DB_info['password'],
-                $DB_info['database'],
-                'default'
-            );
-            $this->conn = \DataBase\Connection\database::getConnection();
-        } catch (\PDOException $e) {
-            error_log("Falha ao conectar ao banco: " . $e->getMessage());
-            $this->conn = null;
-        }
-        
-        if(session_status() === PHP_SESSION_NONE) {
-            session_set_cookie_params([
-                'lifetime' => 60 * 60 * 24 * 30,
-                'path' => '/',
-                'domain' => '',
-                'secure' => isset($_SERVER['HTTPS']),
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]); 
-            session_start();
-        }
+        return (string) AppConfig::get('urlBase', 'http://localhost');
     }
 
-    public function getBasePath(): string
+    public static function checkAuth(): void
     {
-        self::setConfig();
-        $config = $this->config;
-        return $config['urlBase'];
-    }
-
-    public static function checkAuth()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        self::startSession();
 
         if (!isset($_SESSION['user_email']) || empty($_SESSION['user_email'])) {
             http_response_code(401);
@@ -75,12 +48,25 @@ class Security
         }
     }
 
-    public static function getAuthUser()
+    public static function getAuthUser(): array
     {
         self::checkAuth();
         return [
             'email' => $_SESSION['user_email'] ?? null,
-            'nome' => $_SESSION['user_name'] ?? null
+            'nome' => $_SESSION['user_name'] ?? null,
+            'id' => $_SESSION['user_id'] ?? null,
         ];
+    }
+
+    public static function destroySession(): void
+    {
+        self::startSession();
+
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], (bool) $params['secure'], (bool) $params['httponly']);
+        }
+        session_destroy();
     }
 }

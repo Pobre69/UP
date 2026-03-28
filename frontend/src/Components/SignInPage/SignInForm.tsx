@@ -14,7 +14,6 @@ import {
   UserCheck,
   Loader2,
   CheckCircle,
-  Calendar,
   ChevronDown,
   ArrowLeft,
   AlertCircle,
@@ -123,38 +122,26 @@ function Dropdown({
   useEffect(() => {
     if (!isOpen) return;
 
-    const wrap = wrapRef.current;
-    if (!wrap) return;
-
-    const card = wrap.closest(".card") as HTMLElement | null;
-    const bounds = (card ?? document.body).getBoundingClientRect();
-    const r = wrap.getBoundingClientRect();
-
-    const spaceBelow = bounds.bottom - r.bottom - 12;
-    const spaceAbove = r.top - bounds.top - 12;
-
-    const preferDown = spaceBelow >= 220 || spaceBelow >= spaceAbove;
-    setOpenUp(!preferDown);
-
-    setMaxH(clamp(preferDown ? spaceBelow : spaceAbove, 160, 320));
-
     function onRecalc() {
-      const cardNow = wrapRef.current?.closest(".card") as HTMLElement | null;
-      if (!wrapRef.current) return;
+      const wrap = wrapRef.current;
+      if (!wrap) return;
 
-      const b = (cardNow ?? document.body).getBoundingClientRect();
-      const rr = wrapRef.current.getBoundingClientRect();
-      const sb = b.bottom - rr.bottom - 12;
-      const sa = rr.top - b.top - 12;
-      const down = sb >= 220 || sb >= sa;
+      const card = wrap.closest(".card") as HTMLElement | null;
+      const bounds = (card ?? document.body).getBoundingClientRect();
+      const rect = wrap.getBoundingClientRect();
+      const spaceBelow = bounds.bottom - rect.bottom - 12;
+      const spaceAbove = rect.top - bounds.top - 12;
+      const preferDown = spaceBelow >= 220 || spaceBelow >= spaceAbove;
 
-      setOpenUp(!down);
-      setMaxH(clamp(down ? sb : sa, 160, 320));
+      setOpenUp(!preferDown);
+      setMaxH(clamp(preferDown ? spaceBelow : spaceAbove, 160, 320));
     }
 
+    const rafId = window.requestAnimationFrame(onRecalc);
     window.addEventListener("resize", onRecalc);
     window.addEventListener("scroll", onRecalc, true);
     return () => {
+      window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", onRecalc);
       window.removeEventListener("scroll", onRecalc, true);
     };
@@ -234,26 +221,6 @@ export default function SignInForm() {
   const navigate = useNavigate();
   const planoSelecionado = searchParams.get('plano');
 
-  useEffect(() => {
-    if (!planoSelecionado) {
-      navigate('/');
-    }
-  }, [planoSelecionado, navigate]);
-
-  if (!planoSelecionado) {
-    return (
-      <div id="boxform">
-        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-          <AlertCircle size={48} color="#ff6b6b" style={{ margin: '0 auto 1rem' }} />
-          <h2>Acesso Negado</h2>
-          <p>Você precisa selecionar um plano antes de se cadastrar.</p>
-          <button onClick={() => navigate('/')} className="button" style={{ marginTop: '1rem' }}>
-            Voltar para página inicial
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -316,6 +283,12 @@ export default function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    if (!planoSelecionado) {
+      navigate("/");
+    }
+  }, [planoSelecionado, navigate]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((p) => ({ ...p, [key]: value }));
@@ -435,37 +408,33 @@ export default function SignInForm() {
       });
   }
 
-  function reset() {
-    setSuccess(false);
-    setSubmitError("");
-    setTouched({});
-    setForm({
-      fullName: "",
-      company: "",
-      email: "",
-      password: "",
-      instagram: "",
-      segment: "",
-      city: "São Paulo - SP",
-      mainGoal: "",
-      competitors: "",
-      driveLink: "",
-      attendant: "",
-    });
+  if (!planoSelecionado) {
+    return (
+      <div id="boxform">
+        <div className="card" style={{ textAlign: "center", padding: "2rem" }}>
+          <AlertCircle size={48} color="#ff6b6b" style={{ margin: "0 auto 1rem" }} />
+          <h2>Acesso Negado</h2>
+          <p>Você precisa selecionar um plano antes de se cadastrar.</p>
+          <button onClick={() => navigate("/")} className="button" style={{ marginTop: "1rem" }}>
+            Voltar para página inicial
+          </button>
+        </div>
+      </div>
+    );
   }
 
-    return (
+  return (
     <div id="boxform">
-      <a href="/" className="back-link reveal" style={{ "--reveal-delay": "20ms" } as any}>
+      <a href="/" className="back-link reveal" style={{ "--reveal-delay": "20ms" } as React.CSSProperties}>
         <ArrowLeft size={18} />
         <span>Voltar ao início</span>
       </a>
 
-      <div id="title-icon" className="reveal" style={{ "--reveal-delay": "40ms" } as any}>
+      <div id="title-icon" className="reveal" style={{ "--reveal-delay": "40ms" } as React.CSSProperties}>
         <Rocket size={38} color="white" strokeWidth={2} />
       </div>
 
-      <div id="title" className="reveal" style={{ "--reveal-delay": "90ms" } as any}>
+      <div id="title" className="reveal" style={{ "--reveal-delay": "90ms" } as React.CSSProperties}>
         Bem-vindo(a) à <span className="purplegradient">UP!</span>
         <span id="titlePhrase">
           Preencha os dados abaixo para começarmos a trabalhar juntos.
@@ -475,7 +444,7 @@ export default function SignInForm() {
       <div id="form">
         {!success ? (
           <form id="signupForm" onSubmit={onSubmit} noValidate>
-            <div className="card reveal" id="card" style={{ "--reveal-delay": "140ms" } as any}>
+            <div className="card reveal" id="card" style={{ "--reveal-delay": "140ms" } as React.CSSProperties}>
               <div className="section-title" id="section-title">
                 <span className="section-icon" id="section-icon">
                   <Target size={18} />
@@ -783,7 +752,7 @@ export default function SignInForm() {
             </div>
           </form>
         ) : (
-          <div className="card success reveal" id="success" style={{ "--reveal-delay": "120ms" } as any}>
+          <div className="card success reveal" id="success" style={{ "--reveal-delay": "120ms" } as React.CSSProperties}>
             <div className="success-icon" id="success-icon">
               <CheckCircle size={34} />
             </div>

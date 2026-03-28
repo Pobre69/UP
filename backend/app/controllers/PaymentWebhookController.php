@@ -2,98 +2,111 @@
 
 namespace Controllers;
 
+use App\Config\AppConfig;
+use App\Middleware\Security;
 use App\Repository\UsuarioRepository;
 
 class PaymentWebhookController
 {
-    public function handleWebhook() {
+    public function handleWebhook(): void
+    {
         header('Content-Type: application/json');
-        
-        $rawInput = file_get_contents('php://input');
+
+        $rawInput = file_get_contents('php://input') ?: '';
         $data = json_decode($rawInput, true);
-        
-        error_log('[Webhook] Dados recebidos: ' . $rawInput);
-        
-        if (!$data) {
+        if (!is_array($data)) {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Dados inválidos']);
             return;
         }
-        
-        $status = $data['status'] ?? '';
-        $customerEmail = $data['customer']['email'] ?? $data['email'] ?? $data['customer_email'] ?? '';
-        
-        if (empty($customerEmail)) {
+
+        if (!$this->isSignatureValid($rawInput)) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'mensagem' => 'Webhook não autorizado']);
+            return;
+        }
+
+        $status = strtolower(trim((string)($data['status'] ?? '')));
+        $customerEmail = trim((string)($data['customer']['email'] ?? $data['email'] ?? $data['customer_email'] ?? ''));
+
+        if ($customerEmail === '' || !filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Email não fornecido']);
             return;
         }
-        
-        if ($status === 'paid' || $status === 'approved') {
-            try {
-                $usuarioRepo = new UsuarioRepository();
-                $usuario = $usuarioRepo->getByEmail($customerEmail);
-                
-                if (!$usuario) {
-                    http_response_code(404);
-                    echo json_encode(['success' => false, 'mensagem' => 'Usuário não encontrado']);
-                    return;
-                }
-                
-                $usuarioRepo->ativarConta($customerEmail);
-                
-                error_log('[Webhook] Conta ativada para: ' . $customerEmail);
-                
-                http_response_code(200);
-                echo json_encode(['success' => true, 'mensagem' => 'Conta ativada com sucesso']);
-            } catch (\Exception $e) {
-                error_log('[Webhook] Erro: ' . $e->getMessage());
-                http_response_code(500);
-                echo json_encode(['success' => false, 'mensagem' => 'Erro ao ativar conta']);
-            }
-        } else {
+
+        if (!in_array($status, ['paid', 'approved'], true)) {
             http_response_code(200);
             echo json_encode(['success' => true, 'mensagem' => 'Status não requer ação']);
-        }
-    }
-    
-    public function verificarPagamento() {
-        header('Content-Type: application/json');
-        
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        
-        $email = $_SESSION['user_email'] ?? '';
-        
-        if (empty($email)) {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'mensagem' => 'Não autenticado']);
             return;
         }
-        
+
         try {
             $usuarioRepo = new UsuarioRepository();
-            $usuario = $usuarioRepo->getByEmail($email);
-            
+            $usuario = $usuarioRepo->getByEmail($customerEmail);
+
             if (!$usuario) {
                 http_response_code(404);
                 echo json_encode(['success' => false, 'mensagem' => 'Usuário não encontrado']);
                 return;
             }
-            
-            $ativo = $usuario['ativo'] ?? false;
-            
+
+            if (!(bool)($usuario['ativo'] ?? false)) {
+                $usuarioRepo->ativarConta($customerEmail);
+            }
+
+            http_response_code(200);
+            echo json_encode(['success' => true, 'mensagem' => 'Conta ativada com sucesso']);
+        } catch (\Throwable $e) {
+            error_log('[Webhook] ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro ao ativar conta']);
+        }
+    }
+
+    public function verificarPagamento(): void
+    {
+        header('Content-Type: application/json');
+
+        Security::checkAuth();
+        $email = (string)(Security::getAuthUser()['email'] ?? '');
+
+        try {
+            $usuarioRepo = new UsuarioRepository();
+            $usuario = $usuarioRepo->getByEmail($email);
+
+            if (!$usuario) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'mensagem' => 'Usuário não encontrado']);
+                return;
+            }
+
             http_response_code(200);
             echo json_encode([
                 'success' => true,
-                'ativo' => $ativo,
+                'ativo' => (bool)($usuario['ativo'] ?? false),
                 'planoSelecionado' => $usuario['plano_selecionado'] ?? null
             ]);
-        } catch (\Exception $e) {
-            error_log('[Verificar Pagamento] Erro: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            error_log('[Verificar Pagamento] ' . $e->getMessage());
             http_response_code(500);
             echo json_encode(['success' => false, 'mensagem' => 'Erro ao verificar status']);
         }
+    }
+
+    private function isSignatureValid(string $payload): bool
+    {
+        $secret = (string) AppConfig::get('security.webhookSecret', '');
+        if ($secret === '') {
+            return true;
+        }
+
+        $signature = (string)($_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '');
+        if ($signature === '') {
+            return false;
+        }
+
+        $expected = hash_hmac('sha256', $payload, $secret);
+        return hash_equals($expected, $signature);
     }
 }

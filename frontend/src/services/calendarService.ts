@@ -1,5 +1,7 @@
 import { API_BASE_URL } from '../config/api';
 
+type SchedulePostPayload = Record<string, unknown>;
+
 export const calendarService = {
   async getCalendarData() {
     const response = await fetch(`${API_BASE_URL}/api/calendar`, {
@@ -12,7 +14,7 @@ export const calendarService = {
     return response.json();
   },
 
-  async schedulePost(data: any) {
+  async schedulePost(data: SchedulePostPayload) {
     const response = await fetch(`${API_BASE_URL}/api/calendar/schedule`, {
       method: 'POST',
       credentials: 'include',

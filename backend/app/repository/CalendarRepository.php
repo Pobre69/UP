@@ -2,17 +2,17 @@
 
 namespace App\Repository;
 
-use PDO;
 use DataBase\Connection\database;
+use PDO;
 
 class CalendarRepository
 {
-    public function getConnection(): PDO
+    private function getConnection(): PDO
     {
         return database::getConnection();
     }
 
-    public function getPostsByMonth(string $email, int $year, int $month)
+    public function getPostsByMonth(string $email, int $year, int $month): array
     {
         $stmt = $this->getConnection()->prepare(
             'SELECT 
@@ -29,15 +29,11 @@ class CalendarRepository
              AND MONTH(timestamp) = :month
              ORDER BY timestamp ASC'
         );
-        $stmt->execute([
-            ':email' => $email,
-            ':year' => $year,
-            ':month' => $month
-        ]);
+        $stmt->execute([':email' => $email, ':year' => $year, ':month' => $month]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getStoriesByMonth(string $email, int $year, int $month)
+    public function getStoriesByMonth(string $email, int $year, int $month): array
     {
         $stmt = $this->getConnection()->prepare(
             'SELECT 
@@ -52,15 +48,11 @@ class CalendarRepository
              AND MONTH(timestamp) = :month
              ORDER BY timestamp ASC'
         );
-        $stmt->execute([
-            ':email' => $email,
-            ':year' => $year,
-            ':month' => $month
-        ]);
+        $stmt->execute([':email' => $email, ':year' => $year, ':month' => $month]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getScheduledPostsByMonth(string $email, int $year, int $month)
+    public function getScheduledPostsByMonth(string $email, int $year, int $month): array
     {
         $stmt = $this->getConnection()->prepare(
             'SELECT 
@@ -76,32 +68,42 @@ class CalendarRepository
              AND status = "pending"
              ORDER BY scheduled_date ASC'
         );
-        $stmt->execute([
-            ':email' => $email,
-            ':year' => $year,
-            ':month' => $month
-        ]);
+        $stmt->execute([':email' => $email, ':year' => $year, ':month' => $month]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAllContentByMonth(string $email, int $year, int $month)
+    public function getAllContentByMonth(string $email, int $year, int $month): array
     {
-        $posts = $this->getPostsByMonth($email, $year, $month);
-        $stories = $this->getStoriesByMonth($email, $year, $month);
-        $scheduled = $this->getScheduledPostsByMonth($email, $year, $month);
+        $allContent = array_merge(
+            $this->getPostsByMonth($email, $year, $month),
+            $this->getStoriesByMonth($email, $year, $month),
+            $this->getScheduledPostsByMonth($email, $year, $month)
+        );
 
-        $allContent = array_merge($posts, $stories, $scheduled);
-        
-        // Agrupar por data
         $grouped = [];
         foreach ($allContent as $item) {
-            $date = $item['date'];
-            if (!isset($grouped[$date])) {
-                $grouped[$date] = [];
-            }
+            $date = (string) $item['date'];
+            $grouped[$date] ??= [];
             $grouped[$date][] = $item;
         }
 
+        ksort($grouped);
         return $grouped;
+    }
+
+    public function schedulePost(string $email, string $contentType, ?string $caption, ?string $mediaUrl, string $scheduledDate): bool
+    {
+        $stmt = $this->getConnection()->prepare(
+            'INSERT INTO scheduled_posts (email, content_type, caption, media_url, scheduled_date)
+             VALUES (:email, :content_type, :caption, :media_url, :scheduled_date)'
+        );
+
+        return $stmt->execute([
+            ':email' => $email,
+            ':content_type' => $contentType,
+            ':caption' => $caption,
+            ':media_url' => $mediaUrl,
+            ':scheduled_date' => $scheduledDate,
+        ]);
     }
 }

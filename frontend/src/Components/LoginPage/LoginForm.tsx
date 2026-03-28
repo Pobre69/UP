@@ -204,9 +204,9 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       <div className="formFooter">
         <p>
           Não tem conta?{" "}
-          <a href="/signup" onClick={(e) => {
+          <a href="/SignIn" onClick={(e) => {
             e.preventDefault();
-            navigate("/signup");
+            navigate("/SignIn");
           }}>
             Cadastre-se
           </a>

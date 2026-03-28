@@ -1,28 +1,37 @@
 {
-    "urlBase": "http://localhost:5173",
-    "frontendUrl": "http://localhost:5173",
+    "urlBase": "${APP_URL:http://localhost}",
+    "frontendUrl": "${FRONTEND_URL:http://localhost:5173}",
     "database": {
         "UP": {
             "name": "UP",
             "host": "${DB_HOST:localhost}",
             "username": "${DB_USER:root}",
             "password": "${DB_PASSWORD:}",
-            "database": "UP",
+            "database": "${DB_NAME:UP}",
             "charset": "utf8mb4"
         }
     },
     "firstController": "indexController@index",
     "session": {
+        "name": "UPSESSID",
         "lifetime": 2592000,
         "secure": false,
         "httponly": true,
         "samesite": "Lax"
     },
     "security": {
+        "webhookSecret": "${PAYMENT_WEBHOOK_SECRET:}",
         "rateLimit": {
             "enabled": true,
             "maxAttempts": 5,
-            "windowMs": 900000
+            "windowSeconds": 900
+        }
+    },
+    "payments": {
+        "links": {
+            "basico": "https://pay.cakto.com.br/nvtso3j_754042",
+            "premium": "https://pay.cakto.com.br/3mz49rp_754011",
+            "completo": "https://pay.cakto.com.br/4sgtxw3_754018"
         }
     }
 }

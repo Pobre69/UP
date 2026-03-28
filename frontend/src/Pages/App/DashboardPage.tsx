@@ -25,14 +25,22 @@ import { dashboard as mockDashboard, demoUser } from "../../mock/data";
 import { formatNumber } from "../../utils/format";
 import "./pages.css";
 
+type InstagramStatusData = { connected?: boolean; username?: string };
+
+function toNumberDelta(value: string | number): number {
+  if (typeof value === "number") return value;
+  const normalized = Number.parseFloat(value.replace("%", ""));
+  return Number.isFinite(normalized) ? normalized : 0;
+}
+
+
 export default function DashboardPage() {
   const [range, setRange] = useState<"diario" | "semanal" | "mensal">("diario");
-  const [dashboard, setDashboard] = useState<any>(null);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showInstagramAlert, setShowInstagramAlert] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
-  const [instagramStatus, setInstagramStatus] = useState<any>(null);
+  const [instagramStatus, setInstagramStatus] = useState<InstagramStatusData | null>(null);
   const [errorModal, setErrorModal] = useState<{ show: boolean; title: string; message: string; onRetry?: () => void }>({ 
     show: false, 
     title: '', 
@@ -42,7 +50,7 @@ export default function DashboardPage() {
   useEffect(() => {
     // Verificar status da conexão do Instagram
     instagramService.getConnectionStatus()
-      .then(res => setInstagramStatus(res.data))
+      .then((res) => setInstagramStatus((res.data as InstagramStatusData | undefined) ?? null))
       .catch(console.error);
 
     // Carregar dados do dashboard
@@ -50,15 +58,36 @@ export default function DashboardPage() {
       .then(setDashboard)
       .catch((err) => {
         console.error('Erro ao carregar dashboard:', err);
-        setError(err.message);
         setShowInstagramAlert(true);
         // Usar dados mockados como fallback
         setDashboard({
           user: demoUser,
           profileGrowthPct: mockDashboard.profileGrowthPct,
-          stats: mockDashboard.stats,
+          stats: {
+            seguidores: {
+              value: mockDashboard.stats.seguidores.value,
+              delta: toNumberDelta(mockDashboard.stats.seguidores.delta),
+            },
+            cliquesPerfil: {
+              value: mockDashboard.stats.cliquesPerfil.value,
+              delta: toNumberDelta(mockDashboard.stats.cliquesPerfil.delta),
+            },
+            alcanceTotal: {
+              value: mockDashboard.stats.alcanceTotal.value,
+              delta: toNumberDelta(mockDashboard.stats.alcanceTotal.delta),
+            },
+            impressoes: {
+              value: mockDashboard.stats.impressoes.value,
+              delta: toNumberDelta(mockDashboard.stats.impressoes.delta),
+            },
+            engajamento: {
+              value: mockDashboard.stats.engajamento.value,
+              delta: toNumberDelta(mockDashboard.stats.engajamento.delta),
+            },
+          },
           seguidoresSerie: mockDashboard.seguidoresSerie,
           alcanceSerie: mockDashboard.alcanceSerie,
+          chartDates: mockDashboard.chartDates,
           engajamentoResumo: mockDashboard.engajamentoResumo
         });
       })
@@ -78,12 +107,13 @@ export default function DashboardPage() {
       await instagramService.connectAccount(accessToken);
       setShowInstagramAlert(false);
       window.location.reload();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao conectar Instagram:', error);
+      const message = error instanceof Error ? error.message : 'Não foi possível conectar sua conta. Verifique se o token está correto e tente novamente.';
       setErrorModal({
         show: true,
         title: 'Erro ao Conectar Instagram',
-        message: error.message || 'Não foi possível conectar sua conta. Verifique se o token está correto e tente novamente.',
+        message,
         onRetry: () => {
           setErrorModal({ show: false, title: '', message: '' });
           setShowConnectModal(true);
@@ -97,12 +127,13 @@ export default function DashboardPage() {
       await instagramService.disconnectAccount();
       setShowInstagramAlert(true);
       window.location.reload();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao desconectar Instagram:', error);
+      const message = error instanceof Error ? error.message : 'Não foi possível desconectar sua conta do Instagram. Tente novamente mais tarde.';
       setErrorModal({
         show: true,
         title: 'Erro ao Desconectar',
-        message: error.message || 'Não foi possível desconectar sua conta do Instagram. Tente novamente mais tarde.'
+        message
       });
     }
   };
@@ -182,31 +213,31 @@ export default function DashboardPage() {
           icon={<Users size={18} />}
           label="Seguidores"
           value={formatNumber(dashboard.stats.seguidores.value)}
-          delta={{ value: dashboard.stats.seguidores.delta, tone: "up" }}
+          delta={{ value: String(dashboard.stats.seguidores.delta), tone: "up" }}
         />
         <StatCard
           icon={<MousePointerClick size={18} />}
           label="Cliques no Perfil"
           value={formatNumber(dashboard.stats.cliquesPerfil.value)}
-          delta={{ value: dashboard.stats.cliquesPerfil.delta, tone: "up" }}
+          delta={{ value: String(dashboard.stats.cliquesPerfil.delta), tone: "up" }}
         />
         <StatCard
           icon={<Eye size={18} />}
           label="Alcance Total"
           value={formatNumber(dashboard.stats.alcanceTotal.value)}
-          delta={{ value: dashboard.stats.alcanceTotal.delta, tone: "up" }}
+          delta={{ value: String(dashboard.stats.alcanceTotal.delta), tone: "up" }}
         />
         <StatCard
           icon={<Zap size={18} />}
           label="Impressões"
           value={formatNumber(dashboard.stats.impressoes.value)}
-          delta={{ value: dashboard.stats.impressoes.delta, tone: "down" }}
+          delta={{ value: String(dashboard.stats.impressoes.delta), tone: "down" }}
         />
         <StatCard
           icon={<Sparkles size={18} />}
           label="Engajamento"
           value={`${dashboard.stats.engajamento.value.toFixed(1)}%`}
-          delta={{ value: dashboard.stats.engajamento.delta, tone: "up" }}
+          delta={{ value: String(dashboard.stats.engajamento.delta), tone: "up" }}
         />
       </div>
 
@@ -216,7 +247,7 @@ export default function DashboardPage() {
             <CardTitle>Crescimento de Seguidores</CardTitle>
             <Segmented
               value={range}
-              onChange={(v) => setRange(v as any)}
+              onChange={(v) => setRange(v as "diario" | "semanal" | "mensal")}
               options={[
                 { value: "diario", label: "Diário" },
                 { value: "semanal", label: "Semanal" },
@@ -228,7 +259,7 @@ export default function DashboardPage() {
             <SimpleLineChart points={followers} />
             <div className="chartAxis">
               {chartDates.length > 0 ? (
-                chartDates.map((d, i) => (
+                chartDates.map((d: string, i: number) => (
                   <span key={i}>{d}</span>
                 ))
               ) : (
@@ -246,7 +277,7 @@ export default function DashboardPage() {
             <SimpleBarChart values={reach} />
             <div className="chartAxis">
               {chartDates.length > 0 ? (
-                chartDates.map((d, i) => (
+                chartDates.map((d: string, i: number) => (
                   <span key={i}>{d}</span>
                 ))
               ) : (

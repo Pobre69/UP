@@ -1,5 +1,7 @@
 import { API_BASE_URL } from '../config/api';
 
+type RequestPayload = Record<string, unknown>;
+
 export const requestsService = {
   async getRequests() {
     const response = await fetch(`${API_BASE_URL}/api/requests`, {
@@ -12,7 +14,7 @@ export const requestsService = {
     return response.json();
   },
 
-  async createRequest(data: any) {
+  async createRequest(data: RequestPayload) {
     const response = await fetch(`${API_BASE_URL}/api/requests/create`, {
       method: 'POST',
       credentials: 'include',

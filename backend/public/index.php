@@ -1,20 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 require_once __DIR__ . '/../config/cors.php';
+require_once __DIR__ . '/../app/config/AppConfig.php';
 
-$configPath = __DIR__ . '/../config/config.json';
-$config = json_decode(file_get_contents($configPath), true);
-$dbConfig = $config['database']['UP'];
+$autoloadPath = __DIR__ . '/../vendor/autoload.php';
+if (is_file($autoloadPath)) {
+    require_once $autoloadPath;
+}
 
-require_once __DIR__ . '/../config/database/database.php';
+use App\Config\AppConfig;
 use DataBase\Connection\database;
 
-$db = new database();
-$db->setConnection(
-    $dbConfig['host'],
-    $dbConfig['username'],
-    $dbConfig['password'],
-    $dbConfig['database']
-);
+try {
+    $dbConfig = AppConfig::get('database.UP');
+    if (!is_array($dbConfig)) {
+        throw new RuntimeException('Configuração de banco ausente.');
+    }
 
-require_once __DIR__ . '/../routes/Web.php';
+    require_once __DIR__ . '/../config/database/database.php';
+
+    $db = new database();
+    $db->setConnection(
+        (string)($dbConfig['host'] ?? 'localhost'),
+        (string)($dbConfig['username'] ?? 'root'),
+        (string)($dbConfig['password'] ?? ''),
+        (string)($dbConfig['database'] ?? 'UP')
+    );
+
+    require_once __DIR__ . '/../routes/Web.php';
+} catch (Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'mensagem' => 'Falha ao iniciar o backend.'
+    ]);
+    error_log('[Bootstrap] ' . $e->getMessage());
+}

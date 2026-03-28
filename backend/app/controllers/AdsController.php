@@ -49,7 +49,7 @@ class AdsController
             echo json_encode($response);
         } catch (\Exception $e) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro interno ao processar campanhas']);
         }
     }
 
@@ -82,7 +82,7 @@ class AdsController
             echo json_encode(['success' => true, 'mensagem' => 'Campanha criada com sucesso']);
         } catch (\Exception $e) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro interno ao processar campanhas']);
         }
     }
 
@@ -109,7 +109,7 @@ class AdsController
             echo json_encode(['success' => true, 'mensagem' => 'Campanha atualizada com sucesso']);
         } catch (\Exception $e) {
             http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => $e->getMessage()]);
+            echo json_encode(['success' => false, 'mensagem' => 'Erro interno ao processar campanhas']);
         }
     }
 }

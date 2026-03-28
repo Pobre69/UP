@@ -2,94 +2,105 @@
 
 namespace Controllers;
 
-use App\Repository\UsuarioRepository;
-use App\Repository\UsuarioDetalhesRepository;
+use App\Config\AppConfig;
 use App\Repository\ConcorrenteRepository;
+use App\Repository\UsuarioDetalhesRepository;
+use App\Repository\UsuarioRepository;
+use DataBase\Connection\database;
 
 class SignUpController
 {
-    public function register() {
+    public function register(): void
+    {
         header('Content-Type: application/json');
-        
+
         $data = json_decode(file_get_contents('php://input'), true);
-        if (!$data) {
+        if (!is_array($data)) {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Dados inválidos']);
             return;
         }
-        
-        $fullName = trim($data['fullName'] ?? '');
-        $company = trim($data['company'] ?? '');
-        $email = trim($data['email'] ?? '');
-        $password = $data['password'] ?? '';
-        $instagram = trim($data['instagram'] ?? '');
-        $segment = $data['segment'] ?? '';
-        $city = trim($data['city'] ?? '');
-        $mainGoal = $data['mainGoal'] ?? '';
-        $competitors = trim($data['competitors'] ?? '');
-        $driveLink = trim($data['driveLink'] ?? '');
-        $attendant = $data['attendant'] ?? '';
-        $planoSelecionado = $data['planoSelecionado'] ?? '';
-        
-        if (empty($fullName) || empty($email) || empty($password) || empty($segment) || empty($city) || empty($mainGoal) || empty($planoSelecionado)) {
+
+        $fullName = trim((string)($data['fullName'] ?? ''));
+        $company = trim((string)($data['company'] ?? ''));
+        $email = trim((string)($data['email'] ?? ''));
+        $password = (string)($data['password'] ?? '');
+        $instagram = trim((string)($data['instagram'] ?? ''));
+        $segment = trim((string)($data['segment'] ?? ''));
+        $city = trim((string)($data['city'] ?? ''));
+        $mainGoal = trim((string)($data['mainGoal'] ?? ''));
+        $competitors = trim((string)($data['competitors'] ?? ''));
+        $driveLink = trim((string)($data['driveLink'] ?? ''));
+        $attendant = trim((string)($data['attendant'] ?? ''));
+        $planoSelecionado = trim((string)($data['planoSelecionado'] ?? ''));
+
+        if ($fullName === '' || $email === '' || $password === '' || $segment === '' || $city === '' || $mainGoal === '' || $planoSelecionado === '') {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'Campos obrigatórios não preenchidos']);
             return;
         }
-        
+
         if (strlen($password) < 6) {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'A senha deve ter no mínimo 6 caracteres']);
             return;
         }
-        
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['success' => false, 'mensagem' => 'E-mail inválido']);
             return;
         }
-        
+
+        $paymentLinks = (array) AppConfig::get('payments.links', []);
+        if (!array_key_exists($planoSelecionado, $paymentLinks)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'mensagem' => 'Plano inválido']);
+            return;
+        }
+
+        $usuarioRepo = new UsuarioRepository();
+        $detalhesRepo = new UsuarioDetalhesRepository();
+        $concorrenteRepo = new ConcorrenteRepository();
+        $conn = database::getConnection();
+
         try {
-            $usuarioRepo = new UsuarioRepository();
-            $detalhesRepo = new UsuarioDetalhesRepository();
-            $concorrenteRepo = new ConcorrenteRepository();
-            
-            $companyValue = !empty($company) ? $company : 'Não informado';
-            $localizacaoJson = json_encode(['cidade' => $city]);
-            
+            $conn->beginTransaction();
+
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $companyValue = $company !== '' ? $company : null;
+            $localizacaoJson = json_encode(['cidade' => $city], JSON_UNESCAPED_UNICODE);
+
             $usuarioRepo->add($email, $fullName, $hashedPassword, $companyValue, $planoSelecionado);
-            $detalhesRepo->add($email, $mainGoal, $driveLink, $segment, $instagram, $attendant, $localizacaoJson);
-            
-            if (!empty($competitors)) {
+            $detalhesRepo->add($email, $mainGoal, $driveLink !== '' ? $driveLink : null, $segment, $instagram !== '' ? $instagram : null, $attendant !== '' ? $attendant : null, $localizacaoJson);
+
+            if ($competitors !== '') {
                 $concorrenteRepo->add($email, $competitors);
             }
-            
-            $paymentLinks = [
-                'basico' => 'https://pay.cakto.com.br/nvtso3j_754042', //'https://pay.cakto.com.br/qq5rz6e_752674',
-                'premium' => 'https://pay.cakto.com.br/3mz49rp_754011',
-                'completo' => 'https://pay.cakto.com.br/4sgtxw3_754018'
-            ];
-            
-            $paymentUrl = $paymentLinks[$planoSelecionado] ?? $paymentLinks['basico'];
-            
+
+            $conn->commit();
+
             http_response_code(201);
             echo json_encode([
-                'success' => true, 
+                'success' => true,
                 'mensagem' => 'Cadastro realizado com sucesso!',
-                'paymentUrl' => $paymentUrl
+                'paymentUrl' => $paymentLinks[$planoSelecionado]
             ]);
         } catch (\PDOException $e) {
-            error_log('[SignUp] Erro PDO: ' . $e->getMessage());
-            http_response_code(500);
-            
-            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
-                echo json_encode(['success' => false, 'mensagem' => 'Este e-mail já está cadastrado']);
-            } else {
-                echo json_encode(['success' => false, 'mensagem' => 'Erro ao realizar cadastro. Tente novamente.']);
+            if ($conn->inTransaction()) {
+                $conn->rollBack();
             }
-        } catch (\Exception $e) {
-            error_log('[SignUp] Erro: ' . $e->getMessage());
+            error_log('[SignUp][PDO] ' . $e->getMessage());
+            http_response_code(str_contains($e->getMessage(), 'Duplicate entry') ? 409 : 500);
+            echo json_encode([
+                'success' => false,
+                'mensagem' => str_contains($e->getMessage(), 'Duplicate entry') ? 'Este e-mail já está cadastrado' : 'Erro ao realizar cadastro. Tente novamente.'
+            ]);
+        } catch (\Throwable $e) {
+            if ($conn->inTransaction()) {
+                $conn->rollBack();
+            }
+            error_log('[SignUp] ' . $e->getMessage());
             http_response_code(500);
             echo json_encode(['success' => false, 'mensagem' => 'Erro ao realizar cadastro. Tente novamente.']);
         }

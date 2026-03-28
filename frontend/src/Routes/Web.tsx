@@ -3,7 +3,7 @@ import StarterPage from "../Pages/StarterPage";
 import SignInPage from "../Pages/SignInPage";
 import LoginPage from "../Pages/LoginPage";
 import PaymentVerificationPage from "../Pages/PaymentVerificationPage";
-import ProtectedRoute from "../Components/ProtectedRoute";
+import { ProtectedRoute } from "../Components/ProtectedRoute";
 
 import AppShell from "../Layout/AppShell";
 import DashboardPage from "../Pages/App/DashboardPage";
@@ -21,6 +21,7 @@ export default function WebRoutes() {
       {/* suas rotas atuais (mantidas) */}
       <Route path="/" element={<StarterPage />} />
       <Route path="/SignIn" element={<SignInPage />} />
+      <Route path="/signup" element={<Navigate to="/SignIn" replace />} />
       <Route path="/Login" element={<LoginPage />} />
       <Route path="/payment-verification" element={<PaymentVerificationPage />} />
       <Route path="/login" element={<Navigate to="/Login" replace />} />
