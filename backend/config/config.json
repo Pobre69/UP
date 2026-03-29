@@ -1,13 +1,13 @@
 {
-    "urlBase": "${APP_URL:http://localhost}",
-    "frontendUrl": "${FRONTEND_URL:http://localhost:5173}",
+    "urlBase": "http://localhost",
+    "frontendUrl": "http://localhost:5173",
     "database": {
         "UP": {
             "name": "UP",
-            "host": "${DB_HOST:localhost}",
-            "username": "${DB_USER:root}",
-            "password": "${DB_PASSWORD:}",
-            "database": "${DB_NAME:UP}",
+            "host": "localhost",
+            "username": "root",
+            "password": "arthurpro4",
+            "database": "UP",
             "charset": "utf8mb4"
         }
     },
