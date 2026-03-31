@@ -1,3 +1,5 @@
+import config from "../config.json";
+
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, "");
 
 const getApiBaseUrl = (): string => {
@@ -11,17 +13,7 @@ const getApiBaseUrl = (): string => {
     return trimTrailingSlash(runtimeApiUrl);
   }
 
-  const { origin, pathname } = window.location;
-
-  if (import.meta.env.DEV) {
-    return "http://localhost/Sites/UP/backend/public/index.php";
-  }
-
-  if (pathname.includes('/backend/public/')) {
-    return `${origin}/backend/public/index.php`;
-  }
-
-  return `${origin}/backend/public/index.php`;
+  return trimTrailingSlash(config.backRoute);
 };
 
 export const API_BASE_URL = getApiBaseUrl();

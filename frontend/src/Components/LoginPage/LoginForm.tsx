@@ -1,7 +1,17 @@
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertCircle, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  LogIn,
+  Mail,
+  ShieldCheck,
+} from "lucide-react";
 import { API_BASE_URL, fetchWithRetry } from "../../config/api";
 import "../../Design/LoginPage/LoginForm.css";
 
@@ -37,6 +47,11 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   const validateEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
+  const clearStoredUser = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("userEmail");
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
@@ -53,12 +68,13 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       return;
     }
 
-    if (!password) {
+    if (!password.trim()) {
       setError("Por favor, insira sua senha.");
       return;
     }
 
     setIsLoading(true);
+    clearStoredUser();
 
     try {
       const response = await fetchWithRetry(`${API_BASE_URL}/auth/login`, {
@@ -84,6 +100,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       }
 
       if (!response.ok || !data.success) {
+        clearStoredUser();
+
         if (response.status === 429) {
           setError("Muitas tentativas de login. Tente novamente em alguns minutos.");
         } else if (response.status === 403) {
@@ -106,11 +124,13 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       onLoginSuccess?.();
       navigate(redirectTo, { replace: true });
     } catch (err) {
+      clearStoredUser();
+
       if (err instanceof Error) {
         if (err.name === "AbortError" || err.message.includes("timeout")) {
           setError("Tempo limite de conexão excedido. Tente novamente.");
         } else if (err.message.includes("Failed to fetch")) {
-          setError("Erro de conexão. Verifique se o backend está rodando.");
+          setError("Erro de conexão. Verifique se o backend está rodando e se a rota do config.json está correta.");
         } else {
           setError(err.message);
         }
@@ -123,98 +143,134 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   };
 
   return (
-    <div className="login-container">
-      <Link to="/" className="back-link">
-        <ArrowLeft size={16} />
-        <span>Voltar</span>
-      </Link>
+    <div className="login-shell">
+      <div className="login-background login-background-left" />
+      <div className="login-background login-background-right" />
 
-      <section className="login-card">
-        <header className="login-header">
-          <h1 className="login-title">
-            Entrar no <span className="purplegradient">UP</span>
-          </h1>
-          <p className="login-subtitle">Acesse sua conta para continuar.</p>
-        </header>
+      <div className="login-layout">
+        <div className="login-hero">
+          <Link to="/" className="login-back-link">
+            <ArrowLeft size={16} />
+            <span>Voltar para o início</span>
+          </Link>
 
-        <form onSubmit={handleSubmit} className="login-form" noValidate>
-          {error && (
-            <div className="form-error" role="alert" aria-live="polite">
-              <AlertCircle size={18} /> {error}
-            </div>
-          )}
-
-          <div className="field">
-            <label className="label" htmlFor="email">
-              <span className="label-row">
-                <span className="label-icon"><Mail size={16} /></span>
-                E-mail
-                <span className="req">*</span>
-              </span>
-            </label>
-            <input
-              id="email"
-              className={`input ${error && !email ? "input-error" : ""}`}
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (error) setError(null);
-              }}
-              autoComplete="email"
-              disabled={isLoading}
-              required
-            />
+          <div className="login-badge">
+            <ShieldCheck size={16} />
+            <span>Acesso seguro</span>
           </div>
 
-          <div className="field">
-            <label className="label" htmlFor="password">
-              <span className="label-row">
-                <span className="label-icon"><Lock size={16} /></span>
-                Senha
-                <span className="req">*</span>
-              </span>
-            </label>
-            <div className="input-wrapper">
+          <div className="login-hero-copy">
+            <div className="login-title-icon">
+              <LogIn size={30} />
+            </div>
+            <h1 className="login-title">
+              Entre no <span className="purplegradient">UP</span>
+            </h1>
+            <p className="login-subtitle">
+              Faça login para acessar seu painel, acompanhar seus serviços e continuar o seu atendimento.
+            </p>
+          </div>
+
+          <div className="login-benefits">
+            <div className="login-benefit-card">
+              <strong>Painel completo</strong>
+              <span>Visualize dados, calendário, relatórios e solicitações em um só lugar.</span>
+            </div>
+            <div className="login-benefit-card">
+              <strong>Sessão protegida</strong>
+              <span>Seu acesso continua validado no backend com sessão autenticada.</span>
+            </div>
+          </div>
+        </div>
+
+        <section className="login-card" aria-label="Formulário de login">
+          <div className="login-card-header">
+            <h2 className="login-card-title">Acessar conta</h2>
+            <p className="login-card-subtitle">Use o mesmo padrão visual da tela de cadastro, mas focado no login.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="login-form" noValidate>
+            {error && (
+              <div className="form-error login-form-error" role="alert" aria-live="polite">
+                <AlertCircle size={18} />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div className="field">
+              <label className="label" htmlFor="email">
+                <span className="label-row">
+                  <span className="label-icon"><Mail size={16} /></span>
+                  <span className="label-text">
+                    E-mail <span className="req">*</span>
+                  </span>
+                </span>
+              </label>
               <input
-                id="password"
-                className={`input ${error && !password ? "input-error" : ""}`}
-                type={showPassword ? "text" : "password"}
-                placeholder="Sua senha"
-                value={password}
+                id="email"
+                className={`input ${error && !email ? "input-error" : ""}`}
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
                 onChange={(e) => {
-                  setPassword(e.target.value);
+                  setEmail(e.target.value);
                   if (error) setError(null);
                 }}
-                autoComplete="current-password"
+                autoComplete="email"
                 disabled={isLoading}
                 required
               />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword((current) => !current)}
-                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                disabled={isLoading}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
             </div>
-          </div>
 
-          <button type="submit" className="button" disabled={isLoading}>
-            <span className="btn-row">
-              {isLoading ? <Loader2 size={18} className="spin" /> : null}
-              {isLoading ? "Entrando..." : "Entrar"}
-            </span>
-          </button>
+            <div className="field">
+              <label className="label" htmlFor="password">
+                <span className="label-row">
+                  <span className="label-icon"><Lock size={16} /></span>
+                  <span className="label-text">
+                    Senha <span className="req">*</span>
+                  </span>
+                </span>
+              </label>
+              <div className="login-input-wrapper">
+                <input
+                  id="password"
+                  className={`input ${error && !password ? "input-error" : ""}`}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Digite sua senha"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  disabled={isLoading}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
 
-          <div className="login-subtitle" style={{ textAlign: "center" }}>
-            Não tem conta? <Link to="/SignIn">Cadastre-se</Link>
-          </div>
-        </form>
-      </section>
+            <button type="submit" className="login-submit" disabled={isLoading}>
+              <span className="btn-row">
+                {isLoading ? <Loader2 size={18} className="spin" /> : <LogIn size={18} />}
+                {isLoading ? "Entrando..." : "Entrar"}
+              </span>
+            </button>
+
+            <div className="login-footer-text">
+              Não tem conta? <Link to="/SignIn">Cadastre-se</Link>
+            </div>
+          </form>
+        </section>
+      </div>
     </div>
   );
 }
