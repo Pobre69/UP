@@ -1,51 +1,61 @@
-// Detectar automaticamente a URL base da API
-const getApiBaseUrl = (): string => {
-  const envApiUrl = import.meta.env.VITE_API_URL as string | undefined;
+const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, "");
 
+const getApiBaseUrl = (): string => {
+  const envApiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
   if (envApiUrl) {
-    return envApiUrl;
+    return trimTrailingSlash(envApiUrl);
   }
+
+  const runtimeApiUrl = (window as Window & { __UP_API_URL__?: string }).__UP_API_URL__?.trim();
+  if (runtimeApiUrl) {
+    return trimTrailingSlash(runtimeApiUrl);
+  }
+
+  const { origin, pathname } = window.location;
 
   if (import.meta.env.DEV) {
     return "http://localhost/Sites/UP/backend/public/index.php";
   }
 
-  return `${window.location.protocol}//${window.location.host}/api`;
+  if (pathname.includes('/backend/public/')) {
+    return `${origin}/backend/public/index.php`;
+  }
+
+  return `${origin}/backend/public/index.php`;
 };
 
 export const API_BASE_URL = getApiBaseUrl();
 
-// Configurações de timeout e retry
 export const API_CONFIG = {
-  timeout: 30000, // 30 segundos
+  timeout: 30000,
   retryAttempts: 3,
-  retryDelay: 1000, // 1 segundo
-};
+  retryDelay: 1000,
+} as const;
 
 const isRetryableError = (error: unknown): boolean => {
   return error instanceof Error && (
-    error.name === "AbortError" ||
-    error.message.includes("Failed to fetch") ||
-    error.message.includes("NetworkError")
+    error.name === 'AbortError' ||
+    error.message.includes('Failed to fetch') ||
+    error.message.includes('NetworkError') ||
+    error.message.includes('timeout')
   );
 };
 
-// Função auxiliar para fazer requisições com retry
 export async function fetchWithRetry(
   url: string,
   options: RequestInit = {},
   retries: number = API_CONFIG.retryAttempts
 ): Promise<Response> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), API_CONFIG.timeout);
 
+  try {
     const response = await fetch(url, {
       ...options,
+      credentials: options.credentials ?? 'include',
       signal: controller.signal,
     });
 
-    clearTimeout(timeoutId);
     return response;
   } catch (error) {
     if (retries > 0 && isRetryableError(error)) {
@@ -53,5 +63,7 @@ export async function fetchWithRetry(
       return fetchWithRetry(url, options, retries - 1);
     }
     throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 }

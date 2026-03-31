@@ -41,11 +41,18 @@ class Security
         self::startSession();
 
         if (!isset($_SESSION['user_email']) || empty($_SESSION['user_email'])) {
-            http_response_code(401);
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'mensagem' => 'Não autenticado']);
-            exit;
+            self::rejectUnauthorized('Não autenticado');
         }
+
+        $timeout = (int) AppConfig::get('session.lifetime', 2592000);
+        $lastActivity = (int)($_SESSION['last_activity'] ?? $_SESSION['login_time'] ?? 0);
+
+        if ($lastActivity > 0 && (time() - $lastActivity) > $timeout) {
+            self::destroySession();
+            self::rejectUnauthorized('Sessão expirada');
+        }
+
+        $_SESSION['last_activity'] = time();
     }
 
     public static function getAuthUser(): array
@@ -63,10 +70,27 @@ class Security
         self::startSession();
 
         $_SESSION = [];
+
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], (bool) $params['secure'], (bool) $params['httponly']);
+            setcookie(session_name(), '', [
+                'expires' => time() - 42000,
+                'path' => $params['path'] ?: '/',
+                'domain' => $params['domain'] ?? '',
+                'secure' => (bool)($params['secure'] ?? false),
+                'httponly' => (bool)($params['httponly'] ?? true),
+                'samesite' => $params['samesite'] ?? 'Lax',
+            ]);
         }
+
         session_destroy();
+    }
+
+    private static function rejectUnauthorized(string $message): void
+    {
+        http_response_code(401);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'mensagem' => $message]);
+        exit;
     }
 }

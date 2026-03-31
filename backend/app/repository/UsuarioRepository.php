@@ -44,7 +44,7 @@ class UsuarioRepository
             throw new \Exception('Erro ao inserir usuário no banco de dados');
         }
 
-        return $stmt->rowCount();
+        return (int) $conn->lastInsertId();
     }
 
     public function update(string $email, ?string $nome = null, ?string $senha = null, ?string $empresa = null): array
@@ -105,7 +105,7 @@ class UsuarioRepository
         }
 
         $stmt = $this->getConnection()->prepare(
-            'SELECT email, nome, senha, empresa, ativo, plano_selecionado FROM usuario WHERE email = :email LIMIT 1'
+            'SELECT id, email, nome, senha, empresa, ativo, plano_selecionado FROM usuario WHERE email = :email LIMIT 1'
         );
 
         if (!$stmt->execute([':email' => $email])) {
@@ -117,9 +117,9 @@ class UsuarioRepository
             return null;
         }
 
+        $result['id'] = isset($result['id']) ? (int) $result['id'] : null;
         $result['ativo'] = (bool)($result['ativo'] ?? false);
         $result['plano_selecionado'] = $result['plano_selecionado'] ?? null;
-        $result['id'] = null;
 
         return $result;
     }

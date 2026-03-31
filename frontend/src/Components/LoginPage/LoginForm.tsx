@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Mail, Lock, AlertCircle, Loader } from "lucide-react";
+import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, AlertCircle, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { API_BASE_URL, fetchWithRetry } from "../../config/api";
 import "../../Design/LoginPage/LoginForm.css";
 
@@ -8,120 +9,113 @@ interface LoginFormProps {
   onLoginSuccess?: () => void;
 }
 
+interface LoginResponse {
+  success?: boolean;
+  mensagem?: string;
+  planoSelecionado?: string | null;
+  usuario?: {
+    email?: string;
+    nome?: string | null;
+    empresa?: string | null;
+    id?: number | null;
+  };
+}
+
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = useMemo(() => {
+    const state = location.state as { from?: { pathname?: string } } | null;
+    return state?.from?.pathname || "/app/dashboard";
+  }, [location.state]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setError(null);
 
-    // Validação de entrada
-    if (!email.trim()) {
-      setError("Por favor, insira seu e-mail");
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setError("Por favor, insira seu e-mail.");
       return;
     }
 
-    if (!validateEmail(email)) {
-      setError("Por favor, insira um e-mail válido");
+    if (!validateEmail(normalizedEmail)) {
+      setError("Por favor, insira um e-mail válido.");
       return;
     }
 
     if (!password) {
-      setError("Por favor, insira sua senha");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Senha deve ter no mínimo 6 caracteres");
+      setError("Por favor, insira sua senha.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetchWithRetry(
-        `${API_BASE_URL}/auth/login`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email.toLowerCase().trim(),
-            senha: password,
-          }),
+      const response = await fetchWithRetry(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          senha: password,
+        }),
+      });
+
+      const rawText = await response.text();
+      let data: LoginResponse = {};
+
+      if (rawText) {
+        try {
+          data = JSON.parse(rawText) as LoginResponse;
+        } catch {
+          data = { mensagem: "Resposta inválida do servidor." };
         }
-      );
+      }
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         if (response.status === 429) {
-          setError(
-            "Muitas tentativas de login. Por favor, tente novamente em alguns minutos."
-          );
+          setError("Muitas tentativas de login. Tente novamente em alguns minutos.");
         } else if (response.status === 403) {
-          // Conta não ativada
-          setError(
-            data.mensagem ||
-            "Sua conta ainda não foi ativada. Por favor, conclua o pagamento."
-          );
-          // Redirecionar para página de pagamento se necessário
-          if (data.planoSelecionado) {
-            // Aqui você pode redirecionar para a página de pagamento
-            console.log("Plano selecionado:", data.planoSelecionado);
-          }
+          setError(data.mensagem || "Sua conta ainda não foi ativada.");
         } else if (response.status === 401) {
-          setError("E-mail ou senha incorretos");
+          setError("E-mail ou senha incorretos.");
         } else {
-          setError(
-            data.mensagem || "Erro ao fazer login. Por favor, tente novamente."
-          );
+          setError(data.mensagem || "Não foi possível entrar no momento.");
         }
         return;
       }
 
-      if (!data.success) {
-        setError(data.mensagem || "Erro ao fazer login");
-        return;
+      if (data.usuario) {
+        localStorage.setItem("user", JSON.stringify(data.usuario));
+        if (data.usuario.email) {
+          localStorage.setItem("userEmail", data.usuario.email);
+        }
       }
 
-      // Login bem-sucedido
-      localStorage.setItem("userEmail", data.usuario.email);
-      localStorage.setItem("user", JSON.stringify(data.usuario));
-
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      }
-
-      // Redirecionar para /app
-      navigate("/app/dashboard", { replace: true });
+      onLoginSuccess?.();
+      navigate(redirectTo, { replace: true });
     } catch (err) {
-      console.error("Erro ao fazer login:", err);
-
       if (err instanceof Error) {
-        if (err.message.includes("timeout")) {
+        if (err.name === "AbortError" || err.message.includes("timeout")) {
           setError("Tempo limite de conexão excedido. Tente novamente.");
         } else if (err.message.includes("Failed to fetch")) {
-          setError(
-            "Erro de conexão. Verifique se o servidor está disponível."
-          );
+          setError("Erro de conexão. Verifique se o backend está rodando.");
         } else {
           setError(err.message);
         }
       } else {
-        setError("Erro desconhecido ao fazer login. Tente novamente.");
+        setError("Erro inesperado ao fazer login.");
       }
     } finally {
       setIsLoading(false);
@@ -129,89 +123,98 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="loginForm">
-      {error && (
-        <div className="errorAlert">
-          <AlertCircle size={20} />
-          <span>{error}</span>
-        </div>
-      )}
+    <div className="login-container">
+      <Link to="/" className="back-link">
+        <ArrowLeft size={16} />
+        <span>Voltar</span>
+      </Link>
 
-      <div className="formGroup">
-        <label htmlFor="email">E-mail</label>
-        <div className="inputWrapper">
-          <Mail size={18} />
-          <input
-            id="email"
-            type="email"
-            placeholder="seu@email.com"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setError(null);
-            }}
-            disabled={isLoading}
-            required
-            autoComplete="email"
-          />
-        </div>
-      </div>
+      <section className="login-card">
+        <header className="login-header">
+          <h1 className="login-title">
+            Entrar no <span className="purplegradient">UP</span>
+          </h1>
+          <p className="login-subtitle">Acesse sua conta para continuar.</p>
+        </header>
 
-      <div className="formGroup">
-        <label htmlFor="password">Senha</label>
-        <div className="inputWrapper">
-          <Lock size={18} />
-          <input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Sua senha"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError(null);
-            }}
-            disabled={isLoading}
-            required
-            autoComplete="current-password"
-          />
-          <button
-            type="button"
-            className="togglePassword"
-            onClick={() => setShowPassword(!showPassword)}
-            disabled={isLoading}
-            tabIndex={-1}
-          >
-            {showPassword ? "Ocultar" : "Mostrar"}
+        <form onSubmit={handleSubmit} className="login-form" noValidate>
+          {error && (
+            <div className="form-error" role="alert" aria-live="polite">
+              <AlertCircle size={18} /> {error}
+            </div>
+          )}
+
+          <div className="field">
+            <label className="label" htmlFor="email">
+              <span className="label-row">
+                <span className="label-icon"><Mail size={16} /></span>
+                E-mail
+                <span className="req">*</span>
+              </span>
+            </label>
+            <input
+              id="email"
+              className={`input ${error && !email ? "input-error" : ""}`}
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error) setError(null);
+              }}
+              autoComplete="email"
+              disabled={isLoading}
+              required
+            />
+          </div>
+
+          <div className="field">
+            <label className="label" htmlFor="password">
+              <span className="label-row">
+                <span className="label-icon"><Lock size={16} /></span>
+                Senha
+                <span className="req">*</span>
+              </span>
+            </label>
+            <div className="input-wrapper">
+              <input
+                id="password"
+                className={`input ${error && !password ? "input-error" : ""}`}
+                type={showPassword ? "text" : "password"}
+                placeholder="Sua senha"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError(null);
+                }}
+                autoComplete="current-password"
+                disabled={isLoading}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                disabled={isLoading}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" className="button" disabled={isLoading}>
+            <span className="btn-row">
+              {isLoading ? <Loader2 size={18} className="spin" /> : null}
+              {isLoading ? "Entrando..." : "Entrar"}
+            </span>
           </button>
-        </div>
-      </div>
 
-      <button
-        type="submit"
-        className="submitButton"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <Loader size={18} className="spinner" />
-            Entrando...
-          </>
-        ) : (
-          "Entrar"
-        )}
-      </button>
-
-      <div className="formFooter">
-        <p>
-          Não tem conta?{" "}
-          <a href="/SignIn" onClick={(e) => {
-            e.preventDefault();
-            navigate("/SignIn");
-          }}>
-            Cadastre-se
-          </a>
-        </p>
-      </div>
-    </form>
+          <div className="login-subtitle" style={{ textAlign: "center" }}>
+            Não tem conta? <Link to="/SignIn">Cadastre-se</Link>
+          </div>
+        </form>
+      </section>
+    </div>
   );
 }

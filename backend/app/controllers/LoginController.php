@@ -37,7 +37,7 @@ class LoginController
             return;
         }
 
-        $email = trim((string)($data['email'] ?? ''));
+        $email = trim(mb_strtolower((string)($data['email'] ?? '')));
         $senha = (string)($data['senha'] ?? '');
 
         if ($email === '' || $senha === '') {
@@ -84,6 +84,7 @@ class LoginController
             $_SESSION['user_name'] = $usuario['nome'] ?? null;
             $_SESSION['user_id'] = $usuario['id'] ?? null;
             $_SESSION['login_time'] = time();
+            $_SESSION['last_activity'] = time();
 
             $this->rateLimiter->clearAttempts($clientIp);
             $this->syncInstagramData($email);
@@ -95,6 +96,7 @@ class LoginController
                 'ativo' => $ativo,
                 'planoSelecionado' => $planoSelecionado,
                 'usuario' => [
+                    'id' => $usuario['id'] ?? null,
                     'email' => $usuario['email'] ?? $email,
                     'nome' => $usuario['nome'] ?? null,
                     'empresa' => $usuario['empresa'] ?? null
@@ -112,15 +114,6 @@ class LoginController
         header('Content-Type: application/json');
 
         Security::checkAuth();
-        $loginTime = (int)($_SESSION['login_time'] ?? 0);
-        $sessionTimeout = 30 * 24 * 60 * 60;
-
-        if ($loginTime > 0 && (time() - $loginTime > $sessionTimeout)) {
-            Security::destroySession();
-            http_response_code(401);
-            echo json_encode(['success' => false, 'mensagem' => 'Sessão expirada']);
-            return;
-        }
 
         http_response_code(200);
         echo json_encode([
@@ -148,13 +141,7 @@ class LoginController
 
     private function getClientIp(): string
     {
-        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ip = trim(explode(',', (string)$_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
-        } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            $ip = (string) $_SERVER['HTTP_CLIENT_IP'];
-        }
-
-        return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
+        $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+        return filter_var($remoteAddr, FILTER_VALIDATE_IP) ? $remoteAddr : '0.0.0.0';
     }
 }

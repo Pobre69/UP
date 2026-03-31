@@ -18,24 +18,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
         const response = await fetchWithRetry(`${API_BASE_URL}/auth/validate`, {
           method: "GET",
-          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setIsAuthenticated(Boolean(data.success));
-          return;
-        }
-
-        if (response.status === 401) {
+        if (!response.ok) {
           setIsAuthenticated(false);
           return;
         }
 
-        setIsAuthenticated(false);
+        const data = (await response.json()) as { success?: boolean; usuario?: unknown };
+        setIsAuthenticated(Boolean(data.success && data.usuario));
       } catch (err) {
         console.error("Erro ao validar sessão:", err);
         setIsAuthenticated(false);
@@ -45,7 +39,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     };
 
     void validateSession();
-  }, []);
+  }, [location.pathname]);
 
   if (isLoading) {
     return (
