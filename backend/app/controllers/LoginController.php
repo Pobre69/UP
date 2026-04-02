@@ -1,6 +1,7 @@
 <?php
 namespace Controllers;
 
+use App\Config\AppConfig;
 use App\Middleware\RateLimiter;
 use App\Middleware\Security;
 use App\Repository\InstagramTokenRepository;
@@ -67,24 +68,30 @@ class LoginController
             $planoSelecionado = $usuario['plano_selecionado'] ?? null;
 
             if (!$ativo) {
+                Security::storePendingPayment([
+                    'email' => $email,
+                    'nome' => $usuario['nome'] ?? null,
+                    'id' => $usuario['id'] ?? null,
+                    'planoSelecionado' => $planoSelecionado,
+                ]);
+
+                $paymentLinks = (array) AppConfig::get('payments.links', []);
                 http_response_code(403);
                 echo json_encode([
                     'success' => false,
                     'inativo' => true,
                     'planoSelecionado' => $planoSelecionado,
+                    'paymentUrl' => $planoSelecionado !== null ? ($paymentLinks[$planoSelecionado] ?? null) : null,
                     'mensagem' => 'Sua conta ainda não foi ativada. Por favor, conclua o pagamento para ativar sua conta.'
                 ]);
                 return;
             }
 
-            Security::startSession();
-            session_regenerate_id(true);
-
-            $_SESSION['user_email'] = $email;
-            $_SESSION['user_name'] = $usuario['nome'] ?? null;
-            $_SESSION['user_id'] = $usuario['id'] ?? null;
-            $_SESSION['login_time'] = time();
-            $_SESSION['last_activity'] = time();
+            Security::authenticateUser([
+                'email' => $email,
+                'nome' => $usuario['nome'] ?? null,
+                'id' => $usuario['id'] ?? null,
+            ]);
 
             $this->rateLimiter->clearAttempts($clientIp);
             $this->syncInstagramData($email);

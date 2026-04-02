@@ -27,7 +27,7 @@ class PaymentWebhookController
         }
 
         $status = strtolower(trim((string)($data['status'] ?? '')));
-        $customerEmail = trim((string)($data['customer']['email'] ?? $data['email'] ?? $data['customer_email'] ?? ''));
+        $customerEmail = trim(mb_strtolower((string)($data['customer']['email'] ?? $data['email'] ?? $data['customer_email'] ?? '')));
 
         if ($customerEmail === '' || !filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
@@ -68,8 +68,23 @@ class PaymentWebhookController
     {
         header('Content-Type: application/json');
 
-        Security::checkAuth();
-        $email = (string)(Security::getAuthUser()['email'] ?? '');
+        Security::startSession();
+        $authUser = null;
+
+        try {
+            $authUser = Security::getAuthUser();
+        } catch (\Throwable $e) {
+            $authUser = null;
+        }
+
+        $pending = Security::getPendingPayment();
+        $email = (string)($authUser['email'] ?? $pending['email'] ?? '');
+
+        if ($email === '') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'mensagem' => 'Nenhum pagamento pendente encontrado']);
+            return;
+        }
 
         try {
             $usuarioRepo = new UsuarioRepository();
@@ -81,11 +96,20 @@ class PaymentWebhookController
                 return;
             }
 
+            $ativo = (bool)($usuario['ativo'] ?? false);
+            if ($ativo && !isset($authUser['email'])) {
+                Security::authenticateUser([
+                    'email' => $email,
+                    'nome' => $usuario['nome'] ?? null,
+                    'id' => $usuario['id'] ?? null,
+                ]);
+            }
+
             http_response_code(200);
             echo json_encode([
                 'success' => true,
-                'ativo' => (bool)($usuario['ativo'] ?? false),
-                'planoSelecionado' => $usuario['plano_selecionado'] ?? null
+                'ativo' => $ativo,
+                'planoSelecionado' => $usuario['plano_selecionado'] ?? ($pending['planoSelecionado'] ?? null)
             ]);
         } catch (\Throwable $e) {
             error_log('[Verificar Pagamento] ' . $e->getMessage());
@@ -97,8 +121,11 @@ class PaymentWebhookController
     private function isSignatureValid(string $payload): bool
     {
         $secret = (string) AppConfig::get('security.webhookSecret', '');
+        $baseUrl = (string) AppConfig::get('urlBase', '');
+        $isLocal = str_contains($baseUrl, 'localhost') || str_contains($baseUrl, '127.0.0.1');
+
         if ($secret === '') {
-            return true;
+            return $isLocal;
         }
 
         $signature = (string)($_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] ?? '');

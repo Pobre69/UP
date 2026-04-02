@@ -210,6 +210,8 @@ class Route
                 }
                 throw new \Exception("Método não encontrado: {$methodName} em {$controllerClass}");
             }
+            \App\Middleware\Security::enforceTrustedOrigin();
+
             if (!empty($this->parametros)) {
                 call_user_func_array([$controllerInstance, $methodName], $this->parametros);
             } else {

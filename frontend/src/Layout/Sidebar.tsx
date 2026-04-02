@@ -48,7 +48,6 @@ export default function Sidebar() {
       console.error('Erro ao fazer logout:', error);
     } finally {
       // Limpar dados locais independentemente de sucesso ou erro
-      localStorage.removeItem('userEmail');
       localStorage.removeItem('user');
       sessionStorage.clear();
       

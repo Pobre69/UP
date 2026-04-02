@@ -1,23 +1,32 @@
 <?php
 
 use App\Config\AppConfig;
+use App\Middleware\Security;
 
 $frontendUrl = null;
 try {
     require_once __DIR__ . '/../app/config/AppConfig.php';
+    require_once __DIR__ . '/../app/middleware/Security.php';
     $frontendUrl = AppConfig::get('frontendUrl', 'http://localhost:5173');
+    $allowedOrigins = Security::getTrustedOrigins();
 } catch (\Throwable $e) {
     $frontendUrl = 'http://localhost:5173';
+    $allowedOrigins = [
+        $frontendUrl,
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost',
+        'http://127.0.0.1',
+    ];
 }
 
-$allowedOrigins = array_values(array_filter(array_unique([
-    $frontendUrl,
-    'http://localhost:5173',
-    'http://127.0.0.1:5173'
-])));
+$normalizedAllowedOrigins = array_map(
+    static fn($item) => rtrim((string) $item, '/'),
+    array_values(array_filter(array_unique($allowedOrigins)))
+);
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin !== '' && in_array($origin, $allowedOrigins, true)) {
+if ($origin !== '' && (in_array(rtrim($origin, '/'), $normalizedAllowedOrigins, true) || Security::isTrustedOrigin($origin))) {
     header("Access-Control-Allow-Origin: {$origin}");
     header('Vary: Origin');
 } elseif ($frontendUrl) {

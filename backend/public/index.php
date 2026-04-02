@@ -14,6 +14,10 @@ use App\Config\AppConfig;
 use DataBase\Connection\database;
 
 try {
+    if (!extension_loaded('pdo_mysql')) {
+        throw new RuntimeException('A extensão pdo_mysql do PHP não está habilitada.');
+    }
+
     $dbConfig = AppConfig::get('database.UP');
     if (!is_array($dbConfig)) {
         throw new RuntimeException('Configuração de banco ausente.');
@@ -35,7 +39,8 @@ try {
     header('Content-Type: application/json');
     echo json_encode([
         'success' => false,
-        'mensagem' => 'Falha ao iniciar o backend.'
+        'mensagem' => 'Falha ao iniciar o backend.',
+        'codigo' => 'BOOTSTRAP_ERROR'
     ]);
     error_log('[Bootstrap] ' . $e->getMessage());
 }

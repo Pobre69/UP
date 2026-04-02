@@ -37,12 +37,7 @@ export default function Header() {
     };
 
     const handleLoginClick = () => {
-        const userEmail = localStorage.getItem("userEmail");
-        if (userEmail) {
-            navigate('/app');
-        } else {
-            navigate('/Login');
-        }
+        navigate('/Login');
     };
 
     return (

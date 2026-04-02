@@ -3,6 +3,7 @@
 namespace Controllers;
 
 use App\Config\AppConfig;
+use App\Middleware\Security;
 use App\Repository\ConcorrenteRepository;
 use App\Repository\UsuarioDetalhesRepository;
 use App\Repository\UsuarioRepository;
@@ -23,7 +24,7 @@ class SignUpController
 
         $fullName = trim((string)($data['fullName'] ?? ''));
         $company = trim((string)($data['company'] ?? ''));
-        $email = trim((string)($data['email'] ?? ''));
+        $email = trim(mb_strtolower((string)($data['email'] ?? '')));
         $password = (string)($data['password'] ?? '');
         $instagram = trim((string)($data['instagram'] ?? ''));
         $segment = trim((string)($data['segment'] ?? ''));
@@ -72,6 +73,7 @@ class SignUpController
             $localizacaoJson = json_encode(['cidade' => $city], JSON_UNESCAPED_UNICODE);
 
             $usuarioRepo->add($email, $fullName, $hashedPassword, $companyValue, $planoSelecionado);
+            $usuario = $usuarioRepo->getByEmail($email);
             $detalhesRepo->add($email, $mainGoal, $driveLink !== '' ? $driveLink : null, $segment, $instagram !== '' ? $instagram : null, $attendant !== '' ? $attendant : null, $localizacaoJson);
 
             if ($competitors !== '') {
@@ -80,11 +82,19 @@ class SignUpController
 
             $conn->commit();
 
+            Security::storePendingPayment([
+                'email' => $email,
+                'nome' => $fullName,
+                'id' => $usuario['id'] ?? null,
+                'planoSelecionado' => $planoSelecionado,
+            ]);
+
             http_response_code(201);
             echo json_encode([
                 'success' => true,
                 'mensagem' => 'Cadastro realizado com sucesso!',
-                'paymentUrl' => $paymentLinks[$planoSelecionado]
+                'paymentUrl' => $paymentLinks[$planoSelecionado],
+                'planoSelecionado' => $planoSelecionado
             ]);
         } catch (\PDOException $e) {
             if ($conn->inTransaction()) {

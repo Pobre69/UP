@@ -18,7 +18,7 @@ import {
   ArrowLeft,
   AlertCircle,
 } from "lucide-react";
-import config from "../../config.json";
+import { API_BASE_URL, fetchWithRetry } from "../../config/api";
 
 type Option = { value: string; label: string };
 
@@ -342,7 +342,6 @@ export default function SignInForm() {
     });
 
     if (hasErrors) {
-      console.log("Erros de validação:", errors);
       return;
     }
 
@@ -362,8 +361,7 @@ export default function SignInForm() {
       attendant: form.attendant,
       planoSelecionado: planoSelecionado
     };
-
-    fetch(`${config.backRoute}/auth/signup`, {
+    fetchWithRetry(`${API_BASE_URL}/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -371,36 +369,39 @@ export default function SignInForm() {
       credentials: "include",
       body: JSON.stringify(payload)
     })
-      .then(async res => {
-        console.log("Status da resposta:", res.status);
+      .then(async (res) => {
         const text = await res.text();
-        console.log("Resposta do servidor:", text);
-        
-        if (!res.ok) {
-          let errorData;
-          try {
-            errorData = JSON.parse(text);
-          } catch {
-            throw new Error("Erro ao processar resposta do servidor");
-          }
-          throw new Error(errorData.mensagem || "Erro ao enviar cadastro");
+
+        let data: { success?: boolean; mensagem?: string; paymentUrl?: string; planoSelecionado?: string } = {};
+        if (text) {
+          data = JSON.parse(text);
         }
-        
-        return JSON.parse(text);
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.mensagem || "Erro ao enviar cadastro");
+        }
+
+        return data;
       })
-      .then(data => {
-        console.log("Dados recebidos:", data);
-        if (data.success) {
-          setSuccess(true);
-          setTimeout(() => {
-            window.location.href = data.paymentUrl;
-          }, 1500);
-        } else {
-          setSubmitError(data.mensagem || "Erro ao enviar cadastro");
+      .then((data) => {
+        setSuccess(true);
+        if (data.paymentUrl) {
+          sessionStorage.setItem("pendingPaymentUrl", data.paymentUrl);
         }
+        if (data.planoSelecionado) {
+          sessionStorage.setItem("pendingPlan", data.planoSelecionado);
+        }
+        setTimeout(() => {
+          navigate("/payment-verification", {
+            replace: true,
+            state: {
+              paymentUrl: data.paymentUrl,
+              planoSelecionado: data.planoSelecionado,
+            },
+          });
+        }, 800);
       })
       .catch((error) => {
-        console.error("Erro no cadastro:", error);
         setSubmitError(error.message || "Não foi possível realizar o cadastro");
       })
       .finally(() => {

@@ -536,8 +536,7 @@ BEGIN
         SELECT 'Feedback não existente' AS RESULTADO;
     END IF;
 END%
-DELIMITER ;objetivo TEXT,
-    IN param_google_drive TEXT,
+DELIMITER ;
     IN param_segmento TEXT,
     IN param_instagram VARCHAR(120),
     IN param_ajudante TEXT,

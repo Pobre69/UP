@@ -1,135 +1,144 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2, CheckCircle, XCircle } from "lucide-react";
-import config from "../config.json";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AlertCircle, ArrowLeft, CheckCircle2, CreditCard, Loader2, RefreshCcw } from "lucide-react";
+import { API_BASE_URL, fetchWithRetry } from "../config/api";
+import "../Design/LoginPage/LoginForm.css";
+
+type PaymentStatus = "checking" | "approved" | "pending" | "error";
+
+interface PaymentState {
+  paymentUrl?: string | null;
+  planoSelecionado?: string | null;
+}
+
+const paymentLinks: Record<string, string> = {
+  basico: "https://pay.cakto.com.br/nvtso3j_754042",
+  premium: "https://pay.cakto.com.br/3mz49rp_754011",
+  completo: "https://pay.cakto.com.br/4sgtxw3_754018",
+};
 
 export default function PaymentVerificationPage() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState<'checking' | 'approved' | 'pending'>('checking');
-  const [message, setMessage] = useState('Verificando pagamento...');
-  const [planoSelecionado, setPlanoSelecionado] = useState<string | null>(null);
+  const location = useLocation();
+  const routeState = (location.state as PaymentState | null) ?? null;
+  const [status, setStatus] = useState<PaymentStatus>("checking");
+  const [message, setMessage] = useState("Verificando pagamento...");
+  const [planoSelecionado, setPlanoSelecionado] = useState<string | null>(routeState?.planoSelecionado ?? sessionStorage.getItem("pendingPlan"));
 
-  const paymentLinks: Record<string, string> = {
-    'basico': 'https://pay.cakto.com.br/nvtso3j_754042',  //'https://pay.cakto.com.br/qq5rz6e_752674',
-    'premium': 'https://pay.cakto.com.br/3mz49rp_754011',
-    'completo': 'https://pay.cakto.com.br/4sgtxw3_754018'
-  };
+  const paymentUrl = useMemo(() => {
+    return routeState?.paymentUrl ?? sessionStorage.getItem("pendingPaymentUrl") ?? (planoSelecionado ? paymentLinks[planoSelecionado] ?? null : null);
+  }, [routeState?.paymentUrl, planoSelecionado]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkPayment = async () => {
       try {
-        const response = await fetch(`${config.backRoute}/payment/verificar`, {
-          method: 'GET',
-          credentials: 'include',
+        const response = await fetchWithRetry(`${API_BASE_URL}/payment/verificar`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
 
         const data = await response.json();
 
-        if (data.success && data.ativo) {
-          setStatus('approved');
-          setMessage('Pagamento confirmado! Redirecionando...');
-          setTimeout(() => {
-            navigate('/app');
-          }, 2000);
-        } else {
-          setStatus('pending');
-          setPlanoSelecionado(data.planoSelecionado);
-          setMessage('Aguardando confirmação do pagamento...');
+        if (!isMounted) {
+          return;
         }
-      } catch (error) {
-        console.error('Erro ao verificar pagamento:', error);
-        setStatus('pending');
-        setMessage('Erro ao verificar pagamento. Tente novamente.');
+
+        if (response.ok && data.success && data.ativo) {
+          setStatus("approved");
+          setMessage("Pagamento confirmado! Redirecionando para sua conta...");
+          sessionStorage.removeItem("pendingPaymentUrl");
+          sessionStorage.removeItem("pendingPlan");
+          window.setTimeout(() => {
+            navigate("/app/dashboard", { replace: true });
+          }, 1400);
+          return;
+        }
+
+        setStatus("pending");
+        setPlanoSelecionado(data.planoSelecionado ?? planoSelecionado ?? null);
+        setMessage(data.mensagem || "Aguardando confirmação do pagamento...");
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+        setStatus("error");
+        setMessage("Não foi possível verificar o pagamento agora. Tente novamente.");
       }
     };
 
-    checkPayment();
-    const interval = setInterval(checkPayment, 5000);
+    void checkPayment();
+    const interval = window.setInterval(checkPayment, 5000);
 
-    return () => clearInterval(interval);
-  }, [navigate]);
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
+  }, [navigate, planoSelecionado]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      padding: '2rem',
-      textAlign: 'center'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '3rem',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        maxWidth: '500px'
-      }}>
-        {status === 'checking' && (
-          <>
-            <Loader2 size={64} className="spin" style={{ margin: '0 auto 1.5rem', color: '#8b5cf6' }} />
-            <h2 style={{ marginBottom: '1rem' }}>Verificando Pagamento</h2>
-            <p style={{ color: '#666' }}>{message}</p>
-          </>
-        )}
+    <div className="login-container">
+      <Link to="/Login" className="back-link">
+        <ArrowLeft size={16} />
+        <span>Voltar para o login</span>
+      </Link>
 
-        {status === 'approved' && (
-          <>
-            <CheckCircle size={64} style={{ margin: '0 auto 1.5rem', color: '#10b981' }} />
-            <h2 style={{ marginBottom: '1rem', color: '#10b981' }}>Pagamento Confirmado!</h2>
-            <p style={{ color: '#666' }}>{message}</p>
-          </>
-        )}
+      <section className="login-card">
+        <header className="login-header">
+          <h1 className="login-title">
+            Status do <span className="purplegradient">pagamento</span>
+          </h1>
+          <p className="login-subtitle">A ativação da sua conta acontece automaticamente após a confirmação.</p>
+        </header>
 
-        {status === 'pending' && (
-          <>
-            <XCircle size={64} style={{ margin: '0 auto 1.5rem', color: '#f59e0b' }} />
-            <h2 style={{ marginBottom: '1rem', color: '#f59e0b' }}>Aguardando Pagamento</h2>
-            <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-              Sua conta será ativada automaticamente após a confirmação do pagamento.
-            </p>
-            {planoSelecionado && paymentLinks[planoSelecionado] && (
-              <a
-                href={paymentLinks[planoSelecionado]}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-block',
-                  padding: '0.75rem 1.5rem',
-                  background: '#8b5cf6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  textDecoration: 'none',
-                  marginBottom: '1rem'
-                }}
-              >
-                Realizar Pagamento
-              </a>
-            )}
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: '0.75rem 1.5rem',
-                background: 'transparent',
-                color: '#8b5cf6',
-                border: '2px solid #8b5cf6',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                marginTop: '0.5rem'
-              }}
-            >
-              Verificar Novamente
-            </button>
-          </>
-        )}
-      </div>
+        <div className="login-form" style={{ gap: "18px" }}>
+          {status === "checking" && (
+            <div className="form-error" style={{ background: "rgba(124, 58, 237, 0.12)", borderColor: "rgba(124, 58, 237, 0.2)", color: "#c4b5fd" }}>
+              <Loader2 size={18} className="spin" /> {message}
+            </div>
+          )}
+
+          {status === "approved" && (
+            <div className="form-error" style={{ background: "rgba(16, 185, 129, 0.14)", borderColor: "rgba(16, 185, 129, 0.24)", color: "#86efac" }}>
+              <CheckCircle2 size={18} /> {message}
+            </div>
+          )}
+
+          {status === "pending" && (
+            <div className="form-error" style={{ background: "rgba(245, 158, 11, 0.14)", borderColor: "rgba(245, 158, 11, 0.24)", color: "#fde68a" }}>
+              <CreditCard size={18} /> {message}
+            </div>
+          )}
+
+          {status === "error" && (
+            <div className="form-error">
+              <AlertCircle size={18} /> {message}
+            </div>
+          )}
+
+          <div className="field">
+            <label className="label">Próximos passos</label>
+            <div className="login-subtitle" style={{ textAlign: "left" }}>
+              1. Abra o link de pagamento do seu plano.<br />
+              2. Conclua o pagamento.<br />
+              3. Esta página verifica a ativação automaticamente.
+            </div>
+          </div>
+
+          {paymentUrl && (
+            <a href={paymentUrl} target="_blank" rel="noopener noreferrer" className="submit-button" style={{ textDecoration: "none" }}>
+              Realizar pagamento
+            </a>
+          )}
+
+          <button type="button" className="submit-button secondary" onClick={() => window.location.reload()}>
+            <RefreshCcw size={18} /> Verificar novamente
+          </button>
+        </div>
+      </section>
     </div>
   );
 }
