@@ -181,7 +181,7 @@ class Security
     public static function authenticateUser(array $userData): void
     {
         self::startSession();
-        session_regenerate_id(true);
+        session_regenerate_id(false);
         $_SESSION['user_email'] = $userData['email'] ?? null;
         $_SESSION['user_name'] = $userData['nome'] ?? null;
         $_SESSION['user_id'] = $userData['id'] ?? null;

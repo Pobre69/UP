@@ -83,6 +83,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       }
 
       if (data.usuario) localStorage.setItem("user", JSON.stringify(data.usuario));
+      sessionStorage.setItem("just_logged_in", "1");
       onLoginSuccess?.();
       navigate(redirectTo, { replace: true });
     } catch (err) {

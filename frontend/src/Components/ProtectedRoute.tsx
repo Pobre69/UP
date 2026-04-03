@@ -6,33 +6,62 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+const hasLocalUser = (): boolean => {
+  try {
+    return Boolean(localStorage.getItem("user"));
+  } catch {
+    return false;
+  }
+};
+
+const consumeJustLoggedIn = (): boolean => {
+  try {
+    const flag = sessionStorage.getItem("just_logged_in");
+    if (flag) {
+      sessionStorage.removeItem("just_logged_in");
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
+    hasLocalUser() ? true : null
+  );
+  const [isLoading, setIsLoading] = useState(!hasLocalUser());
 
   useEffect(() => {
+    // Se acabou de fazer login, confia no localStorage e não revalida agora
+    if (consumeJustLoggedIn()) {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+      return;
+    }
+
     const validateSession = async () => {
       try {
-        setIsLoading(true);
-
         const response = await fetchWithRetry(`${API_BASE_URL}/auth/validate`, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
 
         if (!response.ok) {
+          localStorage.removeItem("user");
           setIsAuthenticated(false);
           return;
         }
 
         const data = (await response.json()) as { success?: boolean; usuario?: unknown };
-        setIsAuthenticated(Boolean(data.success && data.usuario));
+        const valid = Boolean(data.success && data.usuario);
+        if (!valid) localStorage.removeItem("user");
+        setIsAuthenticated(valid);
       } catch (err) {
         console.error("Erro ao validar sessão:", err);
-        setIsAuthenticated(false);
+        if (!hasLocalUser()) setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
