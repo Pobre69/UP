@@ -42,6 +42,7 @@ $route->group('/payment', function (Route $route) {
 });
 
 $route->group('/api', function (Route $route) {
+    $route->post('AppController@sync')->name(['app', 'sync']);
     $route->get('DashboardController@getDashboardData')->name(['dashboard']);
     $route->get('EngagementController@getEngagementData')->name(['engagement']);
     $route->get('CalendarController@getCalendarData')->name(['calendar']);

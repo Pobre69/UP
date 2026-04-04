@@ -21,17 +21,10 @@ import { InstagramConnectModal } from "../../Components/UI/InstagramConnectModal
 import { ErrorModal } from "../../Components/UI/ErrorModal";
 import { dashboardService, type DashboardData } from "../../services/dashboardService";
 import { instagramService } from "../../services/instagramService";
-import { dashboard as mockDashboard, demoUser } from "../../mock/data";
 import { formatNumber } from "../../utils/format";
 import "./pages.css";
 
 type InstagramStatusData = { connected?: boolean; username?: string };
-
-function toNumberDelta(value: string | number): number {
-  if (typeof value === "number") return value;
-  const normalized = Number.parseFloat(value.replace("%", ""));
-  return Number.isFinite(normalized) ? normalized : 0;
-}
 
 
 export default function DashboardPage() {
@@ -59,36 +52,26 @@ export default function DashboardPage() {
       .catch((err) => {
         console.error('Erro ao carregar dashboard:', err);
         setShowInstagramAlert(true);
-        // Usar dados mockados como fallback
         setDashboard({
-          user: demoUser,
-          profileGrowthPct: mockDashboard.profileGrowthPct,
+          user: { handle: 'Usuário', email: '' },
+          profileGrowthPct: 0,
           stats: {
-            seguidores: {
-              value: mockDashboard.stats.seguidores.value,
-              delta: toNumberDelta(mockDashboard.stats.seguidores.delta),
-            },
-            cliquesPerfil: {
-              value: mockDashboard.stats.cliquesPerfil.value,
-              delta: toNumberDelta(mockDashboard.stats.cliquesPerfil.delta),
-            },
-            alcanceTotal: {
-              value: mockDashboard.stats.alcanceTotal.value,
-              delta: toNumberDelta(mockDashboard.stats.alcanceTotal.delta),
-            },
-            impressoes: {
-              value: mockDashboard.stats.impressoes.value,
-              delta: toNumberDelta(mockDashboard.stats.impressoes.delta),
-            },
-            engajamento: {
-              value: mockDashboard.stats.engajamento.value,
-              delta: toNumberDelta(mockDashboard.stats.engajamento.delta),
-            },
+            seguidores: { value: 0, delta: 0 },
+            cliquesPerfil: { value: 0, delta: 0 },
+            alcanceTotal: { value: 0, delta: 0 },
+            impressoes: { value: 0, delta: 0 },
+            engajamento: { value: 0, delta: 0 },
           },
-          seguidoresSerie: mockDashboard.seguidoresSerie,
-          alcanceSerie: mockDashboard.alcanceSerie,
-          chartDates: mockDashboard.chartDates,
-          engajamentoResumo: mockDashboard.engajamentoResumo
+          seguidoresSerie: [],
+          alcanceSerie: [],
+          chartDates: [],
+          engajamentoResumo: {
+            curtidasMedia: 0,
+            comentariosMedios: 0,
+            compartilhamentos: 0,
+            alcanceMedio: 0,
+            melhorStory: 0,
+          }
         });
       })
       .finally(() => setLoading(false));

@@ -7,3 +7,5 @@ export { requestsService } from './requestsService';
 export { serviceStatusService } from './serviceStatusService';
 export { planService } from './planService';
 export { instagramService } from './instagramService';
+
+export { appService } from './appService';
