@@ -40,7 +40,7 @@ export default function AppShell() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [location.pathname]);
   
   return (
     <div className="appShell">

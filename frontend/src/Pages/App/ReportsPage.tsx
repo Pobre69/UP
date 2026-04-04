@@ -168,7 +168,7 @@ export default function ReportsPage() {
                     <td>{Number(row.engagement_rate || 0).toFixed(2)}%</td>
                     <td>
                       <span className="inlineTitle">
-                        {row.trend === "up" ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                        {row.trend === "up" ? <TrendingUp size={16} /> : row.trend === "down" ? <TrendingDown size={16} /> : null}
                         {row.trend === "stable" ? "Estável" : `${row.trend_value > 0 ? "+" : ""}${row.trend_value}`}
                       </span>
                     </td>

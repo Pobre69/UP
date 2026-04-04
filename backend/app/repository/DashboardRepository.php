@@ -33,12 +33,12 @@ class DashboardRepository
     public function getFollowersGrowth(string $email, int $days = 30)
     {
         $stmt = $this->getConnection()->prepare(
-            'SELECT followers_count, DATE(collected_at) as date
+            'SELECT DATE(collected_at) as date, MAX(followers_count) as followers_count
              FROM instagram_metrics 
              WHERE email = :email 
              AND collected_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
              GROUP BY DATE(collected_at)
-             ORDER BY collected_at ASC'
+             ORDER BY DATE(collected_at) ASC'
         );
         $stmt->bindValue(':email', $email, PDO::PARAM_STR);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
@@ -49,12 +49,12 @@ class DashboardRepository
     public function getReachSeries(string $email, int $days = 30)
     {
         $stmt = $this->getConnection()->prepare(
-            'SELECT reach, DATE(collected_at) as date
+            'SELECT DATE(collected_at) as date, MAX(reach) as reach
              FROM instagram_metrics 
              WHERE email = :email 
              AND collected_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
              GROUP BY DATE(collected_at)
-             ORDER BY collected_at ASC'
+             ORDER BY DATE(collected_at) ASC'
         );
         $stmt->bindValue(':email', $email, PDO::PARAM_STR);
         $stmt->bindValue(':days', $days, PDO::PARAM_INT);
@@ -69,7 +69,7 @@ class DashboardRepository
                 AVG(like_count) as avg_likes,
                 AVG(comments_count) as avg_comments,
                 AVG(shares_count) as avg_shares,
-                SUM(like_count + comments_count) as total_engagement,
+                SUM(like_count + comments_count + shares_count) as total_engagement,
                 COUNT(*) as total_posts
              FROM instagram_posts 
              WHERE email = :email'
@@ -87,9 +87,9 @@ class DashboardRepository
         );
         $stmt->execute([':email' => $email]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($result && $result['initial_followers'] > 0) {
-            $growth = (($result['current_followers'] - $result['initial_followers']) / $result['initial_followers']) * 100;
+
+        if ($result && (int)$result['initial_followers'] > 0) {
+            $growth = (((int)$result['current_followers'] - (int)$result['initial_followers']) / (int)$result['initial_followers']) * 100;
             return round($growth, 2);
         }
         return 0;
@@ -98,25 +98,28 @@ class DashboardRepository
     public function getStatsDelta(string $email)
     {
         $stmt = $this->getConnection()->prepare(
-            'SELECT 
-                m1.followers_count as current_followers,
-                m1.profile_views as current_views,
-                m1.reach as current_reach,
-                m1.impressions as current_impressions,
-                m1.engagement_rate as current_engagement,
-                m2.followers_count as prev_followers,
-                m2.profile_views as prev_views,
-                m2.reach as prev_reach,
-                m2.impressions as prev_impressions,
-                m2.engagement_rate as prev_engagement
-             FROM instagram_metrics m1
-             LEFT JOIN instagram_metrics m2 ON m2.email = m1.email 
-                AND m2.collected_at < m1.collected_at
-             WHERE m1.email = :email
-             ORDER BY m1.collected_at DESC
-             LIMIT 1'
+            'SELECT followers_count, profile_views, reach, impressions, engagement_rate
+             FROM instagram_metrics
+             WHERE email = :email
+             ORDER BY collected_at DESC
+             LIMIT 2'
         );
         $stmt->execute([':email' => $email]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $current = $rows[0] ?? [];
+        $previous = $rows[1] ?? [];
+
+        return [
+            'current_followers' => $current['followers_count'] ?? 0,
+            'current_views' => $current['profile_views'] ?? 0,
+            'current_reach' => $current['reach'] ?? 0,
+            'current_impressions' => $current['impressions'] ?? 0,
+            'current_engagement' => $current['engagement_rate'] ?? 0,
+            'prev_followers' => $previous['followers_count'] ?? 0,
+            'prev_views' => $previous['profile_views'] ?? 0,
+            'prev_reach' => $previous['reach'] ?? 0,
+            'prev_impressions' => $previous['impressions'] ?? 0,
+            'prev_engagement' => $previous['engagement_rate'] ?? 0,
+        ];
     }
 }

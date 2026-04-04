@@ -43,11 +43,19 @@ class EngagementRepository
                 p.comments_count,
                 p.shares_count,
                 p.saved_count,
-                i.reach,
-                i.impressions,
-                (p.like_count + p.comments_count + p.shares_count) as total_engagement
+                COALESCE(i.reach, 0) as reach,
+                COALESCE(i.impressions, 0) as impressions,
+                (p.like_count + p.comments_count + p.shares_count + p.saved_count) as total_engagement
              FROM instagram_posts p
-             LEFT JOIN instagram_post_insights i ON p.id = i.post_id
+             LEFT JOIN (
+                SELECT i1.post_id, i1.reach, i1.impressions, i1.saved
+                FROM instagram_post_insights i1
+                INNER JOIN (
+                    SELECT post_id, MAX(collected_at) AS latest_collected_at
+                    FROM instagram_post_insights
+                    GROUP BY post_id
+                ) latest ON latest.post_id = i1.post_id AND latest.latest_collected_at = i1.collected_at
+             ) i ON p.id = i.post_id
              WHERE p.email = :email
              ORDER BY p.timestamp DESC
              LIMIT :limit'
@@ -61,9 +69,17 @@ class EngagementRepository
     public function getAverageReach(string $email)
     {
         $stmt = $this->getConnection()->prepare(
-            'SELECT AVG(i.reach) as avg_reach
-             FROM instagram_post_insights i
-             INNER JOIN instagram_posts p ON i.post_id = p.id
+            'SELECT AVG(latest_insights.reach) as avg_reach
+             FROM (
+                SELECT i1.post_id, i1.reach
+                FROM instagram_post_insights i1
+                INNER JOIN (
+                    SELECT post_id, MAX(collected_at) AS latest_collected_at
+                    FROM instagram_post_insights
+                    GROUP BY post_id
+                ) latest ON latest.post_id = i1.post_id AND latest.latest_collected_at = i1.collected_at
+             ) latest_insights
+             INNER JOIN instagram_posts p ON latest_insights.post_id = p.id
              WHERE p.email = :email'
         );
         $stmt->execute([':email' => $email]);

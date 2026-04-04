@@ -222,7 +222,7 @@ export default function ServiceStatusPage() {
                       {getStatusLabel(item.status)}
                     </td>
                     <td style={{ padding: '10px', fontSize: '12px', color: '#666' }}>
-                      {new Date(item.created_at).toLocaleDateString('pt-BR')}
+                      {new Date((item.published_date || item.scheduled_date || item.created_at)).toLocaleDateString('pt-BR')}
                     </td>
                   </tr>
                 ))}

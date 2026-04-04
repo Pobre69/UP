@@ -23,18 +23,8 @@ interface CalendarResponse {
 
 function monthNamePT(m: number) {
   const months = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
   ];
   return months[m];
 }
@@ -51,6 +41,7 @@ export default function CalendarPage() {
   const [content, setContent] = useState<Record<string, CalendarItem[]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -61,10 +52,14 @@ export default function CalendarPage() {
         const month = cursor.getMonth() + 1;
         const response = (await calendarService.getCalendarData(year, month)) as CalendarResponse;
         if (!response.success) throw new Error("Resposta inválida do servidor");
-        setContent(response.data?.content ?? {});
+        const nextContent = response.data?.content ?? {};
+        setContent(nextContent);
+        const firstDate = Object.keys(nextContent)[0] ?? null;
+        setSelectedDate((current) => (current && nextContent[current] ? current : firstDate));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro ao carregar calendário");
         setContent({});
+        setSelectedDate(null);
       } finally {
         setLoading(false);
       }
@@ -80,20 +75,18 @@ export default function CalendarPage() {
     const startDow = first.getDay();
     const start = new Date(year, month, 1 - startDow);
     const days: Date[] = [];
-    for (let i = 0; i < 35; i++) {
+    for (let i = 0; i < 42; i += 1) {
       days.push(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
     }
     return { year, month, days };
   }, [cursor]);
 
+  const selectedItems = selectedDate ? content[selectedDate] ?? [] : [];
+
   return (
     <div className="page">
       <PageHeader
-        title={
-          <span className="inlineTitle">
-            <CalendarDays size={18} /> Calendário de Conteúdo
-          </span>
-        }
+        title={<span className="inlineTitle"><CalendarDays size={18} /> Calendário de Conteúdo</span>}
         subtitle="Visualize seus conteúdos agendados e publicados."
       />
 
@@ -121,11 +114,18 @@ export default function CalendarPage() {
             const inMonth = d.getMonth() === grid.month;
             const key = d.toISOString().slice(0, 10);
             const items = content[key] ?? [];
+            const isSelected = selectedDate === key;
             return (
-              <div key={idx} className={`calCell ${inMonth ? "" : "calCellMuted"}`}>
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setSelectedDate(key)}
+                className={`calCell ${inMonth ? "" : "calCellMuted"}`}
+                style={isSelected ? { outline: "2px solid var(--accent)", outlineOffset: -2 } : undefined}
+              >
                 <div className="calNum">{d.getDate()}</div>
                 <div style={{ display: "flex", gap: 4, marginTop: 6, flexWrap: "wrap" }}>
-                  {items.slice(0, 3).map((item) => (
+                  {items.slice(0, 4).map((item) => (
                     <span
                       key={item.id}
                       title={`${item.content_type ?? "Conteúdo"} - ${item.status ?? ""}`}
@@ -139,7 +139,7 @@ export default function CalendarPage() {
                     />
                   ))}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -155,7 +155,26 @@ export default function CalendarPage() {
           <div className="emptyBox" style={{ marginTop: 14 }}>Carregando calendário...</div>
         ) : Object.keys(content).length === 0 ? (
           <div className="emptyBox" style={{ marginTop: 14 }}>Nenhum conteúdo encontrado neste mês.</div>
-        ) : null}
+        ) : (
+          <div style={{ marginTop: 18 }}>
+            <strong>{selectedDate ? new Date(`${selectedDate}T00:00:00`).toLocaleDateString("pt-BR") : "Selecione um dia"}</strong>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+              {selectedItems.length === 0 ? (
+                <div className="emptyBox">Nenhum conteúdo neste dia.</div>
+              ) : (
+                selectedItems.map((item) => (
+                  <div key={`${selectedDate}-${item.id}`} style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 6 }}>
+                      <strong>{item.content_type ?? "Conteúdo"}</strong>
+                      <span className="pill pillNeutral">{item.status ?? "—"}</span>
+                    </div>
+                    <div style={{ color: "#6b7280", fontSize: 14 }}>{item.caption?.trim() ? item.caption : "Sem legenda"}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

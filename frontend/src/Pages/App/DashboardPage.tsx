@@ -28,7 +28,7 @@ type InstagramStatusData = { connected?: boolean; username?: string };
 
 
 export default function DashboardPage() {
-  const [range, setRange] = useState<"diario" | "semanal" | "mensal">("diario");
+  const [range, setRange] = useState<"diario" | "semanal" | "mensal">("mensal");
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showInstagramAlert, setShowInstagramAlert] = useState(false);
@@ -47,7 +47,7 @@ export default function DashboardPage() {
       .catch(console.error);
 
     // Carregar dados do dashboard
-    dashboardService.getDashboardData()
+    dashboardService.getDashboardData(range)
       .then(setDashboard)
       .catch((err) => {
         console.error('Erro ao carregar dashboard:', err);
@@ -75,7 +75,7 @@ export default function DashboardPage() {
         });
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [range]);
 
   const handleConnectInstagram = () => {
     setShowConnectModal(true);
@@ -181,8 +181,7 @@ export default function DashboardPage() {
               Desempenho do Perfil <span className={`pill ${performancePill}`}>{performanceLevel}</span>
             </div>
             <div className="profilePerfSub">
-              Seu perfil cresceu mais que <b>{dashboard.profileGrowthPct}%</b> dos
-              nossos clientes este mês <Sparkles size={14} />
+              Crescimento do período: <b>{dashboard.profileGrowthPct}%</b> em relação ao seu histórico recente <Sparkles size={14} />
             </div>
           </div>
         </div>
@@ -196,31 +195,31 @@ export default function DashboardPage() {
           icon={<Users size={18} />}
           label="Seguidores"
           value={formatNumber(dashboard.stats.seguidores.value)}
-          delta={{ value: String(dashboard.stats.seguidores.delta), tone: "up" }}
+          delta={{ value: String(dashboard.stats.seguidores.delta), tone: dashboard.stats.seguidores.delta >= 0 ? "up" : "down" }}
         />
         <StatCard
           icon={<MousePointerClick size={18} />}
           label="Cliques no Perfil"
           value={formatNumber(dashboard.stats.cliquesPerfil.value)}
-          delta={{ value: String(dashboard.stats.cliquesPerfil.delta), tone: "up" }}
+          delta={{ value: String(dashboard.stats.cliquesPerfil.delta), tone: dashboard.stats.cliquesPerfil.delta >= 0 ? "up" : "down" }}
         />
         <StatCard
           icon={<Eye size={18} />}
           label="Alcance Total"
           value={formatNumber(dashboard.stats.alcanceTotal.value)}
-          delta={{ value: String(dashboard.stats.alcanceTotal.delta), tone: "up" }}
+          delta={{ value: String(dashboard.stats.alcanceTotal.delta), tone: dashboard.stats.alcanceTotal.delta >= 0 ? "up" : "down" }}
         />
         <StatCard
           icon={<Zap size={18} />}
           label="Impressões"
           value={formatNumber(dashboard.stats.impressoes.value)}
-          delta={{ value: String(dashboard.stats.impressoes.delta), tone: "down" }}
+          delta={{ value: String(dashboard.stats.impressoes.delta), tone: dashboard.stats.impressoes.delta >= 0 ? "up" : "down" }}
         />
         <StatCard
           icon={<Sparkles size={18} />}
           label="Engajamento"
           value={`${dashboard.stats.engajamento.value.toFixed(1)}%`}
-          delta={{ value: String(dashboard.stats.engajamento.delta), tone: "up" }}
+          delta={{ value: String(dashboard.stats.engajamento.delta), tone: dashboard.stats.engajamento.delta >= 0 ? "up" : "down" }}
         />
       </div>
 

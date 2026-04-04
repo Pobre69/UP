@@ -59,7 +59,12 @@ class InstagramPostRepository
     {
         $stmt = $this->getConnection()->prepare(
             'INSERT INTO instagram_post_insights (post_id, reach, impressions, saved)
-             VALUES (:post_id, :reach, :impressions, :saved)'
+             VALUES (:post_id, :reach, :impressions, :saved)
+             ON DUPLICATE KEY UPDATE
+             reach = VALUES(reach),
+             impressions = VALUES(impressions),
+             saved = VALUES(saved),
+             collected_at = CURRENT_TIMESTAMP'
         );
 
         return $stmt->execute([
