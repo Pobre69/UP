@@ -61,6 +61,20 @@ class PlanRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function ativarPlano($usuario_id, $plano_nome)
+    {
+        $plano = Plano::where('nome', $plano_nome)->first();
+
+        if (!$plano) return;
+
+        DB::table('usuario_plano')->insert([
+            'usuario_id' => $usuario_id,
+            'plano_id' => $plano->id,
+            'data_inicio' => date('Y-m-d H:i:s'),
+            'data_fim' => date('Y-m-d H:i:s', strtotime('+30 days'))
+        ]);
+    }
+
     public function assignPlanToUser(string $email, int $planId, string $planName, string $startDate, string $endDate)
     {
         $stmt = $this->getConnection()->prepare(

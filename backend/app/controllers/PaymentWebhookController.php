@@ -8,60 +8,35 @@ use App\Repository\UsuarioRepository;
 
 class PaymentWebhookController
 {
-    public function handleWebhook(): void
+    public function handleWebhook($request, $response)
     {
-        header('Content-Type: application/json');
+        $data = json_decode(file_get_contents("php://input"), true);
 
-        $rawInput = file_get_contents('php://input') ?: '';
-        $data = json_decode($rawInput, true);
-        if (!is_array($data)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'mensagem' => 'Dados inválidos']);
-            return;
+        $status = $data['status'] ?? null;
+        $email = $data['customer']['email'] ?? null;
+
+        if (!$email) {
+            return $response->json(['error' => 'Email não encontrado'], 400);
         }
 
-        if (!$this->isSignatureValid($rawInput)) {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'mensagem' => 'Webhook não autorizado']);
-            return;
-        }
+        if ($status === 'paid' || $status === 'approved') {
 
-        $status = strtolower(trim((string)($data['status'] ?? '')));
-        $customerEmail = trim(mb_strtolower((string)($data['customer']['email'] ?? $data['email'] ?? $data['customer_email'] ?? '')));
+            $usuario = Usuario::where('email', $email)->first();
 
-        if ($customerEmail === '' || !filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'mensagem' => 'Email não fornecido']);
-            return;
-        }
+            if ($usuario) {
 
-        if (!in_array($status, ['paid', 'approved'], true)) {
-            http_response_code(200);
-            echo json_encode(['success' => true, 'mensagem' => 'Status não requer ação']);
-            return;
-        }
+                $usuario->ativo = 1;
+                $usuario->save();
 
-        try {
-            $usuarioRepo = new UsuarioRepository();
-            $usuario = $usuarioRepo->getByEmail($customerEmail);
+                $plano = $data['product']['name'] ?? 'basico';
 
-            if (!$usuario) {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'mensagem' => 'Usuário não encontrado']);
-                return;
+                app(PlanRepository::class)->ativarPlano($usuario->id, $plano);
+
+                return $response->json(['success' => true]);
             }
-
-            if (!(bool)($usuario['ativo'] ?? false)) {
-                $usuarioRepo->ativarConta($customerEmail);
-            }
-
-            http_response_code(200);
-            echo json_encode(['success' => true, 'mensagem' => 'Conta ativada com sucesso']);
-        } catch (\Throwable $e) {
-            error_log('[Webhook] ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['success' => false, 'mensagem' => 'Erro ao ativar conta']);
         }
+
+        return $response->json(['ignored' => true]);
     }
 
     public function verificarPagamento(): void
