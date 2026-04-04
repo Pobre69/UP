@@ -22,7 +22,7 @@ class Route
         $this->setAfterFile();
     }
 
-    private function setAfterFile()
+    private function setAfterFile(): void
     {
         $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
         $script = $_SERVER['SCRIPT_NAME'] ?? ($_SERVER['PHP_SELF'] ?? '');
@@ -39,124 +39,124 @@ class Route
                 $after = $urlPath;
             }
         }
+
         if ($after === '') {
             $after = '/';
         }
 
         $partes = array_map(
-            fn($p) => '/' . $p,
+            static fn($p) => '/' . $p,
             array_filter(explode('/', $after))
         );
-
 
         $this->afterFile = $after;
         $this->partes = $partes ?: ['/'];
     }
 
-    private function pathVerify(string $method)
+    private function pathVerify(string $method): self
     {
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === $method) {
-            $this->pathVerification = true;
-        } else {
-            $this->pathVerification = false;
-        }
+        $this->pathVerification = isset($_SERVER['REQUEST_METHOD'])
+            && strtoupper((string) $_SERVER['REQUEST_METHOD']) === strtoupper($method);
         $this->count++;
         return $this;
     }
 
-    private function firstRoute()
+    private function firstRoute(): void
     {
         $configPath = __DIR__ . '/../config/config.json';
         $configJson = file_get_contents($configPath);
         $configJson = json_decode($configJson, true);
-        $this->partes = [];
-        $this->partes[] = '/';
+        $this->partes = ['/'];
         $this->afterFile = '/';
         $this->controller = $configJson['firstController'] ?? '';
         $this->pathVerification = true;
         $this->founded = true;
     }
 
-    private function verifyInfo()
+    private function verifyInfo(): void
     {
-        foreach ($this->info as $i => $info){
-            // Se name é [''], aceitar apenas o grupo
-            if (isset($info['name'][0]) && $info['name'][0] === '') {
+        foreach ($this->info as $info) {
+            $routeName = $info['name'] ?? [];
+
+            if (isset($routeName[0]) && $routeName[0] === '') {
                 $this->controller = $info['controller'];
                 $this->parametros = $info['parametros'] ?? [];
+                $this->pathVerification = (bool)($info['method_match'] ?? false);
                 $this->founded = true;
                 return;
             }
-            
-            // Verificar partes do name
+
             $verify = true;
-            foreach ($info['name'] as $n => $name){
+            foreach ($routeName as $n => $name) {
                 if ($name !== ltrim($this->partes[$n + 2] ?? '', '/')) {
                     $verify = false;
                     break;
                 }
             }
-            
+
             if ($verify) {
                 $this->controller = $info['controller'];
                 $this->parametros = $info['parametros'] ?? [];
+                $this->pathVerification = (bool)($info['method_match'] ?? false);
                 $this->founded = true;
                 return;
             }
         }
+
         $this->founded = false;
     }
 
-    public function get($controller)
+    public function get($controller): self
     {
         $this->controller = $controller;
-        self::pathVerify('GET');
-        return $this;
+        return $this->pathVerify('GET');
     }
 
-    public function post($controller)
+    public function post($controller): self
     {
         $this->controller = $controller;
-        self::pathVerify('POST');
-        return $this;
+        return $this->pathVerify('POST');
     }
 
-    public function put($controller)
+    public function put($controller): self
     {
         $this->controller = $controller;
-        self::pathVerify('PUT');
-        return $this;
+        return $this->pathVerify('PUT');
     }
 
-    public function any($controller)
+    public function any($controller): self
     {
         $this->controller = $controller;
         $this->pathVerification = true;
+        $this->count++;
         return $this;
     }
 
-    public function name(array $name)
+    public function name(array $name): self
     {
         $this->info[$this->count] = [
             'name' => $name,
-            'controller' => $this->controller
+            'controller' => $this->controller,
+            'method_match' => $this->pathVerification,
+            'parametros' => $this->info[$this->count]['parametros'] ?? [],
         ];
         $this->name = $name;
         return $this;
     }
 
-    public function parametros(array $parametros)
+    public function parametros(array $parametros): self
     {
         $this->info[$this->count] = [
             'name' => $this->name,
             'controller' => $this->controller,
-            'parametros' => $parametros
+            'method_match' => $this->pathVerification,
+            'parametros' => $parametros,
         ];
         $this->parametros = $parametros;
         return $this;
     }
 
-    public function group(string $prefix, callable $comands)
+    public function group(string $prefix, callable $comands): void
     {
         if (isset($this->partes[1]) && !empty($this->partes[1])) {
             $parte1 = ltrim($this->partes[1], '/');
@@ -167,30 +167,30 @@ class Route
                 return;
             }
         } else {
-            self::firstRoute();
-            self::execute();
+            $this->firstRoute();
+            $this->execute();
             return;
         }
 
         call_user_func($comands, $this);
-        self::execute();
+        $this->execute();
     }
 
-    public function notFound(callable $notFound = null, callable $controller = null, callable $method = null)
+    public function notFound(callable $notFound = null, callable $controller = null, callable $method = null): void
     {
         $this->notFound = $notFound;
         $this->controllerNotFoundHandler = $controller;
         $this->methodNotFoundHandler = $method;
     }
-    
-    public function execute()
+
+    public function execute(): void
     {
-        self::verifyInfo();
+        $this->verifyInfo();
         if ($this->founded && $this->pathVerification) {
             $parts = explode('@', $this->controller);
             $controllerName = $parts[0] ?? '';
             $methodName = $parts[1] ?? 'index';
-            
+
             $controllerClass = 'Controllers\\' . $controllerName;
             if (!class_exists($controllerClass)) {
                 if ($this->controllerNotFoundHandler !== null) {
@@ -210,6 +210,7 @@ class Route
                 }
                 throw new \Exception("Método não encontrado: {$methodName} em {$controllerClass}");
             }
+
             \App\Middleware\Security::enforceTrustedOrigin();
 
             if (!empty($this->parametros)) {
