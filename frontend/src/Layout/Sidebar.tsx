@@ -9,6 +9,7 @@ import {
   Megaphone,
   Inbox,
   Crown,
+  Mail,
   LogOut,
 } from "lucide-react";
 import { API_BASE_URL } from "../config/api";
@@ -23,6 +24,7 @@ const nav = [
   { to: "/app/anuncios", label: "Anúncios", icon: Megaphone },
   { to: "/app/solicitacoes", label: "Solicitações", icon: Inbox },
   { to: "/app/plano", label: "Meu Plano", icon: Crown },
+  { to: "/app/contato", label: "Contato", icon: Mail },
 ];
 
 export default function Sidebar() {

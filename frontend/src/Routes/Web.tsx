@@ -14,6 +14,7 @@ import CalendarPage from "../Pages/App/CalendarPage";
 import AdsPage from "../Pages/App/AdsPage";
 import RequestsPage from "../Pages/App/RequestsPage";
 import PlanPage from "../Pages/App/PlanPage";
+import ContactPage from "../Pages/App/ContactPage";
 
 export default function WebRoutes() {
   return (
@@ -37,6 +38,7 @@ export default function WebRoutes() {
         <Route path="anuncios" element={<AdsPage />} />
         <Route path="solicitacoes" element={<RequestsPage />} />
         <Route path="plano" element={<PlanPage />} />
+        <Route path="contato" element={<ContactPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
